@@ -1,13 +1,57 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Diagnostics.Metrics;
+using System.Numerics;
+using System.Runtime.Intrinsics.X86;
+using System.Text.RegularExpressions;
 
+DateTime localDate = DateTime.Now;
 // init varialbles
-string? mainWord;                           // main word
-int turnTime = 10;                          // turn time for each player in cesonds
-int tmpTurnTime = turnTime;                 // temp value for timer
-var timer = new System.Timers.Timer();      // timer
-List<string> statList = new List<string>(); // list of correct player word
-bool isGameFinished = false;                // flag for game ending
-string[] playerNames;       // player names array
+string? mainWord;                                   // main word
+const int turnTime = 10;                            // turn time for each player in cesonds
+int tmpTurnTime = turnTime;                         // temp value for timer
+var timer = new System.Timers.Timer();              // timer
+List<string> statList = new List<string>();         // list of correct player word
+bool isGameFinished = false;                        // flag for game ending
+string[] playerNames;                               // player names array
+string[] languages = ["English", "Русский"];        // languages array
+int choosedLanguage;                                // user language choice
+const int minNumber = 8;                            // min chars for a word
+const int maxNumber = 30;                           // max chars for a word
+string[] arrRegex = ["^[a-zA-Z]", "^[а-яёА-ЯЁ]"];   // regex array
+                                                    // different text depends on language
+string[] arrWordText =
+    ["Please enter a word. You can only use letters of the Latin alphabet. The size of the word: ",
+    "Пожалуйста введите слово. Разрешено использовать только буквы русского алфавита. Размер слова: "];
+string[] arrTurn = 
+    ["Excellent! Let's play! A word: ",
+    "Отлично! Играем! Слово: "];
+string[] arrSecRem = 
+    [" seconds remaining...",
+    " секунд осталось..."];
+string[] arrTimeSUp = 
+    ["Your time's up.",
+    "Время вышло."];
+string[] arrGameOverText = 
+    ["Game is over. The winner is ",
+    "Игра закончена. Победитель "];
+string[] arrGameOverDrowText =
+    ["Game is over. It's draw.",
+    "Игра закончена. Ничья "];
+string[] arrGameStatText = 
+    ["Please check game statistics with a word ",
+    "Пожалуйста проверьте статистику игры со словом "];
+string[] arrCorrectWord = 
+    [" is correct. Good job!",
+    " подходит. Отличная работа!"];
+string[] arrEmptyWord = 
+    ["Empty word is not allowed. Please try again.",
+    "Пустое слово недопустимо. Попробуйте еще раз."];
+string[] arrNotChar = 
+    [" char isn't in main word.",
+    " нет в главном слове."];
+string[] arrTurnPlayerText = 
+    ["Turn of ",
+    "Ход игрока "];
 
 // start game
 welcomeText();
@@ -30,24 +74,27 @@ void welcomeText()
 // method prepare some params for future game: a word, char's restrictions.
 void prepareGameParams()
 {
-    const int minNumber = 8;    //min chars for a word
-    const int maxNumber = 30;   //max chars for a word
     playerNames = ["Player 1", "Player 2"];
 
+    chooseLanguage();
+
+    //clearConsole();
+
     // enter new word
-    printMessage($"Please enter a word. You can only use letters of the Latin alphabet and Cyrillic alphabet. A word can contain from {minNumber} to {maxNumber} letters: ");
+    printMessage(arrWordText[choosedLanguage - 1] + $"{minNumber} - {maxNumber}");
     mainWord = readMessage();
 
     // check a word correctness
     bool isWordValid = false;
     // regex for main word
-    Regex wordRegex = new Regex("^[а-яёА-ЯЁa-zA-Z]{" + minNumber + "," + maxNumber + "}$");
+    Regex wordRegex = new Regex(arrRegex[choosedLanguage - 1] + "{" + minNumber + "," + maxNumber + "}$");
 
     do
     {
         if (!validateMainWord(mainWord, wordRegex))
         {
-            printMessage($"Use letters of the Latin alphabet and Cyrillic alphabet. A word can contain from {minNumber} to {maxNumber} letters. PLease try again."); // check if a word doesn't fit the parameters
+            //clearConsole();
+            printMessage(arrWordText[choosedLanguage - 1] + $"{minNumber} - {maxNumber}"); // check if a word doesn't fit the parameters
             mainWord = readMessage();   // enter a word
         }
         else
@@ -55,6 +102,17 @@ void prepareGameParams()
             isWordValid = true;
         }
     } while (!isWordValid);
+}
+
+void chooseLanguage()
+{
+    printMessage("Please choose the language:");
+    for (int i = 0; i < languages.Length; i++)
+    {
+        printMessage((i + 1) + ". " + languages[i]);
+    }
+
+    choosedLanguage = int.Parse(readMessage());
 }
 
 // word validation through regex
@@ -68,7 +126,7 @@ bool validateMainWord(string word, Regex regex)
 // othewise return the number of winner and statistics
 void play()
 {
-    printMessage($"Excellent. Let's play with a word '{mainWord}'. You'll have only {turnTime} seconds for your try.");
+    printMessage(arrTurn[choosedLanguage - 1] + $"{mainWord}");
 
     int turn = 1;           // turn number
     string tmpPlayerName;   // temp player name
@@ -76,11 +134,13 @@ void play()
     while (!isGameFinished)
     {
         tmpPlayerName = (turn % 2 == 1) ? playerNames[0] : playerNames[1];
-
+        printMessage("start");
         setTimer();
-
+        printMessage("settimer");
         playerTurn(tmpPlayerName, turn);
+        printMessage("playerturn");
         timer.Stop();
+        printMessage("stoptimer");
         tmpTurnTime = turnTime;
 
         turn++;
@@ -94,6 +154,7 @@ void setTimer()
 {
     var timer = new System.Timers.Timer(1000);
     timer.Elapsed += Timer_Elapsed;
+    printMessage("starttimer " + localDate);
     timer.Start();
 }
 
@@ -101,12 +162,13 @@ void Timer_Elapsed(Object source, System.Timers.ElapsedEventArgs e)
 {
     if (tmpTurnTime > 0)
     {
-        printMessage(tmpTurnTime-- + " seconds remaining");
+        printMessage(tmpTurnTime-- + arrSecRem[choosedLanguage - 1]);
     }
     else
     {
-        printMessage("Your time's up.");
+        printMessage(arrTimeSUp[choosedLanguage - 1]);
         timer.Stop(); // Stop the timer
+        printMessage("Stoptimer");
         tmpTurnTime = turnTime;
         isGameFinished = true;
     } 
@@ -115,39 +177,54 @@ void Timer_Elapsed(Object source, System.Timers.ElapsedEventArgs e)
 // method show stat at the end of game
 void finishGame(List<string> statList)
 {
-    string tmp = statList.ToArray()[statList.Count - 1].Split("|")[0];
-    printMessage("Game is over. " + (tmp) + " is a winner!");
+    if (statList.Count == 0)
+    {
+        printMessage(arrGameOverDrowText[choosedLanguage - 1]);
+    }
+    else
+    {
+        string tmp = statList.ToArray()[statList.Count - 1].Split("|")[0];
+        printMessage(arrGameOverText[choosedLanguage - 1] + $"{tmp}");
+    }
+    
     if (statList.Count > 1)
     {
-        printMessage($"Please check game statistics with a word '{mainWord}': ");
+        printMessage(arrGameStatText[choosedLanguage - 1] + $"{mainWord}");
         string[] arr = statList.ToArray();
         for (int i = 0; i < arr.Length; i++)
         {
             string[] tmpArr = arr[i].Split('|');
-            printMessage("Turn " + (i + 1) + ". " + tmpArr[0] + ". Word: " + tmpArr[1] + ".");
+            printMessage((i + 1) + ". " + tmpArr[0] + ". " + tmpArr[1] + ".");
         }
     }
 }
 
+// clear console
+void clearConsole()
+{
+    Console.Clear();
+}
+
 void playerTurn(string playerName, int turn)
 {
+    //clearConsole();
+
     string lowerWord = mainWord.ToLower();     // main word in lower case
     string playerWord;
 
-    printMessage($"Turn {turn}. " + playerName + ", your try: ");
+    printMessage($"{turn}. " + playerName + ", your try: ");
     
     // player word shouldn't be empty
     playerWord = readMessage();
     while (playerWord == "")
     {
-        printMessage("Empty word is not allowed. Please try again."); // check if a word doesn't fit the parameters
-        playerWord = readMessage();          // enter a word
+        printMessage(arrEmptyWord[choosedLanguage - 1]); // check if a word doesn't fit the parameters
+        playerWord = readMessage();                      
     }
 
     // check if a word is correct
-    if (checkWord(mainWord, playerWord))
+    if (checkWord(lowerWord, playerWord))
     {
-        printMessage($"Word '{playerWord}' is correct. Good job!");
         statList.Add(playerName + "|" +playerWord);
         timer.Stop();
     }
@@ -163,7 +240,7 @@ bool checkWord(string mainWord, string word)
     {
         if (mainWordList.IndexOf(Char.ToLower(ch)) < 0)
         {
-            printMessage($"There isn't '{ch}' char in main word.");
+            printMessage($"'{ch}'" + arrNotChar[choosedLanguage - 1]);
             result = false;
         }
         mainWordList.Remove(ch);
