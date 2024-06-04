@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.Metrics;
-using System.Numerics;
-using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 DateTime localDate = DateTime.Now;
 // init varialbles
