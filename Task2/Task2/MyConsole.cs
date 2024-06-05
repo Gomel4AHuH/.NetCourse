@@ -1,6 +1,6 @@
 ﻿namespace Task2
 {
-    internal class MyConsole
+    internal struct MyConsole
     {
         public void Clear()
         {

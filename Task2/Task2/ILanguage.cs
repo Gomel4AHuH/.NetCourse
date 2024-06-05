@@ -5,8 +5,10 @@
         string Name { get; }
         string regex { get; }
         void EnterPlayerName(int number);
-        void EnterMainWord();
-        void EnterPlayerWord(string word);
+        void EnterMainWordMinChars();
+        void EnterMainWordMaxChars();
+        void EnterMainWord(int minChars, int MaxChars);
+        void EnterPlayerWord(string name, string word);
         void GetWinner(string name);
         void CharIsNotInWord(char ch);
     }
