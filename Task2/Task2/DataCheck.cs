@@ -1,12 +1,13 @@
 ﻿using System.Text.RegularExpressions;
+using Task2.Languages;
 
 namespace Task2
 {
     internal class DataCheck
     {
-        public bool CheckWithRegex(string str, Regex regex)
+        public bool CheckWithRegex(string str, string regex)
         {
-            return regex.IsMatch(str);
+            return Regex.IsMatch(str, regex);
         }
 
         public bool CheckPlayerWord(string mainWord, string playerWord, ILanguage language)

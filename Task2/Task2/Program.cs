@@ -1,4 +1,7 @@
-﻿namespace Task2
+﻿using System;
+using Task2.Languages;
+
+namespace Task2
 {
     internal class Program
     {
@@ -6,15 +9,11 @@
         {
 
             Game game = new Game();
-            
+
             game.Start();
             
             game.Finish();
 
-            Console.WriteLine("Press...");
-            while (Console.ReadKey().Key != ConsoleKey.Enter)
-            {
-            }
         }
     }
 }

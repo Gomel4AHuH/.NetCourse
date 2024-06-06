@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Task2
+namespace Task2.Languages
 {
     internal class Russian : ILanguage
     {
@@ -20,21 +20,25 @@ namespace Task2
         {
             myConsole.WriteMessage("Пожалуйста, введите максимальное количество букв для главного слова:");
         }
-        public void EnterMainWord(int minChars, int MaxChars)
+        public void EnterMainWord(int minChars, int maxChars)
         {
-            myConsole.WriteMessage($"Пожалуйста, введите главное слово размером {minChars} - {MaxChars} букв:");
+            myConsole.WriteMessage($"Пожалуйста, введите главное слово размером {minChars} - {maxChars} букв:");
         }
         public void EnterPlayerWord(string name, string word)
         {
             myConsole.WriteMessage($"{name}, ваш ход со словом '{word}':");
         }
+        public void WordIsInList(string word)
+        {
+            myConsole.WriteMessage($"'{word}' было использовано раньше.");
+        }
         public void GetWinner(string name)
         {
-            myConsole.WriteMessage($"{name} победитель!");
+            myConsole.WriteMessage($"{name} победитель! Игра окончена.");
         }
         public void CharIsNotInWord(char ch)
         {
-            myConsole.WriteMessage($"Буквы {ch} нет в главном слове.");
+            myConsole.WriteMessage($"Буквы '{ch}' нет в главном слове.");
         }
     }
 }
