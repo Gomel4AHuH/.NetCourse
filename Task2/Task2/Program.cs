@@ -1,18 +1,13 @@
-﻿using System;
-using Task2.Languages;
-
-namespace Task2
+﻿namespace Task2
 {
-    internal class Program
+    public class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
 
             Game game = new Game();
 
             game.Start();
-            
-            game.Finish();
 
         }
     }

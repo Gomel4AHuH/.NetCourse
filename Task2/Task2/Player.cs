@@ -1,49 +1,58 @@
-﻿using System.Numerics;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using Task2.Languages;
-
-namespace Task2
+﻿namespace Task2
 {
-    internal struct Player
+    public class Player
     {
-        public string Name { get; set; }        
-        public int Score = 0;
-        public bool IsWinner;
+        public string Name { get; set; }
+        public int Score { get; set; }
+        //public bool IsWinner { get; set; }
+        public List<string> Words = new List<string>();
 
-        public Player(ILanguage language, MyConsole myConsole, int number)
+        public Player() { }
+
+        public Player(string name)
+        {
+            this.Name = name;
+        }
+
+        public Player(Game game, int number)
         {
             do
             {
-                myConsole.Clear();
-                language.EnterPlayerName(number);
-                this.Name = myConsole.ReadMessage();
+                game.language.EnterPlayerName(number);
+                Name = game.myConsole.ReadMessage(game);
 
-            } while (new DataCheck().CheckWithRegex(this.Name, language.regex) != true);
-            //} while (!Regex.IsMatch(this.Name, language.regex));
+            } while (new DataCheck().CheckWithRegex(Name, game.language.regex) != true);
+
+            Score = 0;
+            //IsWinner = false;
+            game.ActivePlayers.Add(Name);
+            game.myConsole.Clear();
         }
 
         public void ReturnPlayerName()
         {
-            Console.WriteLine(this.Name);
+            Console.WriteLine(Name);
         }
 
-        public bool ReadPlayerWord(ILanguage language, MyConsole myConsole, string mainWord, List<string> Words)
+        public bool ReadPlayerWord(Game game)
         {
             bool result = true;
             string playerWord;
-            List<char> mainWordList = mainWord.ToList();
-            this.IsWinner = false;
-           
-            myConsole.Clear();
-            language.EnterPlayerWord(this.Name, mainWord);
-            playerWord = myConsole.ReadMessage();
+            List<char> mainWordList = game.Word.ToLower().ToList();
+            //this.IsWinner = false;
+
+            do
+            {
+                game.language.EnterPlayerWord(Name, game.Word);
+                playerWord = game.myConsole.ReadMessage(game);
+
+            } while (new DataCheck().CheckWithRegex(playerWord, game.language.regex) != true);
 
             foreach (char ch in playerWord)
             {
                 if (mainWordList.IndexOf(Char.ToLower(ch)) < 0)
                 {
-                    language.CharIsNotInWord(ch);
+                    game.language.CharIsNotInWord(ch);
                     result = false;
                 }
                 mainWordList.Remove(ch);
@@ -51,15 +60,21 @@ namespace Task2
             
             if (Words.Any(word => word.ToLower() == playerWord.ToLower()))
             {
-                language.WordIsInList(playerWord);
+                game.language.WordIsInList(playerWord);
                 result = false;
             }
-                        
+
             if (result)
             {
                 Words.Add(playerWord);
+                game.Words.Add(playerWord);
                 this.Score += playerWord.Length;
-                this.IsWinner = true;
+                //this.IsWinner = true;
+                game.myConsole.Clear();
+            }
+            else
+            {
+                game.ActivePlayers.Remove(Name);
             }
 
             return result;

@@ -1,79 +1,114 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Task2.Languages;
 
 namespace Task2
 {
-    internal class Game
+    public class Game
     {
+        public Game game { get; set; }
+
+        public int playerNumber;
         public string Word { get; set; }
         public int MinChars { get; set; }
         public int MaxChars { get; set; }
         public ILanguage language { get; set; }
-        public MyConsole myConsole = new MyConsole();
+        public MyConsole myConsole { get; set; }
         private string numberRegex = @"^\d+$";
         public List<string> Words = new List<string>();
-        //public string winnerName;
+
         public List<Player> Players = new List<Player>();
+        public List<string> ActivePlayers = new List<string>();
 
         public Game()
         {
+            this.myConsole = new MyConsole();
+            this.language = ChooseLanguage();            
         }
 
         public void Start()
         {
+
+            //string json = JsonSerializer.Serialize(Players);
+            //myConsole.WriteMessage("json " + json);
+
+            //new File().SaveData(Players[0]);
+
+            //File file = new File();
+            //await file.SaveDataPlayerAsync();
+            
             WelcomeText();
 
-            ChooseLanguage();
+            playerNumber = PlayerNumbers();
 
             EnterWord();
-            
-            Player player1 = new Player(language, myConsole, 1);
-            Player player2 = new Player(language, myConsole, 2);
 
-            Players.Add(player1);
-            Players.Add(player2);
-
-            while (true)
+            for (int i = 1; i <= playerNumber; i++)
             {
-                if (!player1.ReadPlayerWord(language, myConsole, Word, Words)) break;
-                myConsole.WriteMessage(player1.Score.ToString());
-                myConsole.ReadMessage();
-                if (!player2.ReadPlayerWord(language, myConsole, Word, Words)) break;
-                myConsole.WriteMessage(player2.Score.ToString());
-                myConsole.ReadMessage();
+                Players.Add(new Player(this, i));
             }
 
-            //this.winnerName = player1.IsWinner ? player1.Name : player2.Name;
-        }
-
-        public void Finish()
-        {
-            string tmpWinnerName = "";
-            for (int i = 0; i < this.Players.Count; i++)
+            while (ActivePlayers.Count > 1)
             {
-                if (Players[i].IsWinner && tmpWinnerName != "") tmpWinnerName = Players[i].Name;
+                for (int i = 0; i < playerNumber; i++)
+                {
+                    if (ActivePlayers.Count == 1)
+                    {
+                        Finish();
+                    }
+                    if (ActivePlayers.Any(word => word == Players[i].Name))
+                    {
+                        Players[i].ReadPlayerWord(this);
+                    }
+                }
             }
-            language.GetWinner(tmpWinnerName);
-            myConsole.WriteMessage("Список слов");
-            for (int i = 0; i < Words.Count; i++)
-            {
-                myConsole.WriteMessage(Words[i]);
-            }
-            myConsole.WriteMessage("Очки игроков");
-            for (int i = 0; i < this.Players.Count; i++)
-            {
-                myConsole.WriteMessage(Players[i].Name + ": " + Players[i].Score.ToString());
-            }
-
         }
 
         public void WelcomeText()
         {
-            myConsole.WriteMessage("Welcome to \"Word\" game!!!\n");
+            language.WelcomeText();
         }
 
-        public void ChooseLanguage()
+        public async void Finish()
+        {
+            await new File(new ConsoleLogger()).SaveDataAsync(Players);
+            ShowWinner();
+        }
+
+        public void ShowWinner()
+        {
+            int maxScore = 0;
+            List<Player> winnerPlayers = new List<Player>();
+
+            foreach (Player player in Players)
+            {
+                if (player.Score > maxScore)
+                {
+                    maxScore = player.Score;
+                }
+            }
+            foreach (Player player in Players)
+            {
+                if (player.Score == maxScore)
+                {
+                    winnerPlayers.Add(player);
+                }
+            }
+
+            if (winnerPlayers.Count > 1)
+            {
+                language.ShowWinner(winnerPlayers);
+            }
+            else
+            {
+                language.ShowWinner(winnerPlayers[0]);
+            }
+            //winnerPlayers.Count > 1 ? Console.WriteLine("several") : Console.WriteLine("the one");
+            //language.ShowWinner((winnerPlayers.Count > 1) ? winnerPlayers : winnerPlayers[0]);
+            //(winnerPlayers.Count == 1) ? language.ShowWinner(winnerPlayers[0]) : language.ShowWinner(winnerPlayers);
+        }
+
+        public ILanguage ChooseLanguage()
         {
             bool result = false;
             while (!result)
@@ -82,9 +117,8 @@ namespace Task2
                 myConsole.WriteMessage("1. English");
                 myConsole.WriteMessage("2. Русский");
 
-                string? userChoice = myConsole.ReadMessage();
+                string? userChoice = myConsole.ReadMessage(this);
 
-                //if (Regex.IsMatch(userChoice, "^[1-2]$"))
                 if (new DataCheck().CheckWithRegex(userChoice, "^[1-2]$"))
                 {
                     result = true;
@@ -99,6 +133,22 @@ namespace Task2
                     }
                 }
             }
+
+            return language;
+        }
+
+        public int PlayerNumbers()
+        {
+            string? playerNumbers;
+            do
+            {
+                language.PlayerNumbers();
+                playerNumbers = myConsole.ReadMessage(game);
+
+            } while (new DataCheck().CheckWithRegex(playerNumbers, "^[2-5]$") != true);
+
+            myConsole.Clear();
+            return int.Parse(playerNumbers);
         }
 
         public void EnterWord()
@@ -106,36 +156,50 @@ namespace Task2
             string? tmpValue;
             do
             {
-                myConsole.Clear();
                 language.EnterMainWordMinChars();
-                tmpValue = myConsole.ReadMessage();
+                tmpValue = myConsole.ReadMessage(game);
 
             } while (new DataCheck().CheckWithRegex(tmpValue, this.numberRegex) != true);
-            //} while (!Regex.IsMatch(tmpValue, this.numberRegex));
 
+            myConsole.Clear();
             this.MinChars = int.Parse(tmpValue);
 
             do
             {
-                myConsole.Clear();
                 language.EnterMainWordMaxChars();
-                tmpValue = myConsole.ReadMessage();
+                tmpValue = myConsole.ReadMessage(game);
 
             } while (new DataCheck().CheckWithRegex(tmpValue, this.numberRegex) != true);
-            //} while (!Regex.IsMatch(tmpValue, this.numberRegex));
 
+            myConsole.Clear();
             // || (this.MinChars < int.Parse(tmpValue))
             this.MaxChars = int.Parse(tmpValue);
 
             string tmpRegex = language.regex.Replace("+$", "{" + this.MinChars + "," + this.MaxChars + "}$");
             do
             {
-                myConsole.Clear();
                 language.EnterMainWord(this.MinChars, this.MaxChars);
-                this.Word = myConsole.ReadMessage();
+                this.Word = myConsole.ReadMessage(game);
 
             } while (new DataCheck().CheckWithRegex(this.Word, tmpRegex) != true);
-            //} while (!Regex.IsMatch(this.Word, tmpRegex));
+
+            myConsole.Clear();
+        }
+
+        public void ShowWords()
+        {
+            for (int i = 0; i < Players.Count; i++)
+            {
+                language.ShowWords(Players[i]);
+            }
+        }
+
+        public void ShowScore()
+        {
+            for (int i = 0; i < Players.Count; i++)
+            {
+                language.ShowScore(Players[i]);
+            }
         }
     }
 }

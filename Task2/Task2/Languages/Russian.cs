@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Numerics;
 
 namespace Task2.Languages
 {
@@ -8,6 +8,20 @@ namespace Task2.Languages
         public MyConsole myConsole = new MyConsole();
         public string regex { get { return @"^[а-яёА-ЯЁ]+$"; } }
 
+        public void WelcomeText()
+        {
+            myConsole.Clear();
+            myConsole.WriteMessage("Добро пожаловать в игру \"Слова\"!!!\n");
+            myConsole.WriteMessage("Пожалуйста, используйте следующие команды для получения дополнительной информации во время игры:\n");
+            myConsole.WriteMessage("/помощь - показать помощь,");
+            myConsole.WriteMessage("/показать-слова - показать все слова текущей игры,");
+            myConsole.WriteMessage("/очки - показать очки текущих игроков,");
+            myConsole.WriteMessage("/общие-очки - показать очки всех игроков.\n");
+        }
+        public void PlayerNumbers()
+        {
+            myConsole.WriteMessage($"Пожалуйства, введите количество игроков от 2 до 5:");
+        }
         public void EnterPlayerName(int number)
         {
             myConsole.WriteMessage($"Пожалуйста, введите имя для игрока {number}:");
@@ -32,13 +46,34 @@ namespace Task2.Languages
         {
             myConsole.WriteMessage($"'{word}' было использовано раньше.");
         }
-        public void GetWinner(string name)
+        public void ShowWinner(Player player)
         {
-            myConsole.WriteMessage($"{name} победитель! Игра окончена.");
+            myConsole.WriteMessage($"{player.Name} победитель с {player.Score} очками! Игра окончена.");
+        }
+        public void ShowWinner(List<Player> players)
+        {
+            myConsole.WriteMessage("Ничья.");
+            for (int i = 0; i < players.Count; i++)
+            {
+                myConsole.WriteMessage($"{players[i].Name} победитель с {players[i].Score} очками!");
+            }
+            myConsole.WriteMessage("Игра окончена.");
         }
         public void CharIsNotInWord(char ch)
         {
             myConsole.WriteMessage($"Буквы '{ch}' нет в главном слове.");
+        }
+        public void ShowWords(Player player)
+        {
+            myConsole.WriteMessage($"Слова игрока {player.Name}:");
+            for (int i = 0; i < player.Words.Count; i++)
+            {
+                myConsole.WriteMessage(player.Words[i]);
+            }
+        }
+        public void ShowScore(Player player)
+        {
+            myConsole.WriteMessage($"{player.Name} имеет {player.Score} очков.");
         }
     }
 }

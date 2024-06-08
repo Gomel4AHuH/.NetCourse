@@ -1,16 +1,22 @@
 ﻿namespace Task2.Languages
 {
-    internal interface ILanguage
+    public interface ILanguage
     {
         string Name { get; }
         string regex { get; }
+
+        void WelcomeText();
+        void PlayerNumbers();
         void EnterPlayerName(int number);
         void EnterMainWordMinChars();
         void EnterMainWordMaxChars();
         void EnterMainWord(int minChars, int maxChars);
         void EnterPlayerWord(string name, string word);
         void WordIsInList(string word);
-        void GetWinner(string name);
+        void ShowWinner(Player player);
+        void ShowWinner(List<Player> players);
         void CharIsNotInWord(char ch);
+        void ShowWords(Player player);
+        void ShowScore(Player player);
     }
 }
