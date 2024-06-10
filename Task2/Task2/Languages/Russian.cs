@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Task2.Languages
+﻿namespace Task2.Languages
 {
     internal class Russian : ILanguage
     {
@@ -30,9 +28,9 @@ namespace Task2.Languages
         {
             myConsole.WriteMessage("Пожалуйста, введите минимальное количество букв для главного слова:");
         }
-        public void EnterMainWordMaxChars()
+        public void EnterMainWordMaxChars(int number)
         {
-            myConsole.WriteMessage("Пожалуйста, введите максимальное количество букв для главного слова:");
+            myConsole.WriteMessage($"Пожалуйста, введите максимальное количество букв для главного слова больше чем {number}:");
         }
         public void EnterMainWord(int minChars, int maxChars)
         {
@@ -53,9 +51,16 @@ namespace Task2.Languages
         public void ShowWinner(List<Player> players)
         {
             myConsole.WriteMessage("Ничья.");
-            for (int i = 0; i < players.Count; i++)
+            try
             {
-                myConsole.WriteMessage($"{players[i].Name} победитель с {players[i].Score} очками!");
+                for (int i = 0; i < players.Count; i++)
+                {
+                    myConsole.WriteMessage($"{players[i].Name} победитель с {players[i].Score} очками!");
+                }
+            }
+            catch
+            {
+                myConsole.WriteMessage("Ошибка в методе 'ShowWinner'.");
             }
             myConsole.WriteMessage("Игра окончена.");
         }
@@ -66,14 +71,34 @@ namespace Task2.Languages
         public void ShowWords(Player player)
         {
             myConsole.WriteMessage($"Слова игрока {player.Name}:");
-            for (int i = 0; i < player.Words.Count; i++)
+            try
             {
-                myConsole.WriteMessage(player.Words[i]);
+                for (int i = 0; i < player.Words.Count; i++)
+                {
+                    myConsole.WriteMessage(player.Words[i]);
+                }
+            }
+            catch
+            {
+                myConsole.WriteMessage("Ошибка в методе 'ShowWords'.");
             }
         }
         public void ShowScore(Player player)
         {
             myConsole.WriteMessage($"{player.Name} имеет {player.Score} очков.");
+        }
+        public void PlayerIsOut(string name)
+        {
+            myConsole.WriteMessage($"{name} выбывает из игры.");
+        }
+        public void DataSaved()
+        {
+            myConsole.WriteMessage("Данные сохранены в файл.");
+        }
+
+        public void ErrorMessage(string method)
+        {
+            myConsole.WriteMessage($"Ошибка в методе '{method}'.");
         }
     }
 }

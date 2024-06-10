@@ -9,14 +9,18 @@
         void PlayerNumbers();
         void EnterPlayerName(int number);
         void EnterMainWordMinChars();
-        void EnterMainWordMaxChars();
+        void EnterMainWordMaxChars(int nubmer);
         void EnterMainWord(int minChars, int maxChars);
         void EnterPlayerWord(string name, string word);
         void WordIsInList(string word);
-        void ShowWinner(Player player);
+        void ShowWinner(Player player);        
         void ShowWinner(List<Player> players);
         void CharIsNotInWord(char ch);
         void ShowWords(Player player);
         void ShowScore(Player player);
+        void PlayerIsOut(string name);
+        void DataSaved();
+        void ErrorMessage(string method);
+
     }
 }

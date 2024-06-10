@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Xml.Linq;
 using Task2.Languages;
 
 namespace Task2
@@ -15,10 +14,17 @@ namespace Task2
         public ILanguage language { get; set; }
         public MyConsole myConsole { get; set; }
         private string numberRegex = @"^\d+$";
+        private string playerNumbers = "^[2-5]$";
         public List<string> Words = new List<string>();
-
         public List<Player> Players = new List<Player>();
         public List<string> ActivePlayers = new List<string>();
+        //public File File { get; set; }
+
+        //
+        const int turnTime = 10;                            // turn time for each player in cesonds
+        int tmpTurnTime = turnTime;                         // temp value for timer
+        private static System.Timers.Timer aTimer;
+        //
 
         public Game()
         {
@@ -26,43 +32,83 @@ namespace Task2
             this.language = ChooseLanguage();            
         }
 
-        public void Start()
+        public async void Start()
         {
 
-            //string json = JsonSerializer.Serialize(Players);
-            //myConsole.WriteMessage("json " + json);
-
-            //new File().SaveData(Players[0]);
-
-            //File file = new File();
-            //await file.SaveDataPlayerAsync();
+            //File file = new File(new ConsoleLogger());
+            //await file.LoadDataAsync();
             
-            WelcomeText();
-
-            playerNumber = PlayerNumbers();
-
-            EnterWord();
-
-            for (int i = 1; i <= playerNumber; i++)
+            try
             {
-                Players.Add(new Player(this, i));
-            }
+                //List<Player> PlayersScore = await new File(new ConsoleLogger()).LoadDataAsync();
 
-            while (ActivePlayers.Count > 1)
-            {
-                for (int i = 0; i < playerNumber; i++)
+                WelcomeText();
+
+                playerNumber = PlayerNumbers();
+
+                EnterWord();
+
+                //add players depends on 'playerNumber' value and set prev score
+                for (int i = 1; i <= playerNumber; i++)
                 {
-                    if (ActivePlayers.Count == 1)
+                    Players.Add(new Player(this, i));
+                    //Players[i - 1].SetPrevScore(PlayersScore);
+                }
+
+                while (ActivePlayers.Count > 1)
+                {
+                    for (int i = 0; i < playerNumber; i++)
                     {
-                        Finish();
-                    }
-                    if (ActivePlayers.Any(word => word == Players[i].Name))
-                    {
-                        Players[i].ReadPlayerWord(this);
+                        //delete player form 'ActivePlayers' list if player made a mistake
+                        if (ActivePlayers.Any(word => word == Players[i].Name))
+                        {
+                            //
+                            setTimer(Players[i].Name);
+                            if (!Players[i].ReadPlayerWord(this)) language.PlayerIsOut(Players[i].Name);
+                            //
+                            aTimer.Stop();
+                        }
+
+                        //finish game if there is only one player in current turn
+                        if (ActivePlayers.Count == 1)
+                        {
+                            Finish();
+                            break;
+                        }
                     }
                 }
             }
+            catch
+            {
+                language.ErrorMessage("Start");
+            }
+
         }
+
+        //
+        void setTimer(string tmpName)
+        {
+            aTimer = new System.Timers.Timer(1000);
+            aTimer.Interval = 1000;
+            aTimer.Elapsed += (o, e) => OnTimedEvent(tmpName);
+            aTimer.Start();
+        }
+
+        void OnTimedEvent(string tmpName)
+        {
+            if (tmpTurnTime > 0)
+            {
+                Console.WriteLine(tmpTurnTime-- + " seconds remaining...");
+            }
+            else
+            {
+                Console.WriteLine(tmpName);
+                this.ActivePlayers.Remove(tmpName);
+                aTimer.Stop(); // Stop the timer
+                Console.WriteLine("Stoptimer");
+            }
+        }
+        //
 
         public void WelcomeText()
         {
@@ -71,134 +117,185 @@ namespace Task2
 
         public async void Finish()
         {
-            await new File(new ConsoleLogger()).SaveDataAsync(Players);
-            ShowWinner();
+            try
+            {
+                //await file.SaveDataAsync(Players);
+                await new File(new ConsoleLogger()).SaveDataAsync(Players);
+                //await new File().SaveDataAsync(Players);
+                ShowWinner();
+            }
+            catch
+            {
+                language.ErrorMessage("Fihish");
+            }
         }
 
         public void ShowWinner()
         {
             int maxScore = 0;
-            List<Player> winnerPlayers = new List<Player>();
 
-            foreach (Player player in Players)
+            try
             {
-                if (player.Score > maxScore)
+                List<Player> winnerPlayers = new List<Player>();
+
+                foreach (Player player in Players)
                 {
-                    maxScore = player.Score;
+                    if (player.Score > maxScore)
+                    {
+                        maxScore = player.Score;
+                    }
+                }
+                foreach (Player player in Players)
+                {
+                    if (player.Score == maxScore)
+                    {
+                        winnerPlayers.Add(player);
+                    }
+                }
+
+                if (winnerPlayers.Count > 1)
+                {
+                    language.ShowWinner(winnerPlayers);
+                }
+                else
+                {
+                    language.ShowWinner(winnerPlayers[0]);
                 }
             }
-            foreach (Player player in Players)
+            catch
             {
-                if (player.Score == maxScore)
-                {
-                    winnerPlayers.Add(player);
-                }
+                language.ErrorMessage("ShowWinner");
             }
 
-            if (winnerPlayers.Count > 1)
-            {
-                language.ShowWinner(winnerPlayers);
-            }
-            else
-            {
-                language.ShowWinner(winnerPlayers[0]);
-            }
-            //winnerPlayers.Count > 1 ? Console.WriteLine("several") : Console.WriteLine("the one");
-            //language.ShowWinner((winnerPlayers.Count > 1) ? winnerPlayers : winnerPlayers[0]);
-            //(winnerPlayers.Count == 1) ? language.ShowWinner(winnerPlayers[0]) : language.ShowWinner(winnerPlayers);
         }
 
         public ILanguage ChooseLanguage()
         {
             bool result = false;
-            while (!result)
+
+            try
             {
-                myConsole.WriteMessage("Please, choose language:");
-                myConsole.WriteMessage("1. English");
-                myConsole.WriteMessage("2. Русский");
-
-                string? userChoice = myConsole.ReadMessage(this);
-
-                if (new DataCheck().CheckWithRegex(userChoice, "^[1-2]$"))
+                while (!result)
                 {
-                    result = true;
-                    switch (int.Parse(userChoice))
+                    myConsole.WriteMessage("Please, choose language:");
+                    myConsole.WriteMessage("1. English");
+                    myConsole.WriteMessage("2. Русский");
+
+                    string? userChoice = myConsole.ReadMessage(this);
+
+                    if (new DataCheck().CheckWithRegex(userChoice, "^[1-2]$"))
                     {
-                        case 1:
-                            language = new English();
-                            break;
-                        case 2:
-                            language = new Russian();
-                            break;
+                        result = true;
+                        switch (int.Parse(userChoice))
+                        {
+                            case 1:
+                                language = new English();
+                                break;
+                            case 2:
+                                language = new Russian();
+                                break;
+                        }
                     }
                 }
             }
-
+            catch
+            {
+                language.ErrorMessage("ChooseLanguage");
+            }
             return language;
         }
 
         public int PlayerNumbers()
         {
-            string? playerNumbers;
+            string? strPlayerNumbers;
+
             do
             {
                 language.PlayerNumbers();
-                playerNumbers = myConsole.ReadMessage(game);
+                strPlayerNumbers = myConsole.ReadMessage(game);
 
-            } while (new DataCheck().CheckWithRegex(playerNumbers, "^[2-5]$") != true);
+            } while (new DataCheck().CheckWithRegex(strPlayerNumbers, playerNumbers) != true);
 
             myConsole.Clear();
-            return int.Parse(playerNumbers);
+
+            return int.Parse(strPlayerNumbers);
         }
 
         public void EnterWord()
         {
             string? tmpValue;
-            do
+
+            try
             {
-                language.EnterMainWordMinChars();
-                tmpValue = myConsole.ReadMessage(game);
+                do
+                {
+                    language.EnterMainWordMinChars();
+                    tmpValue = myConsole.ReadMessage(game);
 
-            } while (new DataCheck().CheckWithRegex(tmpValue, this.numberRegex) != true);
+                } while (new DataCheck().CheckWithRegex(tmpValue, this.numberRegex) != true);
 
-            myConsole.Clear();
-            this.MinChars = int.Parse(tmpValue);
+                myConsole.Clear();
+                this.MinChars = int.Parse(tmpValue);
 
-            do
+                bool result = false;
+                while (!result)
+                {
+                    language.EnterMainWordMaxChars(this.MinChars);
+                    tmpValue = myConsole.ReadMessage(game);
+
+                    result = new DataCheck().CheckWithRegex(tmpValue, this.numberRegex);
+
+                    if (result) result = (this.MinChars < int.Parse(tmpValue));
+                }
+
+                myConsole.Clear();
+
+                this.MaxChars = int.Parse(tmpValue);
+
+                string tmpRegex = language.regex.Replace("+$", "{" + this.MinChars + "," + this.MaxChars + "}$");
+                do
+                {
+                    language.EnterMainWord(this.MinChars, this.MaxChars);
+                    this.Word = myConsole.ReadMessage(game);
+
+                } while (new DataCheck().CheckWithRegex(this.Word, tmpRegex) != true);
+
+                myConsole.Clear();
+            }
+            catch
             {
-                language.EnterMainWordMaxChars();
-                tmpValue = myConsole.ReadMessage(game);
+                language.ErrorMessage("EnterWord");
+            }
 
-            } while (new DataCheck().CheckWithRegex(tmpValue, this.numberRegex) != true);
-
-            myConsole.Clear();
-            // || (this.MinChars < int.Parse(tmpValue))
-            this.MaxChars = int.Parse(tmpValue);
-
-            string tmpRegex = language.regex.Replace("+$", "{" + this.MinChars + "," + this.MaxChars + "}$");
-            do
-            {
-                language.EnterMainWord(this.MinChars, this.MaxChars);
-                this.Word = myConsole.ReadMessage(game);
-
-            } while (new DataCheck().CheckWithRegex(this.Word, tmpRegex) != true);
-
-            myConsole.Clear();
         }
 
         public void ShowWords()
         {
-            for (int i = 0; i < Players.Count; i++)
+            try
             {
-                language.ShowWords(Players[i]);
+                for (int i = 0; i < Players.Count; i++)
+                {
+                    language.ShowWords(Players[i]);
+                }
+            }
+            catch
+            {
+                language.ErrorMessage("ShowWords");
             }
         }
 
         public void ShowScore()
         {
-            for (int i = 0; i < Players.Count; i++)
+            try
             {
-                language.ShowScore(Players[i]);
+                for (int i = 0; i < Players.Count; i++)
+                {
+                    language.ShowScore(Players[i]);
+                }
+            }
+            catch
+            {
+                language.ErrorMessage("ShowScore");
             }
         }
     }

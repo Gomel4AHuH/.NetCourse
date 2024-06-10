@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Task2.Languages
+﻿namespace Task2.Languages
 {
     internal class English : ILanguage
     {
@@ -30,9 +28,9 @@ namespace Task2.Languages
         {
             myConsole.WriteMessage("Please, enter min chars for main word:");
         }
-        public void EnterMainWordMaxChars()
+        public void EnterMainWordMaxChars(int number)
         {
-            myConsole.WriteMessage("Please, enter max chars for main word:");
+            myConsole.WriteMessage($"Please, enter max chars for main word more than {number}:");
         }
         public void EnterMainWord(int minChars, int maxChars)
         {
@@ -53,9 +51,18 @@ namespace Task2.Languages
         public void ShowWinner(List<Player> players)
         {
             myConsole.WriteMessage("It's a draw.");
-            for (int i = 0; i < players.Count; i++)
+
+            try
             {
-                myConsole.WriteMessage($"{players[i].Name} is the winner with {players[i].Score} points!");
+                for (int i = 0; i < players.Count; i++)
+                {
+                    myConsole.WriteMessage($"{players[i].Name} is the winner with {players[i].Score} points!");
+                }
+
+            }
+            catch
+            {
+                ErrorMessage("ShowWinner");
             }
             myConsole.WriteMessage("Game is over.");
         }
@@ -66,14 +73,34 @@ namespace Task2.Languages
         public void ShowWords(Player player)
         {
             myConsole.WriteMessage($"Words of {player.Name} player:");
-            for (int i = 0; i < player.Words.Count; i++)
+            try
             {
-                myConsole.WriteMessage(player.Words[i]);
+                for (int i = 0; i < player.Words.Count; i++)
+                {
+                    myConsole.WriteMessage(player.Words[i]);
+                }
+            }
+            catch
+            {
+                ErrorMessage("ShowWords");
             }
         }
         public void ShowScore(Player player)
         {
             myConsole.WriteMessage($"{player.Name} has {player.Score} points.");
         }
+        public void PlayerIsOut(string name)
+        {
+            myConsole.WriteMessage($"{name} is out of the game.");
+        }
+        public void DataSaved()
+        {
+            myConsole.WriteMessage("Data has been saved to file");
+        }
+        public void ErrorMessage(string method)
+        {
+            myConsole.WriteMessage($"Error in '{method}' method.");
+        }
+
     }
 }
