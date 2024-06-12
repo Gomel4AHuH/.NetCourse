@@ -1,33 +1,7 @@
 ﻿namespace Task2
-{
-    /*
-    public interface ILogger
-    {
-        void Info(string message);
-    }*/
-
-    /*public class ConsoleLogger : ILogger
-    {
-        public void Info(string message)
-        {
-            Console.WriteLine(message);
-        }
-    }*/
-
+{   
     public class MyConsole
-    {/*
-        public void Info(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        private readonly ILogger _logger;*/
-
-        /*public MyConsole(ILogger logger)
-        {
-            _logger = logger;
-        }*/
-
+    {
         public void Clear()
         {
             Console.Clear();
@@ -55,6 +29,7 @@
                         return "";
                     case "/total-score":
                     case "/общие-очки":
+                        game.ShowTotalScore();
                         return "";
                     default:
                         return message;
@@ -70,7 +45,6 @@
         public void WriteMessage(string message)
         {
             Console.WriteLine(message);
-            //_logger.Info(message);
         }
     }
 }

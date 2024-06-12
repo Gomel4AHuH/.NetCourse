@@ -4,11 +4,8 @@
     {
         public string Name { get; set; }
         public int Score { get; set; }
-        public List<string> Words = new List<string>();
 
-        const int turnTime = 10;                            // turn time for each player in cesonds
-        int tmpTurnTime = turnTime;                         // temp value for timer
-        private static System.Timers.Timer aTimer;
+        public List<string> Words = new List<string>();
 
         public Player() { }
 
@@ -44,7 +41,6 @@
 
             try
             {
-                //setTimer(game);
                 do
                 {
                     game.language.EnterPlayerWord(Name, game.Word);
@@ -86,8 +82,6 @@
             {
                 game.language.ErrorMessage("ReadPlayerWord");
             }
-
-            //aTimer.Stop();
             return result;
         }
 
@@ -96,29 +90,6 @@
             foreach (Player player in players)
             {
                 if (player.Name == Name) Score = player.Score;
-            }
-        }
-
-        void setTimer(Game game)
-        {
-            aTimer = new System.Timers.Timer(1000);
-            aTimer.Interval = 1000;
-            aTimer.Elapsed += (o, e) => OnTimedEvent(game);
-            aTimer.Start();
-        }
-
-        void OnTimedEvent(Game game)
-        {
-            if (tmpTurnTime > 0)
-            {
-                Console.WriteLine(tmpTurnTime-- + " seconds remaining...");
-            }
-            else
-            {
-                Console.WriteLine(Name);
-                game.ActivePlayers.Remove(Name);
-                aTimer.Stop(); // Stop the timer
-                Console.WriteLine("Stoptimer");
             }
         }
     }

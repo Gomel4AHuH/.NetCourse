@@ -54,11 +54,10 @@
 
             try
             {
-                for (int i = 0; i < players.Count; i++)
+                foreach (Player player in players)
                 {
-                    myConsole.WriteMessage($"{players[i].Name} is the winner with {players[i].Score} points!");
+                    myConsole.WriteMessage($"{player.Name} is the winner with {player.Score} points!");
                 }
-
             }
             catch
             {
@@ -95,7 +94,11 @@
         }
         public void DataSaved()
         {
-            myConsole.WriteMessage("Data has been saved to file");
+            myConsole.WriteMessage("Data has been saved to file.");
+        }
+        public void DataLoaded()
+        {
+            myConsole.WriteMessage("Data has been loaded from file.");
         }
         public void ErrorMessage(string method)
         {

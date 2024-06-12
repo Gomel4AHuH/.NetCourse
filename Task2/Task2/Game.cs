@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Task2.Languages;
+﻿using Task2.Languages;
 
 namespace Task2
 {
@@ -18,13 +17,7 @@ namespace Task2
         public List<string> Words = new List<string>();
         public List<Player> Players = new List<Player>();
         public List<string> ActivePlayers = new List<string>();
-        //public File File { get; set; }
-
-        //
-        const int turnTime = 10;                            // turn time for each player in cesonds
-        int tmpTurnTime = turnTime;                         // temp value for timer
-        private static System.Timers.Timer aTimer;
-        //
+        public List<Player> AllPlayers = new List<Player>();
 
         public Game()
         {
@@ -35,24 +28,23 @@ namespace Task2
         public async void Start()
         {
 
-            //File file = new File(new ConsoleLogger());
-            //await file.LoadDataAsync();
-            
             try
             {
-                //List<Player> PlayersScore = await new File(new ConsoleLogger()).LoadDataAsync();
-
                 WelcomeText();
 
                 playerNumber = PlayerNumbers();
 
                 EnterWord();
 
+                //load player score form file
+                List<Player> AllPlayers = await new File().LoadDataAsync();
+                this.language.DataLoaded();
+
                 //add players depends on 'playerNumber' value and set prev score
                 for (int i = 1; i <= playerNumber; i++)
                 {
                     Players.Add(new Player(this, i));
-                    //Players[i - 1].SetPrevScore(PlayersScore);
+                    Players[i - 1].SetPrevScore(AllPlayers);
                 }
 
                 while (ActivePlayers.Count > 1)
@@ -62,11 +54,7 @@ namespace Task2
                         //delete player form 'ActivePlayers' list if player made a mistake
                         if (ActivePlayers.Any(word => word == Players[i].Name))
                         {
-                            //
-                            setTimer(Players[i].Name);
                             if (!Players[i].ReadPlayerWord(this)) language.PlayerIsOut(Players[i].Name);
-                            //
-                            aTimer.Stop();
                         }
 
                         //finish game if there is only one player in current turn
@@ -84,32 +72,7 @@ namespace Task2
             }
 
         }
-
-        //
-        void setTimer(string tmpName)
-        {
-            aTimer = new System.Timers.Timer(1000);
-            aTimer.Interval = 1000;
-            aTimer.Elapsed += (o, e) => OnTimedEvent(tmpName);
-            aTimer.Start();
-        }
-
-        void OnTimedEvent(string tmpName)
-        {
-            if (tmpTurnTime > 0)
-            {
-                Console.WriteLine(tmpTurnTime-- + " seconds remaining...");
-            }
-            else
-            {
-                Console.WriteLine(tmpName);
-                this.ActivePlayers.Remove(tmpName);
-                aTimer.Stop(); // Stop the timer
-                Console.WriteLine("Stoptimer");
-            }
-        }
-        //
-
+        
         public void WelcomeText()
         {
             language.WelcomeText();
@@ -119,9 +82,7 @@ namespace Task2
         {
             try
             {
-                //await file.SaveDataAsync(Players);
-                await new File(new ConsoleLogger()).SaveDataAsync(Players);
-                //await new File().SaveDataAsync(Players);
+                await new File().SaveDataAsync(Players);
                 ShowWinner();
             }
             catch
@@ -273,9 +234,9 @@ namespace Task2
         {
             try
             {
-                for (int i = 0; i < Players.Count; i++)
+                foreach (Player player in Players)
                 {
-                    language.ShowWords(Players[i]);
+                    language.ShowWords(player);
                 }
             }
             catch
@@ -288,9 +249,25 @@ namespace Task2
         {
             try
             {
-                for (int i = 0; i < Players.Count; i++)
+                foreach (Player player in Players)
                 {
-                    language.ShowScore(Players[i]);
+                    language.ShowScore(player);
+                }
+            }
+            catch
+            {
+                language.ErrorMessage("ShowScore");
+            }
+        }
+
+        public void ShowTotalScore()
+        {
+            try
+            {
+                foreach (Player player in AllPlayers)
+                {
+                    Console.WriteLine(player.Name);
+                    language.ShowScore(player);
                 }
             }
             catch

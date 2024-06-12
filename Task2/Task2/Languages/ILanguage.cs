@@ -20,7 +20,7 @@
         void ShowScore(Player player);
         void PlayerIsOut(string name);
         void DataSaved();
+        void DataLoaded();
         void ErrorMessage(string method);
-
     }
 }

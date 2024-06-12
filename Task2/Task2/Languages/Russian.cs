@@ -95,7 +95,10 @@
         {
             myConsole.WriteMessage("Данные сохранены в файл.");
         }
-
+        public void DataLoaded()
+        {
+            myConsole.WriteMessage("Данные загружены из файла.");
+        }
         public void ErrorMessage(string method)
         {
             myConsole.WriteMessage($"Ошибка в методе '{method}'.");
