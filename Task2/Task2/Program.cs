@@ -2,12 +2,15 @@
 {
     public class Program
     {
-        static async Task Main(string[] args)
+        private static readonly ConsoleLogger Logger = new();
+        static async Task Main()
         {
 
-            Game game = new Game();
+            Game Game = new(Logger);
 
-            game.Start();
+            Game.ChooseLanguage();
+
+            await Game.Start();
 
         }
     }

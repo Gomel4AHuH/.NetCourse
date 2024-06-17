@@ -3,10 +3,10 @@
     public interface ILanguage
     {
         string Name { get; }
-        string regex { get; }
+        string Regex { get; }
 
         void WelcomeText();
-        void PlayerNumbers();
+        void EnterPlayerNumbers();
         void EnterPlayerName(int number);
         void EnterMainWordMinChars();
         void EnterMainWordMaxChars(int nubmer);
@@ -18,6 +18,7 @@
         void CharIsNotInWord(char ch);
         void ShowWords(Player player);
         void ShowScore(Player player);
+        void ShowTotalScore(Dictionary<string, int> GameStatistic);
         void PlayerIsOut(string name);
         void DataSaved();
         void DataLoaded();

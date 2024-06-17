@@ -2,19 +2,19 @@
 
 namespace Task2
 {
-    internal class DataCheck
+    public class DataCheck
     {
         //check if incomming value matches condition
-        public bool CheckWithRegex(string str, string regex)
+        public static bool CheckWithRegex(string str, string regex)
         {
             return Regex.IsMatch(str, regex);
         }
 
         //return list of chars that are not in the main word
-        public List<char> CheckPlayerWord(string mainWord, string playerWord)
+        public static List<char> CheckPlayerWord(string mainWord, string playerWord)
         {
-            List<char> mainWordList = mainWord.ToList();
-            List<char> chars = new List<char>();
+            List<char> mainWordList = [.. mainWord];
+            List<char> chars = [];
 
             foreach (char ch in playerWord)
             {
@@ -29,9 +29,9 @@ namespace Task2
         }
 
         //check if the word was used before by other players
-        public bool wordIsInList(string word, List<string> words)
+        public static bool WordIsInList(string word, List<string> words)
         {
-            return (words.Any(w => w.ToLower() == word.ToLower())) ? true : false;
+            return words.Any(w => w.Equals(word, StringComparison.CurrentCultureIgnoreCase));
         }
     }
 }

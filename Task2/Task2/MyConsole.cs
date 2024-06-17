@@ -1,15 +1,39 @@
 ﻿namespace Task2
-{   
-    public class MyConsole
+{
+    public interface IConsole
     {
+        void Info(string message);
+        void Clear();
+        string? Read();
+    }
+
+    public class ConsoleLogger : IConsole
+    {
+        public void Info(string message)
+        {
+            Console.WriteLine(message);
+        }
         public void Clear()
         {
             Console.Clear();
         }
+        public string? Read()
+        {
+            return Console.ReadLine();
+        }
+    }
+
+    public class MyConsole(IConsole logger)
+    {
+        public readonly IConsole _logger = logger;
+        public void Clear()
+        {
+            _logger.Clear();
+        }
 
         public string ReadMessage(Game game)
         {
-            string? message = Console.ReadLine();
+            string? message = _logger.Read();
 
             try
             {
@@ -17,7 +41,7 @@
                 {
                     case "/help":
                     case "/помощь":
-                        game.language.WelcomeText();
+                        game.Language.WelcomeText();
                         return "";
                     case "/show-words":
                     case "/показать-слова":
@@ -37,14 +61,14 @@
             }
             catch
             {
-                game.language.ErrorMessage("ReadMessage");
+                game.Language.ErrorMessage("ReadMessage");
                 return message;
             }
         }
 
         public void WriteMessage(string message)
         {
-            Console.WriteLine(message);
+            _logger.Info(message);
         }
     }
 }

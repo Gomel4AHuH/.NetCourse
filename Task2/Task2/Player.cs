@@ -1,96 +1,73 @@
 ﻿namespace Task2
 {
-    public class Player
+    public class Player(int number)
     {
-        public string Name { get; set; }
-        public int Score { get; set; }
+        public string Name { get; set; } = "";
+        public int Number { get; set; } = number;
+        public int Score { get; set; } = 0;
+        public List<string> Words = [];
+        public DataCheck dataCheck = new();
 
-        public List<string> Words = new List<string>();
-
-        public Player() { }
-
-        public Player(string name)
-        {
-            this.Name = name;
-        }
-
-        public Player(Game game, int number)
+        public void SetName(Game Game)
         {
             do
             {
-                game.language.EnterPlayerName(number);
-                Name = game.myConsole.ReadMessage(game);
+                Game.Language.EnterPlayerName(Number);
+                Name = Game.MyConsole.ReadMessage(Game);
 
-            } while (new DataCheck().CheckWithRegex(Name, game.language.regex) != true);
-
-            Score = 0;
-            game.ActivePlayers.Add(Name);
-            game.myConsole.Clear();
+            } while (DataCheck.CheckWithRegex(Name, Game.Language.Regex) != true);
         }
 
-        public void ReturnPlayerName()
-        {
-            Console.WriteLine(Name);
-        }
-
-        public bool ReadPlayerWord(Game game)
+        public bool ReadPlayerWord(Game Game)
         {
             bool result = true;
             string playerWord;
-            List<char> mainWordList = game.Word.ToLower().ToList();
+            List<char> mainWordList = [.. Game.Word.ToLower()];
 
             try
             {
                 do
                 {
-                    game.language.EnterPlayerWord(Name, game.Word);
-                    playerWord = game.myConsole.ReadMessage(game);
+                    Game.Language.EnterPlayerWord(Name, Game.Word);
+                    playerWord = Game.MyConsole.ReadMessage(Game);
 
-                } while (new DataCheck().CheckWithRegex(playerWord, game.language.regex) != true);
+                } while (DataCheck.CheckWithRegex(playerWord, Game.Language.Regex) != true);
 
 
-                List<char> chars = new DataCheck().CheckPlayerWord(game.Word, playerWord);
+                List<char> chars = DataCheck.CheckPlayerWord(Game.Word, playerWord);
 
                 if (chars.Count > 0)
                 {
                     for (int i = 0; i < chars.Count; i++)
                     {
-                        game.language.CharIsNotInWord(chars[i]);
+                        Game.Language.CharIsNotInWord(chars[i]);
                     }
                     result = false;
                 }
 
-                if (new DataCheck().wordIsInList(playerWord, game.Words))
+                if (DataCheck.WordIsInList(playerWord, Game.Words))
                 {
-                    game.language.WordIsInList(playerWord);
+                    Game.Language.WordIsInList(playerWord);
                     result = false;
                 }
 
                 if (result)
                 {
                     Words.Add(playerWord);
-                    game.Words.Add(playerWord);
+                    Game.Words.Add(playerWord);
                     this.Score += playerWord.Length;
-                    game.myConsole.Clear();
+                    Game.MyConsole.Clear();
                 }
                 else
                 {
-                    game.ActivePlayers.Remove(Name);
+                    Game.ActivePlayers.Remove(Name);
                 }
             }
             catch
             {
-                game.language.ErrorMessage("ReadPlayerWord");
+                Game.Language.ErrorMessage("ReadPlayerWord");
             }
             return result;
-        }
-
-        public void SetPrevScore(List<Player> players)
-        {
-            foreach (Player player in players)
-            {
-                if (player.Name == Name) Score = player.Score;
-            }
         }
     }
 }
