@@ -18,7 +18,7 @@
         void CharIsNotInWord(char ch);
         void ShowWords(Player player);
         void ShowScore(Player player);
-        void ShowTotalScore(Dictionary<string, int> GameStatistic);
+        void ShowTotalScore(Dictionary<string, int> gameStatistic);
         void PlayerIsOut(string name);
         void DataSaved();
         void DataLoaded();

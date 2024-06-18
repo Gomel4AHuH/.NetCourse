@@ -10,7 +10,7 @@
 
             Game.ChooseLanguage();
 
-            await Game.Start();
+            await Game.StartAsync();
 
         }
     }

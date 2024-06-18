@@ -1,4 +1,5 @@
-﻿using Task2.Languages;
+﻿using System.Xml.Linq;
+using Task2.Languages;
 
 namespace Task2
 {
@@ -12,13 +13,13 @@ namespace Task2
         public MyConsole MyConsole { get; set; } = new(Logger);
         private const string NumberRegex = @"^\d+$";
         private const string PlayerNumberRegex = "^[2-5]$";
-        public List<string> Words = [];
-        public List<Player> Players = [];
-        public List<string> ActivePlayers = [];
-        public List<Player> AllPlayers = [];
-        public Dictionary<string, int> GameStatistic = [];
+        public List<string> words = [];
+        public List<Player> players = [];
+        public List<string> activePlayers = [];
+        public List<Player> allPlayers = [];
+        public Dictionary<string, int> gameStatistic = [];
 
-        public async Task Start()
+        public async Task StartAsync()
         {
 
             try
@@ -30,7 +31,7 @@ namespace Task2
                 EnterWord();
 
                 //load game statistic form file
-                GameStatistic = await FileService.LoadDataAsync();
+                gameStatistic = await FileService.LoadDataAsync();
                 this.Language.DataLoaded();
 
                 //add players depends on 'playerNumber' value and set prev score
@@ -39,20 +40,20 @@ namespace Task2
                     ProcessPlayer(i);
                 }
 
-                while (ActivePlayers.Count > 1)
+                while (activePlayers.Count > 1)
                 {
                     for (int i = 0; i < PlayerNumber; i++)
                     {
                         //delete player form 'ActivePlayers' list if player made a mistake
-                        if (ActivePlayers.Any(word => word == Players[i].Name))
+                        if (activePlayers.Any(word => word == players[i].Name))
                         {
-                            if (!Players[i].ReadPlayerWord(this)) Language.PlayerIsOut(Players[i].Name);
+                            if (!ReadPlayerWord(players[i])) Language.PlayerIsOut(players[i].Name);
                         }
 
                         //finish game if there is only one player in current turn
-                        if (ActivePlayers.Count == 1)
+                        if (activePlayers.Count == 1)
                         {
-                            Finish();
+                            FinishAsync();
                             break;
                         }
                     }
@@ -74,29 +75,29 @@ namespace Task2
         {
             Player Player = new(i);
             Player.SetName(this);
-            this.ActivePlayers.Add(Player.Name);
-            Players.Add(Player);
+            this.activePlayers.Add(Player.Name);
+            players.Add(Player);
             this.MyConsole.Clear();
         }
 
-        public async void Finish()
+        public async void FinishAsync()
         {
 
             try
             {
-                foreach (Player player in Players)
+                foreach (Player player in players)
                 {
-                    if (GameStatistic.ContainsKey(player.Name))
+                    if (gameStatistic.ContainsKey(player.Name))
                     {
-                        GameStatistic[player.Name] += player.Score;
+                        gameStatistic[player.Name] += player.Score;
                     }
                     else
                     {
-                        GameStatistic.Add(player.Name, player.Score);
+                        gameStatistic.Add(player.Name, player.Score);
                     }
                 }
 
-                await FileService.SaveDataAsync(GameStatistic);
+                await FileService.SaveDataAsync(gameStatistic);
                 ShowWinner();
             }
             catch
@@ -111,22 +112,8 @@ namespace Task2
 
             try
             {
-                List<Player> winnerPlayers = [];
-
-                foreach (Player player in Players)
-                {
-                    if (player.Score > maxScore)
-                    {
-                        maxScore = player.Score;
-                    }
-                }
-                foreach (Player player in Players)
-                {
-                    if (player.Score == maxScore)
-                    {
-                        winnerPlayers.Add(player);
-                    }
-                }
+                maxScore = players.Max(player => player.Score);
+                List<Player> winnerPlayers = players.FindAll(player => player.Score == maxScore);
 
                 if (winnerPlayers.Count > 1)
                 {
@@ -189,7 +176,7 @@ namespace Task2
                 Language.EnterPlayerNumbers();
                 strPlayerNumbers = MyConsole.ReadMessage(this);
 
-            } while (DataCheck.CheckWithRegex(strPlayerNumbers, PlayerNumberRegex) != true);
+            } while (!DataCheck.CheckWithRegex(strPlayerNumbers, PlayerNumberRegex));
 
             MyConsole.Clear();
 
@@ -207,7 +194,7 @@ namespace Task2
                     Language.EnterMainWordMinChars();
                     tmpValue = MyConsole.ReadMessage(this);
 
-                } while (DataCheck.CheckWithRegex(tmpValue, NumberRegex) != true);
+                } while (!DataCheck.CheckWithRegex(tmpValue, NumberRegex));
 
                 MyConsole.Clear();
                 this.MinChars = int.Parse(tmpValue);
@@ -233,7 +220,7 @@ namespace Task2
                     Language.EnterMainWord(this.MinChars, this.MaxChars);
                     this.Word = MyConsole.ReadMessage(this);
 
-                } while (DataCheck.CheckWithRegex(this.Word, tmpRegex) != true);
+                } while (!DataCheck.CheckWithRegex(this.Word, tmpRegex));
 
                 MyConsole.Clear();
             }
@@ -248,7 +235,7 @@ namespace Task2
         {
             try
             {
-                foreach (Player player in Players)
+                foreach (Player player in players)
                 {
                     Language.ShowWords(player);
                 }
@@ -263,7 +250,7 @@ namespace Task2
         {
             try
             {
-                foreach (Player player in Players)
+                foreach (Player player in players)
                 {
                     Language.ShowScore(player);
                 }
@@ -278,12 +265,64 @@ namespace Task2
         {
             try
             {
-                Language.ShowTotalScore(GameStatistic);
+                Language.ShowTotalScore(gameStatistic);
             }
             catch
             {
                 Language.ErrorMessage("ShowScore");
             }
+        }
+
+        public bool ReadPlayerWord(Player player)
+        {
+            bool result = true;
+            string playerWord;
+            List<char> mainWordList = [.. Word.ToLower()];
+
+            try
+            {
+                do
+                {
+                    Language.EnterPlayerWord(player.Name, Word);
+                    playerWord = MyConsole.ReadMessage(this);
+
+                } while (!DataCheck.CheckWithRegex(playerWord, Language.Regex));
+
+
+                List<char> chars = DataCheck.CheckPlayerWord(Word, playerWord);
+
+                if (chars.Count > 0)
+                {
+                    for (int i = 0; i < chars.Count; i++)
+                    {
+                        Language.CharIsNotInWord(chars[i]);
+                    }
+                    result = false;
+                }
+
+                if (DataCheck.WordIsInList(playerWord, words))
+                {
+                    Language.WordIsInList(playerWord);
+                    result = false;
+                }
+
+                if (result)
+                {
+                    player.Words.Add(playerWord);
+                    words.Add(playerWord);
+                    player.Score += playerWord.Length;
+                    MyConsole.Clear();
+                }
+                else
+                {
+                    activePlayers.Remove(player.Name);
+                }
+            }
+            catch
+            {
+                Language.ErrorMessage("ReadPlayerWord");
+            }
+            return result;
         }
     }
 }
