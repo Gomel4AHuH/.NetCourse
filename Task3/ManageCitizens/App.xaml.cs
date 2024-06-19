@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Configuration;
+using System.Data;
+using System.Windows;
 
 namespace ManageCitizens
 {
@@ -8,4 +10,5 @@ namespace ManageCitizens
     public partial class App : Application
     {
     }
+
 }

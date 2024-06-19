@@ -3,11 +3,11 @@
 namespace ManageCitizens.View
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AddNewCountry.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class CreateCountryWindow : Window
     {
-        public MainWindow()
+        public CreateCountryWindow()
         {
             InitializeComponent();
         }

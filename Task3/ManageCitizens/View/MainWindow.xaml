@@ -1,0 +1,100 @@
+﻿<Window x:Class="ManageCitizens.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ManageCitizens.View"
+        mc:Ignorable="d"
+        Title="Citizen database" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Import" >
+                    <MenuItem Header="from csv file"></MenuItem>
+                    <MenuItem Header="from the database" ></MenuItem>
+                    <MenuItem Header="filtered data" ></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Export" >
+                    <MenuItem Header="to Excel"></MenuItem>
+                    <MenuItem Header="to XML" ></MenuItem>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Exit" ></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Add">
+                <MenuItem Header="Citizen" >
+                </MenuItem>
+                <MenuItem Header="City" >
+                </MenuItem>
+                <MenuItem Header="Country" >
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1">
+            <TabItem Name="Citizens">
+                <TabItem.Header>
+                    <TextBlock Text="Citizens"/>
+                </TabItem.Header>
+                <DataGrid
+                    IsReadOnly="True"
+                    AutoGenerateColumns="True"
+                    ItemsSource="{Binding AllCitizens}">
+                    <!--<DataGrid.Columns>
+                        <DataGridTextColumn Header="LastName"
+                                            Binding="{Binding Path=LastName}"
+                                            Width="10*"/>
+                        <DataGridTextColumn Header="Name" 
+                                            Binding="{Binding Path=FirstName}" 
+                                            Width="10*"/>
+                        <DataGridTextColumn Header="MiddleName" 
+                                            Binding="{Binding Path=Patronymic}" 
+                                            Width="10*"/>
+                        <DataGridTextColumn Header="Birthday" 
+                                            Binding="{Binding Path=Birthday}"
+                                            Width="5*"/>
+                        <DataGridTextColumn Header="City" 
+                                            Binding="{Binding Path=City}" 
+                                            Width="10*"/>
+                        <DataGridTextColumn Header="Country" 
+                                            Binding="{Binding Path=Country}" 
+                                            Width="10*"/>
+                    </DataGrid.Columns>-->
+                </DataGrid>
+            </TabItem>
+            <TabItem Name="Cities">
+                <TabItem.Header>
+                    <TextBlock Text="Cities"/>
+                </TabItem.Header>
+                <DataGrid
+                    IsReadOnly="True"
+                    AutoGenerateColumns="True"
+                    ItemsSource="{Binding AllCities}">
+                    <!--<DataGrid.Columns>
+                        <DataGridTextColumn Header="City"
+                            Binding="{Binding Path=City}"
+                            Width="10*"/>                        
+                    </DataGrid.Columns>-->
+                </DataGrid>
+            </TabItem>
+            <TabItem Name="Countries">
+                <TabItem.Header>
+                    <TextBlock Text="Countries"/>
+                </TabItem.Header>
+                <DataGrid
+                    IsReadOnly="True"
+                    AutoGenerateColumns="True"
+                    ItemsSource="{Binding AllCountries}">
+                    <!--<DataGrid.Columns>
+                        <DataGridTextColumn Header="Country"
+                                            Binding="{Binding Path=Country}"
+                                            Width="10*"/>
+                    </DataGrid.Columns>-->
+                </DataGrid>
+            </TabItem>
+        </TabControl>        
+    </Grid>
+</Window>
