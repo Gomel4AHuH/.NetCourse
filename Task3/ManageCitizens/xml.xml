@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestProgram>
+  <Record id="0">
+    <Birthday>2024-01-01T00:00:00</Birthday>
+    <FirstName>Ivan1</FirstName>
+    <LastName>Ivanov2</LastName>
+    <MiddleName>QQQ3</MiddleName>
+    <City>Gomel1</City>
+    <Country>Belarus</Country>
+  </Record>
+  <Record id="0">
+    <Birthday>2016-07-12T00:00:00</Birthday>
+    <FirstName>Petr2</FirstName>
+    <LastName>Petrov1</LastName>
+    <MiddleName>QQQ</MiddleName>
+    <City>Gomel2</City>
+    <Country>Poland3</Country>
+  </Record>
+  <Record id="0">
+    <Birthday>2009-03-24T00:00:00</Birthday>
+    <FirstName>Sidor3</FirstName>
+    <LastName>Sidorov</LastName>
+    <MiddleName>QQQ1</MiddleName>
+    <City>Gomel3</City>
+    <Country>Belarus2</Country>
+  </Record>
+</TestProgram>
