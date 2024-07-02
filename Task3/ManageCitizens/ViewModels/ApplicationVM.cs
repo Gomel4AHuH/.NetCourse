@@ -30,7 +30,7 @@ namespace ManageCitizens.ViewModels
             _applicationDbContext = applicationDbContext;
 
             _citizensRepository = new SQLCitizenRepository(new ApplicationDbContext());
-            _importDataFromCsvFileAsyncCommand = new AsyncRelayCommand(ImportDataFromCsvFileAsync);
+            //_importDataFromCsvFileAsyncCommand = new RelayCommand(ImportDataFromCsvFileAsync);
             Task task = ImportDataFromDbAsync();
         }
         #endregion
@@ -130,7 +130,7 @@ namespace ManageCitizens.ViewModels
             }
         }
 
-        private AsyncRelayCommand _importDataFromCsvFileAsyncCommand;
+        //private AsyncRelayCommand _importDataFromCsvFileAsyncCommand;
         //public AsyncRelayCommand ImportDataFromCsvFileAsyncCommand => _importDataFromCsvFileAsyncCommand;
         private async Task ImportDataFromCsvFileAsync()
         {
@@ -312,6 +312,7 @@ namespace ManageCitizens.ViewModels
                     _citizens.Add(citizen);
                 }
                 _allCitizens = [.. _citizens];
+                TotalCount = _allCitizens.Count;
                 DataNotEmpty();
             }
             catch (Exception ex)
@@ -391,6 +392,7 @@ namespace ManageCitizens.ViewModels
                 OnPropertyChanged(nameof(BirthdayFilter));
             }
         }
+        #endregion
 
         private bool _isDataFiltered;
         public bool IsDataFiltered
@@ -413,7 +415,6 @@ namespace ManageCitizens.ViewModels
                 OnPropertyChanged(nameof(IsDataNotEmpty));
             }
         }
-        #endregion
 
         private readonly RelayCommand _filterCitizensCommand;
 
@@ -443,6 +444,7 @@ namespace ManageCitizens.ViewModels
                             _citizens.Add(citizen);
                         }
                         IsDataFiltered = true;
+                        FilterCount = _citizens.Count;
                         DataNotEmpty();
                     }
                 });
@@ -469,12 +471,35 @@ namespace ManageCitizens.ViewModels
                     CityFilter = "";
                     CountryFilter = "";
                     IsDataFiltered = false;
+                    FilterCount = 0;
                     DataNotEmpty();
                 });
             }
         }
         #endregion
 
+
+        private int _totalCount;
+        public int TotalCount
+        {
+            get => _totalCount;
+            set
+            {
+                _totalCount = value;
+                OnPropertyChanged(nameof(TotalCount));
+            }
+        }
+
+        private int _filterCount;
+        public int FilterCount
+        {
+            get => _filterCount;
+            set
+            {
+                _filterCount = value;
+                OnPropertyChanged(nameof(FilterCount));
+            }
+        }
         private void DataNotEmpty()
         {
             IsDataNotEmpty = (_citizens.Count > 0);

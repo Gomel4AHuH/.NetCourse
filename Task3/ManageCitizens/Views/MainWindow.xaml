@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ManageCitizens.Views"
         mc:Ignorable="d"
         Title="Citizen database" Height="800" Width="1600" ResizeMode="NoResize">
-    <Grid>        
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
             <RowDefinition Height="*"/>
@@ -29,19 +29,19 @@
                 Grid.Row="0"
                 VerticalAlignment="Center"
                 Height="25">
-                <MenuItem Header="File">
+                <MenuItem Header="File" Height="25" Width="30">
                     <MenuItem Header="Clean database" Command="{Binding CleanDatabaseCommand}"></MenuItem>
                     <Separator/>
                     <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Import">
+                <MenuItem Header="Import" Height="25" Width="50">
                     <MenuItem Header="from CSV" Command="{Binding ImportDataFromCsvFileCommand}"></MenuItem>
-                    <MenuItem Header="from CSV Async" Command="{Binding ImportDataFromCsvFileAsyncCommand}"></MenuItem>
+                    <MenuItem Header="from CSV Async" Command="{Binding Path=ImportDataFromCsvFileAsyncCommand}"></MenuItem>
                     <MenuItem Header="from XML" Command="{Binding ImportDataFromXmlFileCommand}"></MenuItem>
                     <MenuItem Header="from Excel" Command="{Binding ImportDataFromExcelFileCommand}"></MenuItem>
                     <MenuItem Header="from JSON" Command="{Binding ImportDataFromJsonFileCommand}"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Export">
+                <MenuItem Header="Export" Height="25" Width="50">
                     <MenuItem Header="to CSV" Command="{Binding ExportDataToCsvFileCommand}"></MenuItem>
                     <MenuItem Header="to XML" Command="{Binding ExportDataToXmlFileCommand}"></MenuItem>
                     <MenuItem Header="to Excel" Command="{Binding ExportDataToExcelFileCommand}"></MenuItem>
@@ -60,7 +60,6 @@
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="200"/>
@@ -69,87 +68,111 @@
                     <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="100"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Text="Last Name"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
                     Text="{Binding LastNameFilter, Mode=TwoWay}"/>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="2"
+                    Grid.Column="1"
                     HorizontalAlignment="Left"
                     Text="First Name"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="2"
+                    Grid.Column="1"
                     Width="150"
                     HorizontalAlignment="Left"
                     Text="{Binding FirstNameFilter, Mode=TwoWay}"/>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     HorizontalAlignment="Left"
-                    Text="Middle Name"/>
+                    Text="Middle Name" Grid.ColumnSpan="2"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding MiddleNameFilter, Mode=TwoWay}"/>
+                    Text="{Binding MiddleNameFilter, Mode=TwoWay}" Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Text="Birthday"/>
                 <DatePicker
                     Grid.Row="4"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
                     Text="{Binding BirthdayFilter, TargetNullValue='', Mode=TwoWay}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="2"
+                    Grid.Column="1"
                     HorizontalAlignment="Left"
                     Text="City"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="2"
+                    Grid.Column="1"
                     Width="150"
                     HorizontalAlignment="Left"
                     Text="{Binding CityFilter, Mode=TwoWay}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     HorizontalAlignment="Left"
                     Text="Country"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding CountryFilter, Mode=TwoWay}"/>
+                    Text="{Binding CountryFilter, Mode=TwoWay}" Grid.ColumnSpan="2"/>
                 <Button
                     Command="{Binding FilterCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="5"
+                    Grid.Column="4"
                     Width="100"
                     HorizontalAlignment="Left"
                     Content="Search"
-                    IsEnabled="{Binding IsDataNotEmpty, Mode=TwoWay}"/>
+                    IsEnabled="{Binding IsDataNotEmpty, Mode=TwoWay}" Grid.ColumnSpan="2"/>
                 <Button
                     Command="{Binding CancelSearchCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="7"
+                    Grid.Column="6"
                     Width="100"
                     HorizontalAlignment="Left"
                     Content="Cancel search"
                     IsEnabled="{Binding IsDataFiltered, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="9"
+                    HorizontalAlignment="Left"
+                    Text="Total count"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="8"
+                    HorizontalAlignment="Left"
+                    Text="Filter count"/>
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="9"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="{Binding TotalCount, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="8"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="{Binding FilterCount, Mode=TwoWay}"/>
             </Grid>
             <DataGrid
                 ItemsSource="{Binding CitizensCollection}"
@@ -159,27 +182,27 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Фамилия"
+                        Header="Last name"
                         Binding="{Binding LastName}"/>
                     <DataGridTextColumn
                         Width="150"
-                       Header="Имя" 
+                       Header="First name" 
                         Binding="{Binding FirstName}"/>
                     <DataGridTextColumn
                         Width="150" 
-                        Header="Отчество"
+                        Header="Middle name"
                         Binding="{Binding MiddleName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Дата рождения"
+                        Header="Birthday"
                         Binding="{Binding Birthday}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Город"
+                        Header="City"
                         Binding="{Binding City}"/>
                     <DataGridTextColumn
                         Width="*"
-                        Header="Страна"
+                        Header="Country"
                         Binding="{Binding Country}"/>
                 </DataGrid.Columns>
             </DataGrid>
