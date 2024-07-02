@@ -1,5 +1,5 @@
-﻿using ManageCitizens.Models;
-using ManageCitizens.Interfaces;
+﻿using ManageCitizens.Interfaces;
+using ManageCitizens.Models;
 using ManageCitizens.Models.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,25 +8,37 @@ namespace ManageCitizens.Repository
     class SQLCitizenRepository(ApplicationDbContext applicationDbContext) : IRepository
     {
         private ApplicationDbContext _db = applicationDbContext;
-
-        public IEnumerable<Citizen> GetCitizenList()
+        public async Task<IEnumerable<Citizen>> GetCitizensAsync()
+        {
+            return await _db.Citizens.ToListAsync();
+        }
+        public IEnumerable<Citizen> GetCitizens()
         {
             return _db.Citizens;
         }
-
-        public Citizen GetCitizen(int id)
+        public async Task InsertAsync(Citizen citizen)
         {
-            return _db.Citizens.Find(id);
+            await _db.Citizens.AddAsync(citizen);
         }
-
-        public void Create(Citizen citizen)
+        public void Insert(Citizen citizen)
         {
             _db.Citizens.Add(citizen);
         }
-
-        public void Update(Citizen citizen)
+        public async Task SaveAsync()
         {
-            _db.Entry(citizen).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+        }       
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+
+        public void DeleteAll()
+        {
+            foreach (Citizen ctzn in _db.Citizens)
+            {
+                Delete(ctzn.Id);
+            }
         }
 
         public void Delete(int id)
@@ -34,12 +46,7 @@ namespace ManageCitizens.Repository
             Citizen citizen = _db.Citizens.Find(id);
             if (citizen != null)
                 _db.Citizens.Remove(citizen);
-        }
-
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
+        }        
 
         private bool disposed = false;
 

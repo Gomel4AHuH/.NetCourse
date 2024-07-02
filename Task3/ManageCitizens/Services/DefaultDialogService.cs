@@ -1,5 +1,4 @@
 ﻿using ManageCitizens.Interfaces;
-using ManageCitizens.Models;
 using ManageCitizens.Views;
 using Microsoft.Win32;
 using System.Windows;

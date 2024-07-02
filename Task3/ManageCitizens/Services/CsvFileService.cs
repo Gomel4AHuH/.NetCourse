@@ -1,10 +1,8 @@
 ﻿using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
-using ManageCitizens.ViewModels;
 using Microsoft.VisualBasic.FileIO;
 using System.IO;
 using System.Text;
-using System.Windows;
 
 
 namespace ManageCitizens.Services
@@ -24,11 +22,25 @@ namespace ManageCitizens.Services
                 string[] row = parser.ReadFields();
                 if ((row !=  null) && (row.Length > 0))
                 {
-                    citizens.Add(new Citizen(row[1], row[2], row[3], DateTime.Parse(row[0]), row[4], row[5]));
+                    citizens.Add(new Citizen(row[1], row[2], row[3], DateOnly.Parse(row[0]), row[4], row[5]));
                 }
             }
 
             return citizens;
+        }
+
+        public async IAsyncEnumerable<Citizen> OpenAsync(string fileName)
+        {
+            using (var streamReader = new StreamReader(fileName))
+            {
+                string? oneLine;
+                while ((oneLine = await streamReader.ReadLineAsync()) != null)
+                {
+                    string[] values = oneLine.Split(';');
+                    yield return new Citizen(values[1], values[2], values[3], DateOnly.Parse(values[0]), values[4], values[5]);
+
+                }
+            }
         }
 
         public void Save(string fileName, List<Citizen> citizensList)

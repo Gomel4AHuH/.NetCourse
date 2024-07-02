@@ -26,7 +26,7 @@ namespace ManageCitizens.Services
                         switch (childnode.Name)
                         {
                             case "Birthday" :
-                                citizen.Birthday = DateTime.Parse(childnode.InnerText);
+                                citizen.Birthday = DateOnly.Parse(childnode.InnerText);
                                 break;
                             case "FirstName":
                                 citizen.FirstName = childnode.InnerText;

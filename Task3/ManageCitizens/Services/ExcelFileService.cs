@@ -2,7 +2,6 @@
 using ManageCitizens.Models;
 using Spire.Xls;
 using System.Data;
-using System.Windows;
 
 namespace ManageCitizens.Services
 {
@@ -80,7 +79,12 @@ namespace ManageCitizens.Services
 
             foreach (DataRow row in dataTable.Rows)
             {
-                citizens.Add(new Citizen(row[0].ToString(), row[1].ToString(), row[2].ToString(), DateTime.Parse(row[3].ToString()), row[4].ToString(), row[5].ToString()));
+                citizens.Add(new Citizen(firstName: row[0].ToString(),
+                                         lastName: row[1].ToString(),
+                                         middleName: row[2].ToString(),
+                                         birthday: DateOnly.Parse(row[3].ToString()),
+                                         city: row[4].ToString(),
+                                         country: row[5].ToString()));
             }
 
             return citizens;

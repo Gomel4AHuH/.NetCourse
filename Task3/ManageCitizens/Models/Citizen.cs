@@ -1,5 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace ManageCitizens.Models
@@ -10,11 +9,11 @@ namespace ManageCitizens.Models
         private string _firstName;
         private string _lastName;
         private string _middleName;
-        private DateTime _birthday;
+        private DateOnly _birthday;
         private string _city;
         private string _country;
 
-        public Citizen(string firstName, string lastName, string middleName, DateTime birthday, string city, string country)
+        public Citizen(string firstName, string lastName, string middleName, DateOnly birthday, string city, string country)
         {
             this._firstName = firstName;
             this._lastName = lastName;
@@ -29,7 +28,7 @@ namespace ManageCitizens.Models
             this._firstName = "";
             this._lastName = "";
             this._middleName = "";
-            this._birthday = new DateTime();
+            this._birthday = new DateOnly();
             this._city = "";
             this._country = "";
         }
@@ -64,7 +63,7 @@ namespace ManageCitizens.Models
                 OnPropertyChanged("MiddleName");
             }
         }
-        public DateTime Birthday
+        public DateOnly Birthday
         {
             get { return _birthday; }
             set

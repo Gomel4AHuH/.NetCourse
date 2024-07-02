@@ -4,11 +4,13 @@ namespace ManageCitizens.Interfaces
 {
     public interface IRepository : IDisposable
     {
-        IEnumerable<Citizen> GetCitizenList();
-        Citizen GetCitizen(int id);
-        void Create(Citizen citizen);
-        void Update(Citizen citizen);
-        void Delete(int id);
+        Task<IEnumerable<Citizen>> GetCitizensAsync();
+        IEnumerable<Citizen> GetCitizens();
+        Task InsertAsync(Citizen citizen);
+        void Insert(Citizen citizen);
+        Task SaveAsync();
         void Save();
+        void DeleteAll();
+        void Delete(int id);
     }
 }

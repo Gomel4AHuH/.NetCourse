@@ -9,7 +9,6 @@
     <Grid>        
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
-            <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
@@ -18,123 +17,172 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
-        <Menu 
+        <Grid
             Grid.Row="1"
             Grid.Column="1">
-            <MenuItem Header="File">                
-                <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Import">
-                <MenuItem Header="from CSV" Command="{Binding ImportDataFromCsvFileCommand}"></MenuItem>
-                <MenuItem Header="from XML" Command="{Binding ImportDataFromXmlFileCommand}"></MenuItem>
-                <MenuItem Header="from Excel" Command="{Binding ImportDataFromExcelFileCommand}"></MenuItem>
-                <MenuItem Header="from JSON" Command="{Binding ImportDataFromJsonFileCommand}"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Export">
-                <MenuItem Header="to CSV" Command="{Binding ExportDataToCsvFileCommand}"></MenuItem>
-                <MenuItem Header="to XML" Command="{Binding ExportDataToXmlFileCommand}"></MenuItem>
-                <MenuItem Header="to Excel" Command="{Binding ExportDataToExcelFileCommand}"></MenuItem>
-                <MenuItem Header="to JSON" Command="{Binding ExportDataToJsonFileCommand}"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Add">
-                <MenuItem Header="Citizen" Command="{Binding OpenCreateCitizenWindowCommand}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="120"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Menu
+                Grid.Row="0"
+                VerticalAlignment="Center"
+                Height="25">
+                <MenuItem Header="File">
+                    <MenuItem Header="Clean database" Command="{Binding CleanDatabaseCommand}"></MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}"></MenuItem>
                 </MenuItem>
-                <!--<MenuItem Header="Copy/Paste" Command="{Binding CopyPasteCitizenCommand}">
+                <MenuItem Header="Import">
+                    <MenuItem Header="from CSV" Command="{Binding ImportDataFromCsvFileCommand}"></MenuItem>
+                    <MenuItem Header="from CSV Async" Command="{Binding ImportDataFromCsvFileAsyncCommand}"></MenuItem>
+                    <MenuItem Header="from XML" Command="{Binding ImportDataFromXmlFileCommand}"></MenuItem>
+                    <MenuItem Header="from Excel" Command="{Binding ImportDataFromExcelFileCommand}"></MenuItem>
+                    <MenuItem Header="from JSON" Command="{Binding ImportDataFromJsonFileCommand}"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Delete" Command="{Binding DeleteCitizenCommand}" >
-                </MenuItem>-->
-            </MenuItem>
-            <Separator />
-
-        </Menu>
-        <!--
-        <Button
-            Command="{Binding OpenCreateCitizenWindowCommand}"
-            Grid.Row="7"
-            Grid.Column="1"
-            x:Name="CreateCitizen"
-            Content="Create citizen"/>
-        <Button
-            Command="{Binding CreateCitizenCommand}"
-            Grid.Row="9"
-            Grid.Column="1"
-            Content="Create"/>
-        <Button
-            Command="{Binding DeleteCitizenCommand}"
-            CommandParameter="{Binding SelectedCitizen}"
-            Grid.Row="10"
-            Grid.Column="1"
-            Content="Delete"/>
-        <Button
-            Command="{Binding CopyPasteCitizenCommand}"
-            CommandParameter="{Binding SelectedCitizen}"
-            Grid.Row="11"
-            Grid.Column="1"
-            Content="Copy/Paste"/>
-        -->
-        <DataGrid
-            ItemsSource="{Binding Citizens}"
-            SelectedItem="{Binding SelectedCitizen}"
-            IsReadOnly="True"
-            AutoGenerateColumns="False"
-            Grid.Row="2"
-            Grid.Column="1">
-            <DataGrid.Columns>
-                <DataGridTextColumn
+                <MenuItem Header="Export">
+                    <MenuItem Header="to CSV" Command="{Binding ExportDataToCsvFileCommand}"></MenuItem>
+                    <MenuItem Header="to XML" Command="{Binding ExportDataToXmlFileCommand}"></MenuItem>
+                    <MenuItem Header="to Excel" Command="{Binding ExportDataToExcelFileCommand}"></MenuItem>
+                    <MenuItem Header="to JSON" Command="{Binding ExportDataToJsonFileCommand}"></MenuItem>
+                </MenuItem>
+                <Separator />
+            </Menu>
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="Last Name"/>
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="1"
                     Width="150"
-                    Header="Фамилия"
-                    Binding="{Binding LastName}"/>
-                <DataGridTextColumn
+                    HorizontalAlignment="Left"
+                    Text="{Binding LastNameFilter, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Text="First Name"/>
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="2"
                     Width="150"
-                    Header="Имя" 
-                    Binding="{Binding FirstName}"/>
-                <DataGridTextColumn
-                    Width="150" 
-                    Header="Отчество"
-                    Binding="{Binding MiddleName}"/>
-                <DataGridTextColumn
+                    HorizontalAlignment="Left"
+                    Text="{Binding FirstNameFilter, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="3"
+                    HorizontalAlignment="Left"
+                    Text="Middle Name"/>
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="3"
                     Width="150"
-                    Header="Дата рождения"
-                    Binding="{Binding Birthday}"/>
-                <DataGridTextColumn
+                    HorizontalAlignment="Left"
+                    Text="{Binding MiddleNameFilter, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Text="Birthday"/>
+                <DatePicker
+                    Grid.Row="4"
+                    Grid.Column="1"
                     Width="150"
-                    Header="Город"
-                    Binding="{Binding City}"/>
-                <DataGridTextColumn
-                    Width="*"
-                    Header="Страна"
-                    Binding="{Binding Country}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <!--
-        <ListBox
-            Grid.Column="3"
-            Grid.Row="9"
-            ItemsSource="{Binding Citizens}"
-            SelectedItem="{Binding SelectedCitizen}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="5">
-                        <TextBlock FontSize="18" Text="{Binding Path=LastName}" />
-                        <TextBlock Text="{Binding Path=FirstName}" />
-                        <TextBlock Text="{Binding Path=MiddleName}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <StackPanel
-            Grid.Column="3"
-            Grid.Row="10"
-            Grid.ColumnSpan="11"
-            DataContext="{Binding SelectedCitizen}">
-            <TextBlock Text="Выбранный Житель"  />
-            <TextBlock Text="Фамилия" />
-            <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Имя" />
-            <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="Отчество" />
-            <TextBox Text="{Binding MiddleName, UpdateSourceTrigger=PropertyChanged}" />
-        </StackPanel>
-        -->
+                    HorizontalAlignment="Left"
+                    Text="{Binding BirthdayFilter, TargetNullValue='', Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Text="City"/>
+                <TextBox
+                    Grid.Row="4"
+                    Grid.Column="2"
+                    Width="150"
+                    HorizontalAlignment="Left"
+                    Text="{Binding CityFilter, Mode=TwoWay}"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="3"
+                    HorizontalAlignment="Left"
+                    Text="Country"/>
+                <TextBox
+                    Grid.Row="4"
+                    Grid.Column="3"
+                    Width="150"
+                    HorizontalAlignment="Left"
+                    Text="{Binding CountryFilter, Mode=TwoWay}"/>
+                <Button
+                    Command="{Binding FilterCitizensCommand}"
+                    Grid.Row="2"
+                    Grid.Column="5"
+                    Width="100"
+                    HorizontalAlignment="Left"
+                    Content="Search"
+                    IsEnabled="{Binding IsDataNotEmpty, Mode=TwoWay}"/>
+                <Button
+                    Command="{Binding CancelSearchCitizensCommand}"
+                    Grid.Row="2"
+                    Grid.Column="7"
+                    Width="100"
+                    HorizontalAlignment="Left"
+                    Content="Cancel search"
+                    IsEnabled="{Binding IsDataFiltered, Mode=TwoWay}"/>
+            </Grid>
+            <DataGrid
+                ItemsSource="{Binding CitizensCollection}"
+                IsReadOnly="True"
+                AutoGenerateColumns="False"
+                Grid.Row="2">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="150"
+                        Header="Фамилия"
+                        Binding="{Binding LastName}"/>
+                    <DataGridTextColumn
+                        Width="150"
+                       Header="Имя" 
+                        Binding="{Binding FirstName}"/>
+                    <DataGridTextColumn
+                        Width="150" 
+                        Header="Отчество"
+                        Binding="{Binding MiddleName}"/>
+                    <DataGridTextColumn
+                        Width="150"
+                        Header="Дата рождения"
+                        Binding="{Binding Birthday}"/>
+                    <DataGridTextColumn
+                        Width="150"
+                        Header="Город"
+                        Binding="{Binding City}"/>
+                    <DataGridTextColumn
+                        Width="*"
+                        Header="Страна"
+                        Binding="{Binding Country}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
 </Window>

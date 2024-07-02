@@ -2,13 +2,13 @@
 
 namespace ManageCitizens.Models.Data
 {
-    internal class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public DbSet<Citizen> Citizens { get; set; } = null!;
+        public DbSet<Citizen> Citizens { get; set; }
 
         public ApplicationDbContext()
         {
-            //Database.EnsureCreated();
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

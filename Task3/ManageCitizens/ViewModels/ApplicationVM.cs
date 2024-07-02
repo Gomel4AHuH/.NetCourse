@@ -1,7 +1,9 @@
-﻿using ManageCitizens.Interfaces;
+﻿using ManageCitizens.Commands;
+using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
+using ManageCitizens.Models.Data;
+using ManageCitizens.Repository;
 using ManageCitizens.Services;
-using ManageCitizens.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -12,118 +14,36 @@ namespace ManageCitizens.ViewModels
     class ApplicationVM : INotifyPropertyChanged
     {
         #region VIEW MODEL
-        private Citizen _selectedCitizen;
-        public ObservableCollection<Citizen> Citizens { get; set; }
+        private ObservableCollection<Citizen> _citizens { get; set; } = [];
+        private ObservableCollection<Citizen> _allCitizens { get; set; } = [];
+        public IEnumerable<Citizen> CitizensCollection => _citizens;
+        public IEnumerable<Citizen> AllCitizensCollection => _allCitizens;
 
-        public Citizen SelectedCitizen
+
+        public ApplicationVM(ApplicationDbContext applicationDbContext, IDialogService dialogService, JsonFileService jsonFileService, CsvFileService csvFileService, XmlFileService xmlFileService, ExcelFileService excelFileService)
         {
-            get { return _selectedCitizen; }
-            set
-            {
-                _selectedCitizen = value;
-                OnPropertyChanged("SelectedCitizen");
-            }
-        }
+            _dialogService = dialogService;
+            _jsonFileService = jsonFileService;
+            _csvFileService = csvFileService;
+            _xmlFileService = xmlFileService;
+            _excelFileService = excelFileService;
+            _applicationDbContext = applicationDbContext;
 
-        public ApplicationVM(IDialogService dialogService, JsonFileService jsonFileService, CsvFileService csvFileService, XmlFileService xmlFileService, ExcelFileService excelFileService)
-        {
-            this._dialogService = dialogService;
-            this._jsonFileService = jsonFileService;
-            this._csvFileService = csvFileService;
-            this._xmlFileService = xmlFileService;
-            this._excelFileService = excelFileService;
-
-            Citizens =
-            [
-                /*new("Ivan", "Ivanov", "QQQ", new DateTime(2024, 01, 01), "Gomel1", "Belarus"),
-                new("Petr", "Petrov", "QQQ", new DateTime(2016, 07, 12), "Gomel2", "Poland"),
-                new("Sidor", "Sidorov", "QQQ", new DateTime(2009, 03, 24), "Gomel3", "Belarus")*/
-            ];
+            _citizensRepository = new SQLCitizenRepository(new ApplicationDbContext());
+            _importDataFromCsvFileAsyncCommand = new AsyncRelayCommand(ImportDataFromCsvFileAsync);
+            Task task = ImportDataFromDbAsync();
         }
         #endregion
-
-        #region WORK WITH CITIZENS COMMANDS
-        private readonly RelayCommand _createCitizenCommand;
-        private readonly RelayCommand _deleteCitizenCommand;
-        private readonly RelayCommand _copyPasteCitizenCommand;
-        private readonly RelayCommand _openCreateCitizenWindowCommand;
-
-        public RelayCommand OpenCreateCitizenWindowCommand
-        {
-            get
-            {
-                return _openCreateCitizenWindowCommand ?? new RelayCommand(obj =>
-                {
-                    OpenCreateCitizenWindow();
-                });
-            }
-        }
-
-        private void OpenCreateCitizenWindow()
-        {
-            CreateCitizenWindow wnd = new(new Citizen())
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            wnd.ShowDialog();
-        }
-
-        public RelayCommand CreateCitizenCommand
-        {
-            get
-            {
-                return _createCitizenCommand ?? new RelayCommand(obj =>
-                {
-                    /*Citizen citizen = new();
-                    Citizens.Insert(Citizens.Count, citizen);
-                    SelectedCitizen = citizen;*/
-                    //DataWorker.CreateCitizen("Andrei", "Patskou", "QQQ", new DateTime(), "Gomel", "Belarus");
-                    MessageBox.Show("Test1");
-                    Citizen citizen = obj as Citizen;
-                    MessageBox.Show(citizen.LastName);
-                    Citizens.Insert(Citizens.Count, citizen);
-                    SelectedCitizen = citizen;
-                    MessageBox.Show("Test2");
-                });
-            }
-        }
-
-        public RelayCommand DeleteCitizenCommand
-        {
-            get
-            {
-                return _deleteCitizenCommand ?? new RelayCommand(obj =>
-                {
-                    if (obj is Citizen citizen)
-                    {
-                        Citizens.Remove(citizen);
-                    }
-                },
-                (obj) => Citizens.Count > 0);
-            }
-        }
-
-        public RelayCommand CopyPasteCitizenCommand
-        {
-            get
-            {
-                return _copyPasteCitizenCommand ?? new RelayCommand(obj =>
-                {
-                    if (obj is Citizen citizen)
-                    {
-                        Citizen newCitizen = new(citizen.LastName, citizen.FirstName, citizen.MiddleName, citizen.Birthday, citizen.City, citizen.Country);
-                        Citizens.Insert(Citizens.Count, newCitizen);
-                        SelectedCitizen = newCitizen;
-                    }
-                },
-                (obj) => Citizens.Count > 0);
-            }
-        }
-        #endregion
-
+        
         #region IMPORT/EXPORT DATA COMMAND
         private readonly IDialogService _dialogService;
+        private static readonly Dictionary<string, string> _fileExtention = new()
+            {
+                { "json", "JSON Files | *.json"},
+                { "csv", "CSV Files | *.csv"},
+                { "xml", "XML Files | *.xml"},
+                { "excel", "Excel Files | *.xlsx"}
+            };
 
         #region JSON
         private readonly JsonFileService _jsonFileService;
@@ -137,9 +57,9 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.SaveFileDialog("JSON Files | *.json") == true)
+                        if (_dialogService.SaveFileDialog(_fileExtention["json"]))
                         {
-                            _jsonFileService.Save(_dialogService.FilePath, [.. Citizens]);
+                            _jsonFileService.Save(_dialogService.FilePath, [.. _citizens]);
                             _dialogService.ShowMessage("Data exported");
                         }
                     }
@@ -160,13 +80,19 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.OpenFileDialog("JSON Files| *.json") == true)
+                        if (_dialogService.OpenFileDialog(_fileExtention["json"]))
                         {
                             List<Citizen> citizens = _jsonFileService.Open(_dialogService.FilePath);
-                            Citizens.Clear();
+                            _citizens.Clear();
                             foreach (Citizen ctzn in citizens)
-                                Citizens.Add(ctzn);
-                            _dialogService.ShowMessage("Data imported");
+                            {
+                                ctzn.Id = 0;
+                                _citizensRepository.Insert(ctzn);
+                            }
+                            
+                            _citizensRepository.Save();
+                            Task task = ImportDataFromDbAsync();
+                            _dialogService.ShowMessage("Data imported.");
                         }
                     }
                     catch (Exception ex)
@@ -190,9 +116,9 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {                        
-                        if (_dialogService.SaveFileDialog("CSV Files | *.csv") == true)
+                        if (_dialogService.SaveFileDialog(_fileExtention["csv"]))
                         {
-                            _csvFileService.Save(_dialogService.FilePath, [.. Citizens]);
+                            _csvFileService.Save(_dialogService.FilePath, [.. _citizens]);
                             _dialogService.ShowMessage("Data exported");
                         }
                     }
@@ -201,6 +127,33 @@ namespace ManageCitizens.ViewModels
                         _dialogService.ShowMessage(ex.Message);
                     }
                 });
+            }
+        }
+
+        private AsyncRelayCommand _importDataFromCsvFileAsyncCommand;
+        //public AsyncRelayCommand ImportDataFromCsvFileAsyncCommand => _importDataFromCsvFileAsyncCommand;
+        private async Task ImportDataFromCsvFileAsync()
+        {
+            MessageBox.Show("Dialog csv async");
+            try
+            {
+                if (_dialogService.OpenFileDialog(_fileExtention["csv"]))
+                {
+                    MessageBox.Show("Before OpenAsync");
+                    IAsyncEnumerable<Citizen> citizens = _csvFileService.OpenAsync(_dialogService.FilePath);
+                    MessageBox.Show("After OpenAsync");
+                    _citizens.Clear();
+                    await foreach (Citizen ctzn in citizens)
+                        await _citizensRepository.InsertAsync(ctzn);
+                    MessageBox.Show("Afer InsertAsync OpenAsync");
+                    await _citizensRepository.SaveAsync();
+                    Task task = ImportDataFromDbAsync();
+                    _dialogService.ShowMessage("Data imported.");
+                }
+            }
+            catch (Exception ex)
+            {
+                    _dialogService.ShowMessage(ex.Message);
             }
         }
 
@@ -213,13 +166,15 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.OpenFileDialog("CSV Files | *.csv") == true)
+                        if (_dialogService.OpenFileDialog(_fileExtention["csv"]))
                         {
                             List<Citizen> citizens = _csvFileService.Open(_dialogService.FilePath);
-                            Citizens.Clear();
+                            _citizens.Clear();
                             foreach (Citizen ctzn in citizens)
-                                Citizens.Add(ctzn);
-                            _dialogService.ShowMessage("Data imported");
+                                _citizensRepository.Insert(ctzn);
+                            _citizensRepository.Save();
+                            Task task = ImportDataFromDbAsync();
+                            _dialogService.ShowMessage("Data imported.");
                         }
                     }
                     catch (Exception ex)
@@ -227,7 +182,7 @@ namespace ManageCitizens.ViewModels
                         _dialogService.ShowMessage(ex.Message);
                     }
                 });
-            }
+            }            
         }
         #endregion
 
@@ -243,9 +198,9 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.SaveFileDialog("XML Files | *.xml") == true)
+                        if (_dialogService.SaveFileDialog(_fileExtention["xml"]))
                         {
-                            _xmlFileService.Save(_dialogService.FilePath, [.. Citizens]);
+                            _xmlFileService.Save(_dialogService.FilePath, [.. _citizens]);
                             _dialogService.ShowMessage("Data exported");
                         }
                     }
@@ -267,13 +222,15 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.OpenFileDialog("XML Files | *.xml") == true)
+                        if (_dialogService.OpenFileDialog(_fileExtention["xml"]))
                         {
                             List<Citizen> citizens = _xmlFileService.Open(_dialogService.FilePath);
-                            Citizens.Clear();
+                            _citizens.Clear();
                             foreach (Citizen ctzn in citizens)
-                                Citizens.Add(ctzn);
-                            _dialogService.ShowMessage("Data imported");
+                                _citizensRepository.Insert(ctzn);                            
+                            _citizensRepository.Save();
+                            Task task = ImportDataFromDbAsync();
+                            _dialogService.ShowMessage("Data imported.");                            
                         }
                     }
                     catch (Exception ex)
@@ -297,9 +254,9 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.SaveFileDialog("Excel Files | *.xlsx") == true)
+                        if (_dialogService.SaveFileDialog(_fileExtention["excel"]))
                         {
-                            _excelFileService.Save(_dialogService.FilePath, [.. Citizens]);
+                            _excelFileService.Save(_dialogService.FilePath, [.. _citizens]);
                             _dialogService.ShowMessage("Data exported");
                         }
                     }
@@ -321,13 +278,15 @@ namespace ManageCitizens.ViewModels
                 {
                     try
                     {
-                        if (_dialogService.OpenFileDialog("Excel Files | *.xlsx") == true)
+                        if (_dialogService.OpenFileDialog(_fileExtention["excel"]))
                         {
                             List<Citizen> citizens = _excelFileService.Open(_dialogService.FilePath);
-                            Citizens.Clear();
+                            _citizens.Clear();
                             foreach (Citizen ctzn in citizens)
-                                Citizens.Add(ctzn);
-                            _dialogService.ShowMessage("Data imported");
+                                _citizensRepository.Insert(ctzn);
+                            _citizensRepository.Save();
+                            Task task = ImportDataFromDbAsync();
+                            _dialogService.ShowMessage("Data imported.");
                         }
                     }
                     catch (Exception ex)
@@ -339,7 +298,187 @@ namespace ManageCitizens.ViewModels
         }
         #endregion
 
+        #region DATABASE
+        private ApplicationDbContext _applicationDbContext;
+
+        private SQLCitizenRepository _citizensRepository;
+        private async Task ImportDataFromDbAsync()
+        {
+            try
+            {
+                IEnumerable<Citizen> citizensList = await _citizensRepository.GetCitizensAsync();
+                 foreach (Citizen citizen in citizensList)
+                {
+                    _citizens.Add(citizen);
+                }
+                _allCitizens = [.. _citizens];
+                DataNotEmpty();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage(ex.Message);
+            }
+        }
         #endregion
+
+        #endregion
+
+        #region FILTER CITIZENS
+
+        #region FILTER FILEDS
+        private string _firstNameFilter;
+        public string FirstNameFilter
+        {
+            get => _firstNameFilter;
+            set
+            {
+                _firstNameFilter = value;
+                OnPropertyChanged(nameof(FirstNameFilter));
+            }
+        }
+
+        private string _lastNameFilter;
+        public string LastNameFilter
+        {
+            get => _lastNameFilter;
+            set
+            {
+                _lastNameFilter = value;
+                OnPropertyChanged(nameof(LastNameFilter));
+            }
+        }
+
+        private string _middleNameFilter;
+        public string MiddleNameFilter
+        {
+            get => _middleNameFilter;
+            set
+            {
+                _middleNameFilter = value;
+                OnPropertyChanged(nameof(MiddleNameFilter));
+            }
+        }
+
+        private string _cityFilter;
+        public string CityFilter
+        {
+            get => _cityFilter;
+            set
+            {
+                _cityFilter = value;
+                OnPropertyChanged(nameof(CityFilter));
+            }
+        }
+
+        private string _countryFilter;
+        public string CountryFilter
+        {
+            get => _countryFilter;
+            set
+            {
+                _countryFilter = value;
+                OnPropertyChanged(nameof(CountryFilter));
+            }
+        }
+
+        private DateOnly _birthdayFilter;
+        public DateOnly BirthdayFilter
+        {
+            get => _birthdayFilter;
+            set
+            {
+                _birthdayFilter = value;
+                OnPropertyChanged(nameof(BirthdayFilter));
+            }
+        }
+
+        private bool _isDataFiltered;
+        public bool IsDataFiltered
+        {
+            get => _isDataFiltered;
+            set
+            {
+                _isDataFiltered = value;
+                OnPropertyChanged(nameof(IsDataFiltered));
+            }
+        }
+
+        private bool _isDataNotEmpty;
+        public bool IsDataNotEmpty
+        {
+            get => _isDataNotEmpty;
+            set
+            {
+                _isDataNotEmpty = value;
+                OnPropertyChanged(nameof(IsDataNotEmpty));
+            }
+        }
+        #endregion
+
+        private readonly RelayCommand _filterCitizensCommand;
+
+        public RelayCommand FilterCitizensCommand
+        {
+            get
+            {
+                return _filterCitizensCommand ?? new RelayCommand(obj =>
+                {
+                    if (string.IsNullOrEmpty(_lastNameFilter)
+                    && string.IsNullOrEmpty(_firstNameFilter)
+                    && string.IsNullOrEmpty(_middleNameFilter)
+                    && string.IsNullOrEmpty(_birthdayFilter.ToString())
+                    && string.IsNullOrEmpty(_cityFilter)
+                    && string.IsNullOrEmpty(_countryFilter))
+                    {
+                        _dialogService.ShowMessage("Search criteria should't be empty.");
+                    }
+                    else
+                    {
+                        FilterService filterService = new(_firstNameFilter, _lastNameFilter, _middleNameFilter, _birthdayFilter, _cityFilter, _countryFilter);
+                        IEnumerable<Citizen> testCol = filterService.CitizenSearch([.. _citizens]);
+                        _citizens.Clear();
+
+                        foreach (Citizen citizen in testCol)
+                        {
+                            _citizens.Add(citizen);
+                        }
+                        IsDataFiltered = true;
+                        DataNotEmpty();
+                    }
+                });
+            }
+        }
+
+        private readonly RelayCommand _cancelSearchCitizensCommand;
+
+        public RelayCommand CancelSearchCitizensCommand
+        {
+            get
+            {
+                return _cancelSearchCitizensCommand ?? new RelayCommand(obj =>
+                {
+                    _citizens.Clear();
+                    foreach (Citizen citizen in _allCitizens)
+                    {
+                        _citizens.Add(citizen);
+                    }
+                    FirstNameFilter = "";
+                    LastNameFilter = "";
+                    MiddleNameFilter = "";
+                    BirthdayFilter = new DateOnly(1, 1, 1);
+                    CityFilter = "";
+                    CountryFilter = "";
+                    IsDataFiltered = false;
+                    DataNotEmpty();
+                });
+            }
+        }
+        #endregion
+
+        private void DataNotEmpty()
+        {
+            IsDataNotEmpty = (_citizens.Count > 0);
+        }
 
         private readonly RelayCommand _exitApplicationCommand;
 
@@ -353,20 +492,28 @@ namespace ManageCitizens.ViewModels
                 });
             }
         }
-        private static void OpenMessageWindow()
-        {
-            ErrorMessageWindow wnd = new("Doesn't implemented yet.")
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            wnd.ShowDialog();
-        }
 
+        private readonly RelayCommand _cleanDatabaseCommand;
+
+        public RelayCommand CleanDatabaseCommand
+        {
+            get
+            {
+                return _cleanDatabaseCommand ?? new RelayCommand(obj =>
+                {
+                    _citizensRepository.DeleteAll();
+                    _citizensRepository.Save();
+                    _citizens.Clear();
+                    DataNotEmpty();
+                    _dialogService.ShowMessage("All data deleted.");
+                });
+            }
+        }
+        
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }        
+        }
     }
 }

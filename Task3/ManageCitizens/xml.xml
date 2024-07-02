@@ -1,27 +1,51 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TestProgram>
-  <Record id="0">
-    <Birthday>2024-01-01T00:00:00</Birthday>
-    <FirstName>Ivan1</FirstName>
-    <LastName>Ivanov2</LastName>
-    <MiddleName>QQQ3</MiddleName>
-    <City>Gomel1</City>
-    <Country>Belarus</Country>
+  <Record id="2573">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
   </Record>
-  <Record id="0">
-    <Birthday>2016-07-12T00:00:00</Birthday>
-    <FirstName>Petr2</FirstName>
-    <LastName>Petrov1</LastName>
-    <MiddleName>QQQ</MiddleName>
-    <City>Gomel2</City>
-    <Country>Poland3</Country>
+  <Record id="2574">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
   </Record>
-  <Record id="0">
-    <Birthday>2009-03-24T00:00:00</Birthday>
-    <FirstName>Sidor3</FirstName>
-    <LastName>Sidorov</LastName>
-    <MiddleName>QQQ1</MiddleName>
-    <City>Gomel3</City>
-    <Country>Belarus2</Country>
+  <Record id="2575">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
+  </Record>
+  <Record id="2579">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
+  </Record>
+  <Record id="2580">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
+  </Record>
+  <Record id="2581">
+    <Birthday>01.01.0001</Birthday>
+    <FirstName>first</FirstName>
+    <LastName>last</LastName>
+    <MiddleName>middle</MiddleName>
+    <City>city</City>
+    <Country>country</Country>
   </Record>
 </TestProgram>
