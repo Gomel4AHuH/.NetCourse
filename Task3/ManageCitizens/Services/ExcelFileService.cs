@@ -1,5 +1,7 @@
 ﻿using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
+using ManageCitizens.Models.Data;
+using ManageCitizens.Repository;
 using Spire.Xls;
 using System.Data;
 
@@ -7,6 +9,16 @@ namespace ManageCitizens.Services
 {
     class ExcelFileService : IFileService
     {
+        public async Task ImportDataAsync(SQLCitizenRepository citizenRepository, IDialogService dialogService, string fileName)
+        {
+
+        }
+
+        public async Task ExportDataAsync(List<Citizen> citizensList, IDialogService dialogService, string fileName)
+        {
+
+        }
+
         public List<Citizen> Open(string fileName)
         {
             List<Citizen>? citizens = [];

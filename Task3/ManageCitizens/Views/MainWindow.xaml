@@ -1,9 +1,10 @@
-﻿<Window x:Class="ManageCitizens.Views.MainWindow"
+﻿<mah:MetroWindow x:Class="ManageCitizens.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ManageCitizens.Views"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         Title="Citizen database" Height="800" Width="1600" ResizeMode="NoResize">
     <Grid>
@@ -16,38 +17,61 @@
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
-        </Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>        
         <Grid
             Grid.Row="1"
             Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
+                <RowDefinition Height="30"/>
                 <RowDefinition Height="120"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Menu
                 Grid.Row="0"
-                VerticalAlignment="Center"
-                Height="25">
-                <MenuItem Header="File" Height="25" Width="30">
-                    <MenuItem Header="Clean database" Command="{Binding CleanDatabaseCommand}"></MenuItem>
+                VerticalAlignment="Center">
+                <MenuItem Header="File">
+                    <MenuItem
+                        Header="Clean database"
+                        Command="{Binding CleanDatabaseCommand}"
+                        IsEnabled="{Binding CleanButtonLock}"/>
                     <Separator/>
-                    <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}"></MenuItem>
+                    <MenuItem
+                        Header="Exit"
+                        Command="{Binding ExitApplicationCommand}"/>
                 </MenuItem>
-                <MenuItem Header="Import" Height="25" Width="50">
-                    <MenuItem Header="from CSV" Command="{Binding ImportDataFromCsvFileCommand}"></MenuItem>
-                    <MenuItem Header="from CSV Async" Command="{Binding Path=ImportDataFromCsvFileAsyncCommand}"></MenuItem>
-                    <MenuItem Header="from XML" Command="{Binding ImportDataFromXmlFileCommand}"></MenuItem>
-                    <MenuItem Header="from Excel" Command="{Binding ImportDataFromExcelFileCommand}"></MenuItem>
-                    <MenuItem Header="from JSON" Command="{Binding ImportDataFromJsonFileCommand}"></MenuItem>
+                <MenuItem Header="Import">
+                    <MenuItem
+                        Header="from CSV"
+                        Command="{Binding ImportDataFromCsvFileAsyncCommand}"/>
+                    <MenuItem
+                        Header="from XML"
+                        Command="{Binding ImportDataFromXmlFileAsyncCommand}"/>
+                    <MenuItem
+                        Header="from Excel"
+                        Command="{Binding ImportDataFromExcelFileAsyncCommand}"/>
+                    <MenuItem
+                        Header="from JSON"
+                        Command="{Binding ImportDataFromJsonFileAsyncCommand}"
+                        IsEnabled="{Binding ImportButtonLock}"/>
                 </MenuItem>
-                <MenuItem Header="Export" Height="25" Width="50">
-                    <MenuItem Header="to CSV" Command="{Binding ExportDataToCsvFileCommand}"></MenuItem>
-                    <MenuItem Header="to XML" Command="{Binding ExportDataToXmlFileCommand}"></MenuItem>
-                    <MenuItem Header="to Excel" Command="{Binding ExportDataToExcelFileCommand}"></MenuItem>
-                    <MenuItem Header="to JSON" Command="{Binding ExportDataToJsonFileCommand}"></MenuItem>
+                <MenuItem Header="Export">
+                    <MenuItem
+                        Header="to CSV"
+                        Command="{Binding ExportDataToCsvFileCommand}"
+                        IsEnabled="{Binding ExportButtonLock}"/>
+                    <MenuItem
+                        Header="to XML"
+                        Command="{Binding ExportDataToXmlFileCommand}"
+                        IsEnabled="{Binding ExportButtonLock}"/>
+                    <MenuItem
+                        Header="to Excel"
+                        Command="{Binding ExportDataToExcelFileCommand}"
+                        IsEnabled="{Binding ExportButtonLock}"/>
+                    <MenuItem
+                        Header="to JSON"
+                        Command="{Binding ExportDataToJsonFileCommand}"
+                        IsEnabled="{Binding ExportButtonLock}"/>
                 </MenuItem>
-                <Separator />
             </Menu>
             <Grid
                 Grid.Row="1"
@@ -60,7 +84,9 @@
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="27"/>
+                    <ColumnDefinition Width="141"/>
+                    <ColumnDefinition Width="32"/>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="50"/>
@@ -74,105 +100,112 @@
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="0"
-                    Text="Last Name"/>
+                    Text="Last name" Grid.ColumnSpan="3"/>
                 <TextBox
                     Grid.Row="2"
                     Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding LastNameFilter, Mode=TwoWay}"/>
+                    Text="{Binding LastNameFilter}" Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Column="3"
                     HorizontalAlignment="Left"
-                    Text="First Name"/>
+                    Text="First name"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="1"
+                    Grid.Column="3"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding FirstNameFilter, Mode=TwoWay}"/>
+                    Text="{Binding FirstNameFilter}"/>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="2"
+                    Grid.Column="4"
                     HorizontalAlignment="Left"
-                    Text="Middle Name" Grid.ColumnSpan="2"/>
+                    Text="Middle name"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="2"
+                    Grid.Column="4"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding MiddleNameFilter, Mode=TwoWay}" Grid.ColumnSpan="2"/>
+                    Text="{Binding MiddleNameFilter}"/>
                 <TextBlock
                     Grid.Row="3"
                     Grid.Column="0"
-                    Text="Birthday"/>
+                    Text="Birthday" Grid.ColumnSpan="3"/>
                 <DatePicker
                     Grid.Row="4"
                     Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding BirthdayFilter, TargetNullValue='', Mode=TwoWay}"/>
+                    Text="{Binding BirthdayFilter}" Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="1"
+                    Grid.Column="3"
                     HorizontalAlignment="Left"
                     Text="City"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="1"
+                    Grid.Column="3"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding CityFilter, Mode=TwoWay}"/>
+                    Text="{Binding CityFilter}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="2"
+                    Grid.Column="4"
                     HorizontalAlignment="Left"
                     Text="Country"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="2"
+                    Grid.Column="4"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding CountryFilter, Mode=TwoWay}" Grid.ColumnSpan="2"/>
+                    Text="{Binding CountryFilter}"/>
                 <Button
                     Command="{Binding FilterCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="4"
+                    Grid.Column="6"
                     Width="100"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Center"
                     Content="Search"
-                    IsEnabled="{Binding IsDataNotEmpty, Mode=TwoWay}" Grid.ColumnSpan="2"/>
+                    IsEnabled="{Binding SearchButtonLock}"/>
+                <Button
+                    Command="{Binding TestCommand}"
+                    Grid.Row="4"
+                    Grid.Column="6"
+                    Width="100"
+                    HorizontalAlignment="Center"
+                    Content="Test"/>
                 <Button
                     Command="{Binding CancelSearchCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="6"
+                    Grid.Column="8"
                     Width="100"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Center"
                     Content="Cancel search"
-                    IsEnabled="{Binding IsDataFiltered, Mode=TwoWay}"/>
+                    IsEnabled="{Binding CancelSearchButtonLock}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="9"
+                    Grid.Column="11"
                     HorizontalAlignment="Left"
                     Text="Total count"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="8"
+                    Grid.Column="10"
                     HorizontalAlignment="Left"
                     Text="Filter count"/>
                 <TextBlock
                     Grid.Row="4"
-                    Grid.Column="9"
+                    Grid.Column="11"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    Text="{Binding TotalCount, Mode=TwoWay}"/>
+                    Text="{Binding TotalCount}"/>
                 <TextBlock
                     Grid.Row="4"
-                    Grid.Column="8"
+                    Grid.Column="10"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    Text="{Binding FilterCount, Mode=TwoWay}"/>
+                    Text="{Binding FilterCount}"/>
             </Grid>
             <DataGrid
                 ItemsSource="{Binding CitizensCollection}"
@@ -189,7 +222,7 @@
                        Header="First name" 
                         Binding="{Binding FirstName}"/>
                     <DataGridTextColumn
-                        Width="150" 
+                        Width="150"
                         Header="Middle name"
                         Binding="{Binding MiddleName}"/>
                     <DataGridTextColumn
@@ -208,4 +241,4 @@
             </DataGrid>
         </Grid>
     </Grid>
-</Window>
+</mah:MetroWindow>

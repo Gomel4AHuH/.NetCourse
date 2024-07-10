@@ -1,12 +1,25 @@
 ﻿using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
+using ManageCitizens.Repository;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using System.Text.Json;
 
 namespace ManageCitizens.Services
 {
-    public class JsonFileService : IFileService
+    class JsonFileService : IFileService
     {
+        public async Task ImportDataAsync(SQLCitizenRepository citizenRepository, IDialogService dialogService, string fileName)
+        {
+            /*using FileStream fs = new(fileName, FileMode.OpenOrCreate);
+            return await JsonSerializer.DeserializeAsync<Dictionary<string, int>>(fs);*/
+        }
+
+        public async Task ExportDataAsync(List<Citizen> citizensList, IDialogService dialogService, string fileName)
+        {
+            using FileStream fs = new(fileName, FileMode.OpenOrCreate);
+            await JsonSerializer.SerializeAsync(fs, citizensList);
+        }
         public List<Citizen> Open(string fileName)
         {
             List<Citizen>? citizens = [];

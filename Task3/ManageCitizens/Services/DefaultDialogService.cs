@@ -5,9 +5,10 @@ using System.Windows;
 
 namespace ManageCitizens.Services
 {
-    class DefaultDialogService : IDialogService
+    public class DefaultDialogService : IDialogService
     {
         public string FilePath { get; set; }
+        private MessageView msgVw;
 
         public bool OpenFileDialog(string fileExtention)
         {
@@ -39,12 +40,17 @@ namespace ManageCitizens.Services
 
         public void ShowMessage(string message)
         {
-            MessageView msgVw = new(message)
+            msgVw = new(message)
             {
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             msgVw.ShowDialog();
         }
+
+        /*public void Close()
+        {
+            msgVw.Close();
+        }*/
     }
 }

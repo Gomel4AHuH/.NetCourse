@@ -8,7 +8,7 @@ namespace ManageCitizens.Interfaces
         IEnumerable<Citizen> GetCitizens();
         Task InsertAsync(Citizen citizen);
         void Insert(Citizen citizen);
-        Task SaveAsync();
+        Task SaveChangesAsync();
         void Save();
         void DeleteAll();
         void Delete(int id);

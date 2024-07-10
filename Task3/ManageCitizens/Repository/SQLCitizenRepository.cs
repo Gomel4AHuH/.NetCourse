@@ -24,7 +24,7 @@ namespace ManageCitizens.Repository
         {
             _db.Citizens.Add(citizen);
         }
-        public async Task SaveAsync()
+        public async Task SaveChangesAsync()
         {
             await _db.SaveChangesAsync();
         }       
@@ -39,6 +39,11 @@ namespace ManageCitizens.Repository
             {
                 Delete(ctzn.Id);
             }
+        }
+
+        public async Task DeleteAllAsync()
+        {
+            await _db.Citizens.ExecuteDeleteAsync();
         }
 
         public void Delete(int id)
