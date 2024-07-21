@@ -1,11 +1,11 @@
-﻿using System.Windows;
+﻿using MahApps.Metro.Controls;
 
 namespace ManageCitizens.Views
 {
     /// <summary>
     /// Interaction logic for MessageView.xaml
     /// </summary>
-    public partial class MessageView : Window
+    public partial class MessageView : MetroWindow
     {
         public MessageView(string message)
         {

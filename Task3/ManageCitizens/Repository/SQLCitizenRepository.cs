@@ -12,46 +12,28 @@ namespace ManageCitizens.Repository
         {
             return await _db.Citizens.ToListAsync();
         }
-        public IEnumerable<Citizen> GetCitizens()
+
+        public async IAsyncEnumerable<Citizen> GetRecordsAsync()
         {
-            return _db.Citizens;
+            var records = await _db.Citizens.ToListAsync();
+            foreach (var record in records)
+            {
+                yield return record;
+            }
         }
         public async Task InsertAsync(Citizen citizen)
         {
             await _db.Citizens.AddAsync(citizen);
         }
-        public void Insert(Citizen citizen)
-        {
-            _db.Citizens.Add(citizen);
-        }
         public async Task SaveChangesAsync()
         {
             await _db.SaveChangesAsync();
         }       
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
-
-        public void DeleteAll()
-        {
-            foreach (Citizen ctzn in _db.Citizens)
-            {
-                Delete(ctzn.Id);
-            }
-        }
 
         public async Task DeleteAllAsync()
         {
             await _db.Citizens.ExecuteDeleteAsync();
         }
-
-        public void Delete(int id)
-        {
-            Citizen citizen = _db.Citizens.Find(id);
-            if (citizen != null)
-                _db.Citizens.Remove(citizen);
-        }        
 
         private bool disposed = false;
 

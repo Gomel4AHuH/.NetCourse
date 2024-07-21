@@ -3,6 +3,7 @@ using ManageCitizens.Models;
 using ManageCitizens.Models.Data;
 using ManageCitizens.Repository;
 using ManageCitizens.Services;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -18,6 +19,8 @@ namespace ManageCitizens.ViewModels
         public IEnumerable<Citizen> CitizensCollection => Citizens;
         public IEnumerable<Citizen> AllCitizensCollection => AllCitizens;
 
+        public Progress<double> progress;
+
         public ApplicationVM(ApplicationDbContext applicationDbContext, IDialogService dialogService, JsonFileService jsonFileService, CsvFileService csvFileService, XmlFileService xmlFileService, ExcelFileService excelFileService)
         {
             _dialogService = dialogService;
@@ -29,14 +32,22 @@ namespace ManageCitizens.ViewModels
 
             _citizensRepository = new SQLCitizenRepository(_applicationDbContext);
             ImportDataFromCsvFileAsyncCommand = new RelayCommand(async _ => await ImportDataFromCsvFileAsync());
-            ExportDataFromCsvFileAsyncCommand = new RelayCommand(async _ => await ExportDataFromCsvFileAsync());
+            ExportDataToCsvFileAsyncCommand = new RelayCommand(async _ => await ExportDataToCsvFileAsync());
             ImportDataFromXmlFileAsyncCommand = new RelayCommand(async _ => await ImportDataFromXmlFileAsync());
-            /*ExportDataFromXmlFileAsyncCommand = new RelayCommand(async _ => await ExportDataFromXmlFileAsync());
+            ExportDataToXmlFileAsyncCommand = new RelayCommand(async _ => await ExportDataToXmlFileAsync());
             ImportDataFromJsonFileAsyncCommand = new RelayCommand(async _ => await ImportDataFromJsonFileAsync());
-            ExportDataFromJsonFileAsyncCommand = new RelayCommand(async _ => await ExportDataFromJsonFileAsync());
-            ImportDataFromExcelFileAsyncCommand = new RelayCommand(async _ => await ImportDataFromExcelFileAsync());
-            ExportDataFromExcelFileAsyncCommand = new RelayCommand(async _ => await ExportDataFromExcelFileAsync());*/
+            ExportDataToJsonFileAsyncCommand = new RelayCommand(async _ => await ExportDataToJsonFileAsync());
+            //ImportDataFromExcelFileAsyncCommand = new RelayCommand(async _ => await ImportDataFromExcelFileAsync());
+            //ExportDataToExcelFileAsyncCommand = new RelayCommand(async _ => await ExportDataToExcelFileAsync());
 
+            Language.SetLanguage("en");
+
+            /*progress = new Progress<double>(value =>
+            {
+                ProgressBarValue = value * 100 / ProgressBarMax;
+                //ProgressBarText = $"{value}%";
+                ProgressBarText = $"Data loading... {value} out of {ProgressBarMax}";
+            });*/
             _ = ImportDataFromDbAsync();
         }
         #endregion
@@ -53,76 +64,55 @@ namespace ManageCitizens.ViewModels
 
         #region JSON
         private readonly JsonFileService _jsonFileService;
-        private readonly RelayCommand _exportDataToJsonFileCommand;
+        public RelayCommand ExportDataToJsonFileAsyncCommand { get; }
 
-        public RelayCommand ExportDataToJsonFileCommand
+        public async Task ExportDataToJsonFileAsync()
         {
-            get
+            try
             {
-                return _exportDataToJsonFileCommand ?? new RelayCommand(obj =>
+                if (_dialogService.SaveFileDialog(s_fileExtention["json"]))
                 {
-                    try
-                    {
-                        if (_dialogService.SaveFileDialog(s_fileExtention["json"]))
-                        {
-                            _jsonFileService.Save(_dialogService.FilePath, [.. Citizens]);
-                            _dialogService.ShowMessage("Data exported");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogService.ShowMessage(ex.Message);
-                    }
-                });
+                    await _jsonFileService.ExportDataAsync([.. Citizens], _dialogService, _dialogService.FilePath);
+                    _dialogService.ShowMessage("Data exported.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage(ex.Message);
             }
         }
 
-        private readonly RelayCommand _importDataFromJsonFileCommand;
-        public RelayCommand ImportDataFromJsonFileCommand
+        public RelayCommand ImportDataFromJsonFileAsyncCommand { get; }
+        public async Task ImportDataFromJsonFileAsync()
         {
-            get
+            try
             {
-                return _importDataFromJsonFileCommand ?? new RelayCommand(obj =>
+                if (_dialogService.OpenFileDialog(s_fileExtention["json"]))
                 {
-                    try
-                    {
-                        if (_dialogService.OpenFileDialog(s_fileExtention["json"]))
-                        {
-                            List<Citizen> citizens = _jsonFileService.Open(_dialogService.FilePath);
-                            Citizens.Clear();
-                            foreach (Citizen ctzn in citizens)
-                            {
-                                ctzn.Id = 0;
-                                _citizensRepository.Insert(ctzn);
-                            }
-                            
-                            _citizensRepository.Save();
-                            //_ = ImportDataFromDbAsync();
-                            _dialogService.ShowMessage("Data imported.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogService.ShowMessage(ex.Message);
-                    }
-                });
+                    await _jsonFileService.ImportDataAsync(_citizensRepository, _dialogService, _dialogService.FilePath);
+                    //_ = ImportDataFromDbAsync();
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                    _dialogService.ShowMessage(ex.Message);
+            }
+        }       
         #endregion
 
         #region CSV
         private readonly CsvFileService _csvFileService;
-        public RelayCommand ExportDataFromCsvFileAsyncCommand { get; }
+        public RelayCommand ExportDataToCsvFileAsyncCommand { get; }
 
-        private async Task ExportDataFromCsvFileAsync()
+        private async Task ExportDataToCsvFileAsync()
         {
             try
             {
                 if (_dialogService.SaveFileDialog(s_fileExtention["csv"]))
                 {
                     await _csvFileService.ExportDataAsync([.. Citizens], _dialogService, _dialogService.FilePath);
+                    _dialogService.ShowMessage("Data exported.");
                 }
-                _dialogService.ShowMessage("Data exported.");
             }
             catch (Exception ex)
             {
@@ -138,44 +128,37 @@ namespace ManageCitizens.ViewModels
                 if (_dialogService.OpenFileDialog(s_fileExtention["csv"]))
                 {
                     await _csvFileService.ImportDataAsync(_citizensRepository, _dialogService, _dialogService.FilePath);
+                    _ = ImportDataFromDbAsync();
                 }
-                _ = ImportDataFromDbAsync();
-                _dialogService.ShowMessage("Data imported.");
             }
             catch (Exception ex)
             {
                     _dialogService.ShowMessage(ex.Message);
             }
-        }        
+        }
         #endregion
 
         #region XML
         private readonly XmlFileService _xmlFileService;
-        public readonly RelayCommand _exportDataToXmlFileCommand;        
+        public RelayCommand ExportDataToXmlFileAsyncCommand { get; }
 
-        private RelayCommand ExportDataToXmlFileCommand
+        private async Task ExportDataToXmlFileAsync()
         {
-            get
+            try
             {
-                return _exportDataToXmlFileCommand ?? new RelayCommand(obj =>
+                if (_dialogService.SaveFileDialog(s_fileExtention["xml"]))
                 {
-                    try
-                    {
-                        if (_dialogService.SaveFileDialog(s_fileExtention["xml"]))
-                        {
-                            _xmlFileService.Save(_dialogService.FilePath, [.. Citizens]);
-                            _dialogService.ShowMessage("Data exported");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogService.ShowMessage(ex.Message);
-                    }
-                });
+                    await _xmlFileService.ExportDataAsync([.. Citizens], _dialogService, _dialogService.FilePath);
+                    _dialogService.ShowMessage("Data exported.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage(ex.Message);
             }
         }
         
-        private RelayCommand ImportDataFromXmlFileAsyncCommand { get; }
+        public RelayCommand ImportDataFromXmlFileAsyncCommand { get; }
 
         public async Task ImportDataFromXmlFileAsync()
         {
@@ -184,8 +167,7 @@ namespace ManageCitizens.ViewModels
                 if (_dialogService.OpenFileDialog(s_fileExtention["xml"]))
                     {
                         await _xmlFileService.ImportDataAsync(_citizensRepository, _dialogService, _dialogService.FilePath);
-                        _ = ImportDataFromDbAsync();
-                        _dialogService.ShowMessage("Data imported.");
+                        //_ = ImportDataFromDbAsync();
                     }
             }
             catch (Exception ex)
@@ -235,11 +217,10 @@ namespace ManageCitizens.ViewModels
                         {
                             List<Citizen> citizens = _excelFileService.Open(_dialogService.FilePath);
                             Citizens.Clear();
-                            foreach (Citizen ctzn in citizens)
-                                _citizensRepository.Insert(ctzn);
-                            _citizensRepository.Save();
+                            //foreach (Citizen ctzn in citizens)
+                                //_citizensRepository.Insert(ctzn);
+                            //_citizensRepository.Save();
                             //Task task = ImportDataFromDbAsync();
-                            _dialogService.ShowMessage("Data imported.");
                         }
                     }
                     catch (Exception ex)
@@ -264,6 +245,17 @@ namespace ManageCitizens.ViewModels
             }
         }
 
+        private bool _progressBarVisibility;
+        public bool ProgressBarVisibility
+        {
+            get => _progressBarVisibility;
+            set
+            {
+                _progressBarVisibility = value;
+                OnPropertyChanged(nameof(ProgressBarVisibility));
+            }
+        }
+
         private int _progressBarMax;
         public int ProgressBarMax
         {
@@ -285,72 +277,6 @@ namespace ManageCitizens.ViewModels
                 OnPropertyChanged(nameof(ProgressBarValue));
             }
         }
-        private readonly RelayCommand _testCommand;
-
-        private async Task Test1()
-        {
-            ProgressBarMax = _applicationDbContext.Citizens.Count();
-            ProgressBarValue = 0;
-            for (int i = 0; i < ProgressBarMax; i++)
-            {
-                ProgressBarText = $"Loading... {i} out of {ProgressBarMax} counts";
-                ProgressBarValue++;
-                await Task.Delay(10);
-
-            }
-            ProgressBarMax = 0;
-            ProgressBarValue = 0;
-            ProgressBarText = "";
-        }
-        public RelayCommand TestCommand
-        {
-            get
-            {
-                return _testCommand ?? new RelayCommand(obj =>
-                {
-                    try
-                    {
-                        MessageBox.Show(_citizensRepository.GetCitizens().Count().ToString());
-                        //Test1();
-                        /*object pb = Application.Current.MainWindow.FindName("ProgressBar");
-                        if (pb is ProgressBar)
-                        {
-                            // Following executed if Text element was found.
-                            ProgressBar? pb1 = pb as ProgressBar;
-                            pb1.Value = 20;
-                            pb1.Width = 100;
-                            //pb1.Text = "123";
-                            pb1.Height = 100;
-                        }*/
-
-                        /*ProgressBarMax = 500;
-                        ProgressBarValue = 0;
-                        ProgressBarText = "Testing...";
-                        for (int i = 0; i < 100; i++)
-                        {
-                            ProgressBarValue++;
-                            Task.Delay(500);
-
-                        }
-                        ProgressBarMax = 0;
-                        ProgressBarValue = 0;
-                        ProgressBarText = "";*/
-                        /*progress = new(value =>
-                        {
-                            ProgressBarValue = value;
-                            ProgressBarText = $"{value}%";
-                        });
-
-                        await Task.Run(() => ImportDataFromDb(progress));
-                        ImportDataFromDbAsync();*/
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogService.ShowMessage(ex.Message);
-                    }
-                });
-            }
-        }        
         #endregion
 
         #region DATABASE
@@ -358,41 +284,64 @@ namespace ManageCitizens.ViewModels
         private readonly ApplicationDbContext _applicationDbContext;
 
         private readonly SQLCitizenRepository _citizensRepository;
-                
+
+        //private async Task ImportDataFromDbAsync(IProgress<double> progress)
         private async Task ImportDataFromDbAsync()
         {
             try
             {
-                /*ProgressBarText = $"Database data loading...{_applicationDbContext.Citizens.Count()}";
-                ProgressBarMax = _applicationDbContext.Citizens.Count();
-                ProgressBarValue = 0;*/
-                //MessageBox.Show("Test");
+                //ProgressBarMax = await _applicationDbContext.Citizens.CountAsync();
+                ProgressBarText = $"Database data loading...{_applicationDbContext.Citizens.Count()}";                
+
+                //ProgressBarValue = 0;
+                //ProgressBarVisibility = true;
+                Citizens.Clear();
                 
                 IEnumerable<Citizen> citizensList = await _citizensRepository.GetCitizensAsync();
-                TotalCount = citizensList.Count();
-                //ProgressBarValue++;
-                foreach (Citizen citizen in citizensList)
-                {
-                    Citizens.Add(citizen);
-                    /*_ = Task.Run(() => Citizens.Add(citizen));
-                    ProgressBarValue++;*/
-                /*await Application.Current.Dispatcher.BeginInvoke((Action)delegate () 
-                {
-                    Citizens.Add(citizen);
-                    ProgressBarValue++;
-                });*/
-                }
-                /*for (int i = 0; i < citizensList.Count(); i++)
-                {
-                    Citizens.Add(citizensList.ElementAt(i));
-                    ProgressBarValue++;
-                }*/
 
+                await foreach (var record in _citizensRepository.GetRecordsAsync())
+                {
+                    Citizens.Add(record);
+                }
+                //for (int i = 1; i <= ProgressBarMax; i++)
+                //{
+                //Citizen citizen = await _applicationDbContext.Citizens.ElementAtAsync(i);
+
+                //Citizens.Add(citizen);
+                //int progressPerc = i * 100 / ProgressBarMax;
+                //int progressPerc = i;
+                //progress.Report(progressPerc);
+                //}
+                ProgressBarText = "Data loaded";
+                /*Citizen[] citizens = citizensList.ToArray();
+                for (int i = 1; i <= citizens.Length; i++)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ProgressBarValue = i;
+                    });
+                }*/
+                TotalCount = citizensList.Count();
+
+                //int i = 0;
+                /*foreach (Citizen citizen in citizensList)
+                {
+                    Citizens.Add(citizen);
+                    //i++;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ProgressBarValue = i * 100 / TotalCount - 1;
+                        //ProgressBarValue = Citizens.Count;
+                    });
+                    int progressPerc = i * 100 / TotalCount;
+                    progress.Report(progressPerc);
+                }*/
+                //Citizens = [.. citizensList];
                 AllCitizens = [.. Citizens];
 
-                /*ProgressBarText = "";
-                ProgressBarValue = 0;*/
-                if (TotalCount != 0) _dialogService.ShowMessage("Data loaded.");
+                //ProgressBarText = "All data loaded.";
+                //ProgressBarValue = 0;
+                //if (TotalCount != 0) _dialogService.ShowMessage("Data loaded.");
                 //_dialogService.Close();
             }
             catch (Exception ex)
@@ -609,6 +558,71 @@ namespace ManageCitizens.ViewModels
         #endregion
         */
 
+        #region LANGUAGES
+
+        private bool _setEnLanguageLock;
+        public bool SetEnLanguageLock
+        {
+            get => _setEnLanguageLock;
+            set
+            {
+                _setEnLanguageLock = value;
+                OnPropertyChanged(nameof(SetEnLanguageLock));
+            }
+        }
+
+        private bool _setRuLanguageLock;
+        public bool SetRuLanguageLock
+        {
+            get => _setRuLanguageLock;
+            set
+            {
+                _setRuLanguageLock = value;
+                OnPropertyChanged(nameof(SetRuLanguageLock));
+            }
+        }
+
+        private readonly RelayCommand _setEnLanguage;
+
+        public RelayCommand SetEnLanguage
+        {
+            get
+            {
+                return _setEnLanguage ?? new RelayCommand(obj =>
+                {
+                    try
+                    {
+                        Language.SetLanguage("en");
+                    }
+                    catch (Exception ex)
+                    {
+                        _dialogService.ShowMessage(ex.Message);
+                    }
+                });
+            }
+        }
+
+        private readonly RelayCommand _setRuLanguage;
+
+        public RelayCommand SetRuLanguage
+        {
+            get
+            {
+                return _setRuLanguage ?? new RelayCommand(obj =>
+                {
+                    try
+                    {
+                        Language.SetLanguage("ru");
+                    }
+                    catch (Exception ex)
+                    {
+                        _dialogService.ShowMessage(ex.Message);
+                    }
+                });
+            }
+        }
+        #endregion
+
         private int _totalCount;
         public int TotalCount
         {
@@ -652,10 +666,8 @@ namespace ManageCitizens.ViewModels
             {
                 return _cleanDatabaseCommand ?? new RelayCommand(obj =>
                 {
-                    //_citizensRepository.DeleteAll();
                     _ = _citizensRepository.DeleteAllAsync();
                     _ = _citizensRepository.SaveChangesAsync();
-                    //_citizensRepository.Save();
                     Citizens.Clear();
                     AllCitizens.Clear();
                     TotalCount = 0;

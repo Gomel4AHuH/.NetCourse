@@ -1,7 +1,6 @@
 ﻿using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
 using ManageCitizens.Repository;
-using Microsoft.VisualBasic.FileIO;
 using System.IO;
 using System.Text;
 
@@ -35,34 +34,21 @@ namespace ManageCitizens.Services
         {
             try 
             {
-                using FileStream fs = new(fileName, FileMode.OpenOrCreate);
                 string separator = ";";
-                StringBuilder output = new();
                 byte[] newline = Encoding.ASCII.GetBytes(Environment.NewLine);
-
+                using FileStream fs = new(fileName, FileMode.OpenOrCreate);
                 foreach (Citizen citizen in citizensList)
                 {
                     string[] newLine = { citizen.Birthday.ToString(), citizen.FirstName, citizen.LastName, citizen.MiddleName, citizen.City, citizen.Country };
                     byte[] buffer = Encoding.Default.GetBytes(string.Join(separator, newLine));
-                    fs.Write(buffer, 0, buffer.Length);
-                    fs.Write(newline, 0, newline.Length);
+                    await fs.WriteAsync(buffer);
+                    await fs.WriteAsync(newline);
                 }
             }
             catch (Exception ex)
             {
                 dialogService.ShowMessage(ex.Message);
             }
-        }
-
-        public List<Citizen> Open(string fileName)
-        {
-            List<Citizen>? citizens = [];
-
-            return citizens;
-        }
-
-        public void Save(string fileName, List<Citizen> citizensList)
-        {            
         }
     }
 }

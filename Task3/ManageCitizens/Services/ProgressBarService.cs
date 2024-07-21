@@ -1,10 +1,10 @@
 ﻿namespace ManageCitizens.Services
 {
-    public class ProgressBarService(string text, int count)
+    public class ProgressBarService(string text, int count, double progress)
     {
         private string _text { get; set; }  = text;
         private int _count { get; set; } = count;
-        private double _progress { get; set; }
+        private double _progress { get; set; } = progress;
 
         public void Start()
         {

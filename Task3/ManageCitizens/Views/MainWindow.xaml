@@ -6,7 +6,11 @@
         xmlns:local="clr-namespace:ManageCitizens.Views"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Citizen database" Height="800" Width="1600" ResizeMode="NoResize">
+        Title="{DynamicResource Title}"
+        Height="800"
+        Width="1600"
+        ResizeMode="NoResize"
+        ShowCloseButton="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
@@ -25,52 +29,83 @@
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="120"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
+            <ProgressBar
+                Name="ProgressBar"
+                Grid.Row="3"
+                Value="{Binding ProgressBarValue}"/>
+                <!--
+                Visibility="{Binding ProgressBarVisibility}"
+                -->
+            <TextBlock
+                Name="TBProgress"
+                Text="{Binding ProgressBarText}"
+                HorizontalAlignment="Center"
+                Grid.Row="3"/>
             <Menu
                 Grid.Row="0"
                 VerticalAlignment="Center">
-                <MenuItem Header="File">
+                <MenuItem Header="{DynamicResource MenuFile}">
                     <MenuItem
-                        Header="Clean database"
+                        Header="{DynamicResource MenuFileCleanDb}"
                         Command="{Binding CleanDatabaseCommand}"
                         IsEnabled="{Binding CleanButtonLock}"/>
                     <Separator/>
                     <MenuItem
-                        Header="Exit"
+                        Header="{DynamicResource MenuFileExit}"
                         Command="{Binding ExitApplicationCommand}"/>
                 </MenuItem>
-                <MenuItem Header="Import">
+                <MenuItem Header="{DynamicResource MenuImport}">
                     <MenuItem
-                        Header="from CSV"
+                        Header="{DynamicResource MenuImportFromCSV}"
                         Command="{Binding ImportDataFromCsvFileAsyncCommand}"/>
                     <MenuItem
-                        Header="from XML"
+                        Header="{DynamicResource MenuImportFromXML}"
                         Command="{Binding ImportDataFromXmlFileAsyncCommand}"/>
                     <MenuItem
-                        Header="from Excel"
+                        Header="{DynamicResource MenuImportFromExcel}"
                         Command="{Binding ImportDataFromExcelFileAsyncCommand}"/>
                     <MenuItem
-                        Header="from JSON"
+                        Header="{DynamicResource MenuImportFromJson}"
                         Command="{Binding ImportDataFromJsonFileAsyncCommand}"
                         IsEnabled="{Binding ImportButtonLock}"/>
+                    <MenuItem
+                        Header="from JSON1"
+                        Command="{Binding ImportDataFromJsonFileCommand}"
+                        IsEnabled="{Binding ImportButtonLock}"/>
                 </MenuItem>
-                <MenuItem Header="Export">
+                <MenuItem Header="{DynamicResource MenuExport}">
                     <MenuItem
-                        Header="to CSV"
-                        Command="{Binding ExportDataToCsvFileCommand}"
+                        Header="{DynamicResource MenuExportToCSV}"
+                        Command="{Binding ExportDataToCsvFileAsyncCommand}"
                         IsEnabled="{Binding ExportButtonLock}"/>
                     <MenuItem
-                        Header="to XML"
-                        Command="{Binding ExportDataToXmlFileCommand}"
+                        Header="{DynamicResource MenuExportToXML}"
+                        Command="{Binding ExportDataToXmlFileAsyncCommand}"
                         IsEnabled="{Binding ExportButtonLock}"/>
                     <MenuItem
-                        Header="to Excel"
-                        Command="{Binding ExportDataToExcelFileCommand}"
+                        Header="{DynamicResource MenuExportToExcel}"
+                        Command="{Binding ExportDataToExcelFileAsyncCommand}"
                         IsEnabled="{Binding ExportButtonLock}"/>
                     <MenuItem
-                        Header="to JSON"
+                        Header="{DynamicResource MenuExportToJson}"
+                        Command="{Binding ExportDataToJsonFileAsyncCommand}"
+                        IsEnabled="{Binding ExportButtonLock}"/>
+                    <MenuItem
+                        Header="to JSON1"
                         Command="{Binding ExportDataToJsonFileCommand}"
                         IsEnabled="{Binding ExportButtonLock}"/>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource MenuLanguage}">
+                    <MenuItem
+                        Header="{DynamicResource MenuLanguageEn}"
+                        Command="{Binding SetEnLanguage}"
+                        IsEnabled="{DynamicResource MenuLanguageEnLock}"/>
+                    <MenuItem
+                        Header="{DynamicResource MenuLanguageRu}"
+                        Command="{Binding SetRuLanguage}"
+                        IsEnabled="{DynamicResource MenuLanguageRuLock}"/>
                 </MenuItem>
             </Menu>
             <Grid
@@ -100,18 +135,20 @@
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="0"
-                    Text="Last name" Grid.ColumnSpan="3"/>
+                    Text="{DynamicResource FilterLastName}"
+                    Grid.ColumnSpan="3"/>
                 <TextBox
                     Grid.Row="2"
                     Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding LastNameFilter}" Grid.ColumnSpan="2"/>
+                    Text="{Binding LastNameFilter}"
+                    Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="3"
                     HorizontalAlignment="Left"
-                    Text="First name"/>
+                    Text="{DynamicResource FilterFirstName}"/>
                 <TextBox
                     Grid.Row="2"
                     Grid.Column="3"
@@ -122,7 +159,7 @@
                     Grid.Row="1"
                     Grid.Column="4"
                     HorizontalAlignment="Left"
-                    Text="Middle name"/>
+                    Text="{DynamicResource FilterMiddleName}"/>
                 <TextBox
                     Grid.Row="2"
                     Grid.Column="4"
@@ -132,18 +169,20 @@
                 <TextBlock
                     Grid.Row="3"
                     Grid.Column="0"
-                    Text="Birthday" Grid.ColumnSpan="3"/>
+                    Text="{DynamicResource FilterBirthday}"
+                    Grid.ColumnSpan="3"/>
                 <DatePicker
                     Grid.Row="4"
                     Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding BirthdayFilter}" Grid.ColumnSpan="2"/>
+                    Text="{Binding BirthdayFilter}"
+                    Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="3"
                     Grid.Column="3"
                     HorizontalAlignment="Left"
-                    Text="City"/>
+                    Text="{DynamicResource FilterCity}"/>
                 <TextBox
                     Grid.Row="4"
                     Grid.Column="3"
@@ -154,7 +193,7 @@
                     Grid.Row="3"
                     Grid.Column="4"
                     HorizontalAlignment="Left"
-                    Text="Country"/>
+                    Text="{DynamicResource FilterCountry}"/>
                 <TextBox
                     Grid.Row="4"
                     Grid.Column="4"
@@ -167,33 +206,36 @@
                     Grid.Column="6"
                     Width="100"
                     HorizontalAlignment="Center"
-                    Content="Search"
-                    IsEnabled="{Binding SearchButtonLock}"/>
+                    Content="{DynamicResource FilterSearchButton}"
+                    IsEnabled="{Binding SearchButtonLock}"
+                    Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
                 <Button
-                    Command="{Binding TestCommand}"
+                    Click="Button_Click"
                     Grid.Row="4"
                     Grid.Column="6"
                     Width="100"
                     HorizontalAlignment="Center"
-                    Content="Test"/>
+                    Content="Test"
+                    Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
                 <Button
                     Command="{Binding CancelSearchCitizensCommand}"
                     Grid.Row="2"
                     Grid.Column="8"
                     Width="100"
                     HorizontalAlignment="Center"
-                    Content="Cancel search"
-                    IsEnabled="{Binding CancelSearchButtonLock}"/>
+                    Content="{DynamicResource FilterCancelSearchButton}"
+                    IsEnabled="{Binding CancelSearchButtonLock}"
+                    Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
                 <TextBlock
                     Grid.Row="3"
                     Grid.Column="11"
                     HorizontalAlignment="Left"
-                    Text="Total count"/>
+                    Text="{DynamicResource TextTotalCount}"/>
                 <TextBlock
                     Grid.Row="3"
                     Grid.Column="10"
                     HorizontalAlignment="Left"
-                    Text="Filter count"/>
+                    Text="{DynamicResource TextFilterCount}"/>
                 <TextBlock
                     Grid.Row="4"
                     Grid.Column="11"
@@ -215,27 +257,27 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Last name"
+                        Header="{DynamicResource DataGridLastNameColumn}"
                         Binding="{Binding LastName}"/>
                     <DataGridTextColumn
                         Width="150"
-                       Header="First name" 
+                        Header="{DynamicResource DataGridFirstNameColumn}"
                         Binding="{Binding FirstName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Middle name"
+                        Header="{DynamicResource DataGridMiddleNameColumn}"
                         Binding="{Binding MiddleName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="Birthday"
+                        Header="{DynamicResource DataGridBirthdayColumn}"
                         Binding="{Binding Birthday}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="City"
+                        Header="{DynamicResource DataGridCityColumn}"
                         Binding="{Binding City}"/>
                     <DataGridTextColumn
                         Width="*"
-                        Header="Country"
+                        Header="{DynamicResource DataGridCountryColumn}"
                         Binding="{Binding Country}"/>
                 </DataGrid.Columns>
             </DataGrid>

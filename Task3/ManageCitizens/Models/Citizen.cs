@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace ManageCitizens.Models
 {
     public class Citizen : INotifyPropertyChanged
     {
-        private readonly int _id;
         private string _firstName;
         private string _lastName;
         private string _middleName;
@@ -32,7 +32,7 @@ namespace ManageCitizens.Models
             this._city = "";
             this._country = "";
         }
-
+        [JsonIgnore]
         public int Id { get; set; }
         public string FirstName 
         {

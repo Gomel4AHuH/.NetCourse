@@ -14,10 +14,47 @@ namespace ManageCitizens.Services
         {
             try
             {
-                XmlTextReader xmlTextReader = new(fileName);
+                XmlReaderSettings settings = new()
+                {
+                    Async = true
+                };
+                XmlReader reader = XmlReader.Create(fileName, settings);
+                while (await reader.ReadAsync())
+                {
+                    Citizen citizen = new();
+                    switch (reader.Name)
+                    {
+                        case "FirstName":
+                            MessageBox.Show(await reader.GetValueAsync());
+                            break;
+                    }
+                    /*switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            MessageBox.Show("Start Element {0}", reader.Name);
+                            break;
+                        case XmlNodeType.Text:
+                            MessageBox.Show("Text Node: {0}",
+                                     await reader.GetValueAsync());
+                            break;
+                        case XmlNodeType.EndElement:
+                            MessageBox.Show("End Element {0}", reader.Name);
+                            break;
+                        default:
+                            MessageBox.Show("Other node {0} with value {1}"+reader.NodeType+reader.Value);
+                            break;
+                    }*/
+                    //await citizenRepository.InsertAsync(citizen);
+                }
+
+                //await citizenRepository.SaveChangesAsync();
+                //string str = await reader.GetValueAsync();
+                //MessageBox.Show(str);
+
+                /*XmlTextReader xmlTextReader = new(fileName);
                 string node = await xmlTextReader.GetValueAsync();
-                MessageBox.Show(node);
-                
+                MessageBox.Show(node);*/
+
 
                 //Close the reader.
                 //xmlTextReader.Close();
@@ -69,13 +106,26 @@ namespace ManageCitizens.Services
 
         public async Task ExportDataAsync(List<Citizen> citizensList, IDialogService dialogService, string fileName)
         {
-        
-        }
+            XDocument xDoc = new();
+            XElement root = new("TestProgram");
+            foreach (Citizen citizen in citizensList)
+            {
+                XElement record = new("Record");
+                record.Add(new XAttribute("id", citizen.Id));
+                record.Add(new XElement("Birthday", citizen.Birthday));
+                record.Add(new XElement("FirstName", citizen.FirstName));
+                record.Add(new XElement("LastName", citizen.LastName));
+                record.Add(new XElement("MiddleName", citizen.MiddleName));
+                record.Add(new XElement("City", citizen.City));
+                record.Add(new XElement("Country", citizen.Country));
 
-        public List<Citizen> Open(string fileName)
-        {
-            List<Citizen> qqq = [];
-            return qqq;
+                root.Add(record);
+            }
+
+            xDoc.Add(root);
+            //xDoc.Save(fileName);
+            await Task.Run(() => xDoc.Save(fileName));
+
         }
 
         public void Save(string fileName, List<Citizen> citizensList)
