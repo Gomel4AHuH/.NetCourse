@@ -1,6 +1,6 @@
-﻿using ManageCitizens.Interfaces;
+﻿using ClosedXML.Excel;
+using ManageCitizens.Interfaces;
 using ManageCitizens.Models;
-using ManageCitizens.Models.Data;
 using ManageCitizens.Repository;
 using Spire.Xls;
 using System.Data;
@@ -11,79 +11,72 @@ namespace ManageCitizens.Services
     {
         public async Task ImportDataAsync(SQLCitizenRepository citizenRepository, IDialogService dialogService, string fileName)
         {
+            try
+            {
+                List<Citizen>? citizens = [];
 
+                await Task.Run(() => 
+                {
+                    Workbook workbook = new();
+
+                    workbook.LoadFromFile(fileName);
+
+                    Worksheet worksheet = workbook.Worksheets[0];
+
+                    DataTable dataTable = worksheet.ExportDataTable();
+
+                    citizens = ConvertDataTableToList(dataTable);
+
+                    workbook.Dispose();
+                });
+
+                foreach (Citizen citizen in citizens)
+                {
+                    await citizenRepository.InsertAsync(citizen);
+                }
+
+                await citizenRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowMessage(ex.Message);
+            }            
         }
 
         public async Task ExportDataAsync(List<Citizen> citizensList, IDialogService dialogService, string fileName)
         {
-
-        }
-
-        public List<Citizen> Open(string fileName)
-        {
-            List<Citizen>? citizens = [];
-
-            Workbook workbook = new();
-
-            workbook.LoadFromFile(fileName);
-
-            Worksheet worksheet = workbook.Worksheets[0];
-
-            DataTable dataTable = worksheet.ExportDataTable();
-
-            citizens = ConvertDataTableToList(dataTable);
-
-            workbook.Dispose();
-
-            return citizens;
-        }
-
-        public void Save(string fileName, List<Citizen> citizensList)
-        {
-            Workbook workbook = new();
-
-            workbook.Worksheets.Clear();
-
-            Worksheet worksheet = workbook.Worksheets.Add("Citizens");
-
-            DataTable dataTable = ConvertListToDataTable(citizensList);
-
-            worksheet.InsertDataTable(dataTable, true, 1, 1, true);
-
-            workbook.SaveToFile(fileName, ExcelVersion.Version2016);
-
-            workbook.Dispose();
-        }
-
-        private static DataTable ConvertListToDataTable(List<Citizen> citizenList)
-        {
-            DataTable dataTable = new();
-
-            foreach (var prop in new Citizen().GetType().GetProperties())
+            try
             {
-                if (prop.Name != "Id")
+                await Task.Run(() =>
                 {
-                    dataTable.Columns.Add(prop.Name, prop.PropertyType);
-                }
-            }
+                    XLWorkbook workbook = new();
+                    IXLWorksheet worksheet = workbook.Worksheets.Add("Citizens");
+                    
+                    worksheet.Cell(1, 1).Value = "FirstName";
+                    worksheet.Cell(1, 2).Value = "LastName";
+                    worksheet.Cell(1, 3).Value = "MiddleName";
+                    worksheet.Cell(1, 4).Value = "Birthday";
+                    worksheet.Cell(1, 5).Value = "City";
+                    worksheet.Cell(1, 6).Value = "Country";
 
-            foreach (var citizen in citizenList)
-            {
-                DataRow row = dataTable.NewRow();
-
-                foreach (var prop in citizen.GetType().GetProperties())
-                {
-                    if (prop.Name != "Id")
+                    for (int i = 0; i < citizensList.Count; i++)
                     {
-                        row[prop.Name] = prop.GetValue(citizen);
+                        worksheet.Cell(i + 2, 2).Value = citizensList[i].FirstName;
+                        worksheet.Cell(i + 2, 3).Value = citizensList[i].LastName;
+                        worksheet.Cell(i + 2, 4).Value = citizensList[i].MiddleName;
+                        worksheet.Cell(i + 2, 1).Value = citizensList[i].Birthday.ToString();
+                        worksheet.Cell(i + 2, 5).Value = citizensList[i].City;
+                        worksheet.Cell(i + 2, 6).Value = citizensList[i].Country;
                     }
-                }
 
-                dataTable.Rows.Add(row);
+                    workbook.SaveAs(fileName);
+                });
             }
-
-            return dataTable;
-        }
+            catch (Exception ex)
+            {
+                dialogService.ShowMessage(ex.Message);
+            }            
+        }        
 
         private static List<Citizen> ConvertDataTableToList(DataTable dataTable)
         {
@@ -91,12 +84,13 @@ namespace ManageCitizens.Services
 
             foreach (DataRow row in dataTable.Rows)
             {
-                citizens.Add(new Citizen(firstName: row[0].ToString(),
-                                         lastName: row[1].ToString(),
-                                         middleName: row[2].ToString(),
-                                         birthday: DateOnly.Parse(row[3].ToString()),
-                                         city: row[4].ToString(),
-                                         country: row[5].ToString()));
+                citizens.Add(new Citizen(
+                    firstName: row[1].ToString(),
+                    lastName: row[2].ToString(),
+                    middleName: row[3].ToString(),
+                    birthday: DateOnly.Parse(row[0].ToString()),
+                    city: row[4].ToString(),
+                    country: row[5].ToString()));
             }
 
             return citizens;

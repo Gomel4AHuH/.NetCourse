@@ -6,6 +6,5 @@
         bool OpenFileDialog(string fileExtention);
         bool SaveFileDialog(string fileExtention);
         void ShowMessage(string message);
-        //void Close();
     }
 }

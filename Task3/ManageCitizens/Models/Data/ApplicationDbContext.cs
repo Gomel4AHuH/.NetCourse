@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ManageCitizens.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace ManageCitizens.Models.Data
 {
@@ -6,17 +7,24 @@ namespace ManageCitizens.Models.Data
     {
         public DbSet<Citizen> Citizens { get; set; }
         public string _sqlDbConnection;
+        private readonly DefaultDialogService _dialogService = new();
 
         public ApplicationDbContext()
-        {
-            _sqlDbConnection = new Configuration().GetConfigurationString();
-            Database.EnsureCreated();
+        {            
+            try
+            {
+                _sqlDbConnection = Configuration.GetConfigurationString();
+                Database.EnsureCreated();                
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage(ex.Message);
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(_sqlDbConnection);
-        }
-
+        }        
     }
 }

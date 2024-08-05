@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
-    <System:String x:Key="Title">База жителей</System:String>
+    <System:String x:Key="MainVindowTitle">База жителей</System:String>
     <System:String x:Key="MenuFile">Файл</System:String>
     <System:String x:Key="MenuFileCleanDb">Очистить базу</System:String>
     <System:String x:Key="MenuFileExit">Выход</System:String>
@@ -23,7 +23,8 @@
     <System:String x:Key="FilterLastName">Фамилия</System:String>
     <System:String x:Key="FilterFirstName">Имя</System:String>
     <System:String x:Key="FilterMiddleName">Отчество</System:String>
-    <System:String x:Key="FilterBirthday">Дата рождения</System:String>
+    <System:String x:Key="FilterBirthdayFrom">Дата рождения с</System:String>
+    <System:String x:Key="FilterBirthdayTo">Дата рождения по</System:String>
     <System:String x:Key="FilterCity">Город</System:String>
     <System:String x:Key="FilterCountry">Страна</System:String>
     <System:String x:Key="FilterSearchButton">Поиск</System:String>
@@ -36,4 +37,12 @@
     <System:String x:Key="DataGridBirthdayColumn">Дата рождения</System:String>
     <System:String x:Key="DataGridCityColumn">Город</System:String>
     <System:String x:Key="DataGridCountryColumn">Страна</System:String>
+    <System:String x:Key="DataExportedMessage">Данные выгружены.</System:String>
+    <System:String x:Key="DataLoadedMessage">Данные загружены.</System:String>
+    <System:String x:Key="EmptyDataLoadedMessage">Данные в базе отсутствуют.</System:String>
+    <System:String x:Key="DataDeletedMessage">Данные удалены.</System:String>
+    <System:String x:Key="SearchEmptyMessage">Условия поиска не должны быть пустыми.</System:String>
+    <System:String x:Key="MessageViewTitle">Сообщение</System:String>
+    <System:String x:Key="OkButton">Ок</System:String>
+    <System:String x:Key="CancelButton">Отмена</System:String>
 </ResourceDictionary>

@@ -7,23 +7,19 @@ namespace ManageCitizens.Repository
 {
     class SQLCitizenRepository(ApplicationDbContext applicationDbContext) : IRepository
     {
-        private ApplicationDbContext _db = applicationDbContext;
-        public async Task<IEnumerable<Citizen>> GetCitizensAsync()
+        private readonly ApplicationDbContext _db = applicationDbContext;
+        public async IAsyncEnumerable<Citizen> GetCitizensAsync()
         {
-            return await _db.Citizens.ToListAsync();
-        }
+            List<Citizen> citizens = await _db.Citizens.ToListAsync();
 
-        public async IAsyncEnumerable<Citizen> GetRecordsAsync()
-        {
-            var records = await _db.Citizens.ToListAsync();
-            foreach (var record in records)
+            foreach (Citizen citizen in citizens)
             {
-                yield return record;
+                yield return citizen;
             }
         }
         public async Task InsertAsync(Citizen citizen)
         {
-            await _db.Citizens.AddAsync(citizen);
+            await _db.Citizens.AddAsync(citizen);            
         }
         public async Task SaveChangesAsync()
         {

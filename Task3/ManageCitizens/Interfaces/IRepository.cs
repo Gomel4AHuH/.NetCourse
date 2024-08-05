@@ -4,7 +4,7 @@ namespace ManageCitizens.Interfaces
 {
     public interface IRepository : IDisposable
     {
-        Task<IEnumerable<Citizen>> GetCitizensAsync();
+        IAsyncEnumerable<Citizen> GetCitizensAsync();
         Task InsertAsync(Citizen citizen);
         Task SaveChangesAsync();
         Task DeleteAllAsync();

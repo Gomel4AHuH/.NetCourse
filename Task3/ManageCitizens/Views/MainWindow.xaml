@@ -6,11 +6,19 @@
         xmlns:local="clr-namespace:ManageCitizens.Views"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="{DynamicResource Title}"
+        Title="{DynamicResource MainVindowTitle}"
         Height="800"
         Width="1600"
         ResizeMode="NoResize"
         ShowCloseButton="False">
+    <Window.Resources>
+        <TextBlock x:Key="LastNameHeader" Text="{DynamicResource DataGridLastNameColumn}"/>
+        <TextBlock x:Key="FirstNameHeader" Text="{DynamicResource DataGridFirstNameColumn}"/>
+        <TextBlock x:Key="MiddleNameHeader" Text="{DynamicResource DataGridMiddleNameColumn}"/>
+        <TextBlock x:Key="BirthdayHeader" Text="{DynamicResource DataGridBirthdayColumn}"/>
+        <TextBlock x:Key="CityHeader" Text="{DynamicResource DataGridCityColumn}"/>
+        <TextBlock x:Key="CountryHeader" Text="{DynamicResource DataGridCountryColumn}"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
@@ -21,7 +29,7 @@
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
-        </Grid.ColumnDefinitions>        
+        </Grid.ColumnDefinitions>
         <Grid
             Grid.Row="1"
             Grid.Column="1">
@@ -31,18 +39,6 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
-            <ProgressBar
-                Name="ProgressBar"
-                Grid.Row="3"
-                Value="{Binding ProgressBarValue}"/>
-                <!--
-                Visibility="{Binding ProgressBarVisibility}"
-                -->
-            <TextBlock
-                Name="TBProgress"
-                Text="{Binding ProgressBarText}"
-                HorizontalAlignment="Center"
-                Grid.Row="3"/>
             <Menu
                 Grid.Row="0"
                 VerticalAlignment="Center">
@@ -59,20 +55,19 @@
                 <MenuItem Header="{DynamicResource MenuImport}">
                     <MenuItem
                         Header="{DynamicResource MenuImportFromCSV}"
-                        Command="{Binding ImportDataFromCsvFileAsyncCommand}"/>
+                        Command="{Binding ImportDataFromCsvFileAsyncCommand}"
+                        IsEnabled="{Binding ImportButtonLock}"/>
                     <MenuItem
                         Header="{DynamicResource MenuImportFromXML}"
-                        Command="{Binding ImportDataFromXmlFileAsyncCommand}"/>
+                        Command="{Binding ImportDataFromXmlFileAsyncCommand}"
+                        IsEnabled="{Binding ImportButtonLock}"/>
                     <MenuItem
                         Header="{DynamicResource MenuImportFromExcel}"
-                        Command="{Binding ImportDataFromExcelFileAsyncCommand}"/>
+                        Command="{Binding ImportDataFromExcelFileAsyncCommand}"
+                        IsEnabled="{Binding ImportButtonLock}"/>
                     <MenuItem
                         Header="{DynamicResource MenuImportFromJson}"
                         Command="{Binding ImportDataFromJsonFileAsyncCommand}"
-                        IsEnabled="{Binding ImportButtonLock}"/>
-                    <MenuItem
-                        Header="from JSON1"
-                        Command="{Binding ImportDataFromJsonFileCommand}"
                         IsEnabled="{Binding ImportButtonLock}"/>
                 </MenuItem>
                 <MenuItem Header="{DynamicResource MenuExport}">
@@ -91,10 +86,6 @@
                     <MenuItem
                         Header="{DynamicResource MenuExportToJson}"
                         Command="{Binding ExportDataToJsonFileAsyncCommand}"
-                        IsEnabled="{Binding ExportButtonLock}"/>
-                    <MenuItem
-                        Header="to JSON1"
-                        Command="{Binding ExportDataToJsonFileCommand}"
                         IsEnabled="{Binding ExportButtonLock}"/>
                 </MenuItem>
                 <MenuItem Header="{DynamicResource MenuLanguage}">
@@ -119,42 +110,43 @@
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="27"/>
-                    <ColumnDefinition Width="141"/>
-                    <ColumnDefinition Width="32"/>
                     <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="30"/>
                     <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="30"/>
                     <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="30"/>
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="0"
-                    Text="{DynamicResource FilterLastName}"
-                    Grid.ColumnSpan="3"/>
+                    HorizontalAlignment="Left"
+                    Text="{DynamicResource FilterLastName}"/>
                 <TextBox
                     Grid.Row="2"
                     Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding LastNameFilter}"
-                    Grid.ColumnSpan="2"/>
+                    Text="{Binding LastNameFilter}"/>
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     HorizontalAlignment="Left"
                     Text="{DynamicResource FilterFirstName}"/>
                 <TextBox
                     Grid.Row="2"
-                    Grid.Column="3"
+                    Grid.Column="2"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding FirstNameFilter}"/>
+                    Text="{Binding FirstNameFilter}" Grid.ColumnSpan="2"/>
                 <TextBlock
                     Grid.Row="1"
                     Grid.Column="4"
@@ -167,60 +159,61 @@
                     HorizontalAlignment="Left"
                     Text="{Binding MiddleNameFilter}"/>
                 <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Text="{DynamicResource FilterBirthday}"
+                    Grid.Row="1"
+                    Grid.Column="6"
+                    Text="{DynamicResource FilterBirthdayFrom}"
                     Grid.ColumnSpan="3"/>
                 <DatePicker
-                    Grid.Row="4"
-                    Grid.Column="0"
+                    Grid.Row="2"
+                    Grid.Column="6"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding BirthdayFilter}"
-                    Grid.ColumnSpan="2"/>
+                    SelectedDate="{Binding BirthdayFromFilter}"/>
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="8"
+                    Text="{DynamicResource FilterBirthdayTo}"/>
+                <DatePicker
+                    Grid.Row="2"
+                    Grid.Column="8"
+                    Width="150"
+                    HorizontalAlignment="Left"
+                    SelectedDate="{Binding BirthdayToFilter}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="3"
+                    Grid.Column="0"
                     HorizontalAlignment="Left"
                     Text="{DynamicResource FilterCity}"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="3"
+                    Grid.Column="0"
                     Width="150"
                     HorizontalAlignment="Left"
                     Text="{Binding CityFilter}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="4"
+                    Grid.Column="2"
                     HorizontalAlignment="Left"
                     Text="{DynamicResource FilterCountry}"/>
                 <TextBox
                     Grid.Row="4"
-                    Grid.Column="4"
+                    Grid.Column="2"
                     Width="150"
                     HorizontalAlignment="Left"
-                    Text="{Binding CountryFilter}"/>
+                    Text="{Binding CountryFilter}" Grid.ColumnSpan="2"/>
                 <Button
-                    Command="{Binding FilterCitizensCommand}"
+                    Command="{Binding SearchCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="6"
+                    Grid.Column="10"
                     Width="100"
-                    HorizontalAlignment="Center"
+                    HorizontalAlignment="Left"
                     Content="{DynamicResource FilterSearchButton}"
                     IsEnabled="{Binding SearchButtonLock}"
                     Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
                 <Button
-                    Click="Button_Click"
-                    Grid.Row="4"
-                    Grid.Column="6"
-                    Width="100"
-                    HorizontalAlignment="Center"
-                    Content="Test"
-                    Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
-                <Button
                     Command="{Binding CancelSearchCitizensCommand}"
                     Grid.Row="2"
-                    Grid.Column="8"
+                    Grid.Column="12"
                     Width="100"
                     HorizontalAlignment="Center"
                     Content="{DynamicResource FilterCancelSearchButton}"
@@ -228,26 +221,26 @@
                     Style="{StaticResource MahApps.Styles.Button.Square.Accent}"/>
                 <TextBlock
                     Grid.Row="3"
-                    Grid.Column="11"
-                    HorizontalAlignment="Left"
-                    Text="{DynamicResource TextTotalCount}"/>
-                <TextBlock
-                    Grid.Row="3"
                     Grid.Column="10"
                     HorizontalAlignment="Left"
                     Text="{DynamicResource TextFilterCount}"/>
-                <TextBlock
-                    Grid.Row="4"
-                    Grid.Column="11"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Text="{Binding TotalCount}"/>
                 <TextBlock
                     Grid.Row="4"
                     Grid.Column="10"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Text="{Binding FilterCount}"/>
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="12"
+                    HorizontalAlignment="Left"
+                    Text="{DynamicResource TextTotalCount}"/>
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="12"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="{Binding TotalCount}"/>
             </Grid>
             <DataGrid
                 ItemsSource="{Binding CitizensCollection}"
@@ -257,27 +250,27 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="150"
-                        Header="{DynamicResource DataGridLastNameColumn}"
+                        Header="{StaticResource LastNameHeader}"
                         Binding="{Binding LastName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="{DynamicResource DataGridFirstNameColumn}"
+                        Header="{StaticResource FirstNameHeader}"
                         Binding="{Binding FirstName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="{DynamicResource DataGridMiddleNameColumn}"
+                        Header="{StaticResource MiddleNameHeader}"
                         Binding="{Binding MiddleName}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="{DynamicResource DataGridBirthdayColumn}"
+                        Header="{StaticResource BirthdayHeader}"
                         Binding="{Binding Birthday}"/>
                     <DataGridTextColumn
                         Width="150"
-                        Header="{DynamicResource DataGridCityColumn}"
+                        Header="{StaticResource CityHeader}"
                         Binding="{Binding City}"/>
                     <DataGridTextColumn
                         Width="*"
-                        Header="{DynamicResource DataGridCountryColumn}"
+                        Header="{StaticResource CountryHeader}"
                         Binding="{Binding Country}"/>
                 </DataGrid.Columns>
             </DataGrid>

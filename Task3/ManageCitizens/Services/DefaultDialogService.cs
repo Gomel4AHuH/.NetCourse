@@ -1,14 +1,13 @@
 ﻿using ManageCitizens.Interfaces;
 using ManageCitizens.Views;
 using Microsoft.Win32;
-using System.Windows;
 
 namespace ManageCitizens.Services
 {
     public class DefaultDialogService : IDialogService
     {
         public string FilePath { get; set; }
-        private MessageView msgVw;
+        private MessageView? msgVw;
 
         public bool OpenFileDialog(string fileExtention)
         {
@@ -40,17 +39,8 @@ namespace ManageCitizens.Services
 
         public void ShowMessage(string message)
         {
-            msgVw = new(message)
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
+            msgVw = new(message);            
             msgVw.ShowDialog();
         }
-
-        /*public void Close()
-        {
-            msgVw.Close();
-        }*/
     }
 }

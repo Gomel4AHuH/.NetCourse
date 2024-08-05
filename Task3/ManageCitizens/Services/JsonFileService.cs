@@ -10,22 +10,36 @@ namespace ManageCitizens.Services
     {
         public async Task ImportDataAsync(SQLCitizenRepository citizenRepository, IDialogService dialogService, string fileName)
         {
-            using (FileStream fs = new(fileName, FileMode.OpenOrCreate))
+            try
             {
-                List<Citizen>? citizenList = await JsonSerializer.DeserializeAsync<List<Citizen>>(fs);
-                foreach (Citizen citizen in citizenList)
+                using (FileStream? fs = new(fileName, FileMode.OpenOrCreate))
                 {
-                    await citizenRepository.InsertAsync(citizen);
+                    List<Citizen> citizenList = await JsonSerializer.DeserializeAsync<List<Citizen>>(fs);
+                    foreach (Citizen citizen in citizenList)
+                    {
+                        await citizenRepository.InsertAsync(citizen);
+                    }
                 }
-            }
 
-            await citizenRepository.SaveChangesAsync();
+                await citizenRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowMessage(ex.Message);
+            }
         }
 
         public async Task ExportDataAsync(List<Citizen> citizensList, IDialogService dialogService, string fileName)
         {
-            using FileStream fs = new(fileName, FileMode.OpenOrCreate);
-            await JsonSerializer.SerializeAsync(fs, citizensList);
+            try
+            {
+                using FileStream? fs = new(fileName, FileMode.OpenOrCreate);
+                await JsonSerializer.SerializeAsync(fs, citizensList);
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowMessage(ex.Message);
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ namespace ManageCitizens
     public class Configuration
     {
 
-        public string GetConfigurationString()
+        public static string GetConfigurationString()
         {
             IConfiguration builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
