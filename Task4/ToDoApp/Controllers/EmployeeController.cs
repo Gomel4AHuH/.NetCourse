@@ -12,18 +12,64 @@ namespace ToDoApp.Controllers
             _employeeDbContext = employeeDbContext;
         }
 
-        // GET: EmployeeController
-        public ActionResult Index()
-        {
-            List<Employee> employeeList = [.. _employeeDbContext.Employees];
-            return View(employeeList);
-        }
-
+        #region API
         [HttpGet]
         [Route("GetAllEmployees")]
         public List<Employee> GetAll()
         {
             return [.. _employeeDbContext.Employees];
+        }
+
+        [HttpPost]
+        [Route("AddEmployee")]
+        public string AddEmployee(Employee employee)
+        {
+            _employeeDbContext.Employees.Add(employee);
+            _employeeDbContext.SaveChanges();
+            return "Employee added.";
+        }
+
+        [HttpGet]
+        [Route("GetEmployee")]
+        public Employee GetEmployee(int id)
+        {
+            return _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
+        }
+
+        [HttpGet]
+        [Route("UpdateEmployee")]
+        public string UpdateEmployee(Employee employee)
+        {
+            _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            _employeeDbContext.SaveChanges();
+            return "Employee updated.";
+        }
+
+        [HttpDelete]
+        [Route("DeleteEmployee")]
+        public string DeleteEmployee(int id)
+        {
+            Employee employee = _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
+            if (employee != null)
+            {
+                _employeeDbContext.Employees.Remove(employee);
+                _employeeDbContext.SaveChanges();
+                return "Employee deleted.";
+            }
+            else
+            {
+                return "Employee not found.";
+            }
+
+        }
+        #endregion
+
+        #region Actions
+        // GET: EmployeeController
+        public ActionResult Index()
+        {
+            List<Employee> employeeList = [.. _employeeDbContext.Employees];
+            return View(employeeList);
         }
 
         // GET: EmployeeController/Details/5
@@ -41,7 +87,6 @@ namespace ToDoApp.Controllers
 
         // POST: EmployeeController/Create
         [HttpPost]
-        //[Route("Create")]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Employee employee)
         {
@@ -57,13 +102,6 @@ namespace ToDoApp.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetEmployee")]
-        public Employee GetEmployee(int id)
-        {
-            return _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
-        }
-
         // GET: EmployeeController/Edit/5
         public ActionResult Edit(int id)
         {
@@ -71,10 +109,8 @@ namespace ToDoApp.Controllers
             return View(employee);
         }
 
-
         // POST: EmployeeController/Edit/5
         [HttpPost]
-        //[Route("Edit")]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, Employee employee)
         {
@@ -100,7 +136,6 @@ namespace ToDoApp.Controllers
 
         // POST: EmployeeController/Delete/5
         [HttpPost]
-        //[Route("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
@@ -119,5 +154,7 @@ namespace ToDoApp.Controllers
                 return View();
             }
         }
+        #endregion
+
     }
 }
