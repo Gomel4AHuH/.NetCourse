@@ -6,20 +6,6 @@ namespace ToDoApp.Models
 {
     public class Employee
     {
-        public Employee()
-        {
-            
-        }
-        public Employee(string firstName, string lastName, string middleName, DateOnly birthday, string speciality, DateOnly employmentDate)
-        {
-            FirstName = firstName;
-            LastName = lastName;
-            MiddleName = middleName;
-            Birthday = birthday;
-            Speciality = speciality;
-            EmploymentDate = employmentDate;
-        }
-
         [Key]
         [Column(TypeName = "int")]
         public int Id { get; set; }

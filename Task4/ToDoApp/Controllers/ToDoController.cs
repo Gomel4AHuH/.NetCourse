@@ -15,14 +15,21 @@ namespace ToDoApp.Controllers
         // GET: ToDoController
         public ActionResult Index()
         {
-            var toDoList = _toDoDbContext.ToDos.ToList();
+            List<ToDo> toDoList = [.. _toDoDbContext.ToDos];
             return View(toDoList);
+        }
+
+        [HttpGet]
+        [Route("GetAllToDos")]
+        public List<ToDo> GetAll()
+        {
+            return [.. _toDoDbContext.ToDos];
         }
 
         // GET: ToDoController/Details/5
         public ActionResult Details(int id)
         {
-            var toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
+            ToDo toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
             return View(toDo);
         }
 
@@ -34,6 +41,7 @@ namespace ToDoApp.Controllers
 
         // POST: ToDoController/Create
         [HttpPost]
+        [Route("Create")]
         [ValidateAntiForgeryToken]
         public ActionResult Create(ToDo toDo)
         {
@@ -49,15 +57,23 @@ namespace ToDoApp.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetToDo")]
+        public ToDo GetToDo(int id)
+        {
+            return _toDoDbContext.ToDos.Where(toDo => toDo.Id == id).FirstOrDefault();
+        }
+
         // GET: ToDoController/Edit/5
         public ActionResult Edit(int id)
         {
-            var toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
+            ToDo toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
             return View(toDo);
         }
 
         // POST: ToDoController/Edit/5
         [HttpPost]
+        [Route("Edit")]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, ToDo toDo)
         {
@@ -77,18 +93,19 @@ namespace ToDoApp.Controllers
         // GET: ToDoController/Delete/5
         public ActionResult Delete(int id)
         {
-            var toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
+            ToDo toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
             return View(toDo);
         }
 
         // POST: ToDoController/Delete/5
         [HttpPost]
+        [Route("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try
             {
-                var toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
+                ToDo toDo = _toDoDbContext.ToDos.FirstOrDefault(x => x.Id == id);
                 if (toDo != null)
                 {
                     _toDoDbContext.Remove(toDo);

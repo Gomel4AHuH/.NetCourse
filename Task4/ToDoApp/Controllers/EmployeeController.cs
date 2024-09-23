@@ -6,94 +6,118 @@ namespace ToDoApp.Controllers
     public class EmployeeController : Controller
     {
         private readonly EmployeeDbContext _employeeDbContext;
+
         public EmployeeController(EmployeeDbContext employeeDbContext)
         {
             _employeeDbContext = employeeDbContext;
         }
 
-        public IActionResult Index()
+        // GET: EmployeeController
+        public ActionResult Index()
         {
-            return View();
+            List<Employee> employeeList = [.. _employeeDbContext.Employees];
+            return View(employeeList);
         }
 
         [HttpGet]
         [Route("GetAllEmployees")]
         public List<Employee> GetAll()
         {
-            return [.._employeeDbContext.Employees];
+            return [.. _employeeDbContext.Employees];
         }
 
-        [HttpPost]
-        [Route("AddEmployee")]
-        public string AddEmployee(Employee employee)
+        // GET: EmployeeController/Details/5
+        public ActionResult Details(int id)
         {
-            _employeeDbContext.Employees.Add(employee);
-            _employeeDbContext.SaveChanges();
-            return "Employee added.";
+            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
+            return View(employee);
+        }
+
+        // GET: EmployeeController/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: EmployeeController/Create
+        [HttpPost]
+        //[Route("Create")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Employee employee)
+        {
+            try
+            {
+                _employeeDbContext.Employees.Add(employee);
+                _employeeDbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
         }
 
         [HttpGet]
         [Route("GetEmployee")]
         public Employee GetEmployee(int id)
         {
-            return _employeeDbContext.Employees.Where(emp => emp.Id == id ).FirstOrDefault();
+            return _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
         }
 
-        [HttpPut]
-        [Route("UpdateEmployee")]
-        public string UpdateEmployee(Employee employee)
+        // GET: EmployeeController/Edit/5
+        public ActionResult Edit(int id)
         {
-            _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _employeeDbContext.SaveChanges();
-            return "Employee updated.";
+            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
+            return View(employee);
         }
 
-        [HttpDelete]
-        [Route("DeleteEmployee")]
-        public string DeleteEmployee(int id)
-        {
-            Employee employee = _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
-            if (employee != null)
-            {
-                _employeeDbContext.Employees.Remove(employee);
-                _employeeDbContext.SaveChanges();
-                return "Employee deleted.";
-            }
-            else
-            {
-                return "Employee not found.";
-            }
-            
-        }
 
-        /*[HttpGet]
-        public IActionResult AddOrEdit(int Id = 0)
-        {
-            Employee employee = new Employee();
-
-            if (Id == 0)
-            {
-                return View(employee);
-            }
-            else
-            {
-                return View(_employeeDbcontext.Employees.Find(Id));
-            }
-        }
-
+        // POST: EmployeeController/Edit/5
         [HttpPost]
-        public IActionResult AddOrEdit(int Id = 0)
+        //[Route("Edit")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(int id, Employee employee)
         {
-            Employee employee = new Employee();
+            try
+            {
+                _employeeDbContext.Employees.Add(employee);
+                _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _employeeDbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
 
-            if (Id == 0)
+        // GET: EmployeeController/Delete/5
+        public ActionResult Delete(int id)
+        {
+            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
+            return View(employee);
+        }
+
+        // POST: EmployeeController/Delete/5
+        [HttpPost]
+        //[Route("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
             {
-                return View(employee);
+                Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
+                if (employee != null)
+                {
+                    _employeeDbContext.Remove(employee);
+                    _employeeDbContext.SaveChanges();
+                }
+                return RedirectToAction(nameof(Index));
             }
-            else
+            catch
             {
-                return View(_employeeDbcontext.Employees.Find(Id));
+                return View();
             }
-        }*/
+        }
     }
 }
