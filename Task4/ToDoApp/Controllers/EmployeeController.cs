@@ -36,7 +36,7 @@ namespace ToDoApp.Controllers
             return _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("UpdateEmployee")]
         public string UpdateEmployee(Employee employee)
         {
@@ -60,7 +60,6 @@ namespace ToDoApp.Controllers
             {
                 return "Employee not found.";
             }
-
         }
         #endregion
 
