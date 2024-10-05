@@ -46,36 +46,29 @@ else if (TempData["ErrorMessage"] != null)
     </p>
 }
 
-<form asp-action="Index">
-    <p>
-        Search: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
-        <input type="submit" value="Search" />
-    </p>
-</form>
-
 <table class="table table-bordered table-hover table-striped">
 
         <tr>
             <th>
-                @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"] })
+                @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("Last Name", "Index", new { sortOrder = @ViewData["LastNameSortParm"] })
+                @Html.ActionLink("Last Name", "Index", new { sortOrder = @ViewData["LastNameSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("First Name", "Index", new { sortOrder = @ViewData["FirstNameSortParm"] })
+                @Html.ActionLink("First Name", "Index", new { sortOrder = @ViewData["FirstNameSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("Middle Name", "Index", new { sortOrder = @ViewData["MiddleNameSortParm"] })
+                @Html.ActionLink("Middle Name", "Index", new { sortOrder = @ViewData["MiddleNameSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("Birthday", "Index", new { sortOrder = @ViewData["BirthdaySortParm"] })
+                @Html.ActionLink("Birthday", "Index", new { sortOrder = @ViewData["BirthdaySortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("Speciality", "Index", new { sortOrder = @ViewData["SpecialitySortParm"] })
+                @Html.ActionLink("Speciality", "Index", new { sortOrder = @ViewData["SpecialitySortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.ActionLink("Employment date", "Index", new { sortOrder = @ViewData["EmploymentDateSortParm"] })
+                @Html.ActionLink("Employment date", "Index", new { sortOrder = @ViewData["EmploymentDateSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
                 Actions

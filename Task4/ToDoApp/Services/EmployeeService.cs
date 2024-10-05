@@ -19,6 +19,16 @@ namespace ToDoApp.Services
             IQueryable<Employee> employees = from e in _employeeContext.Employees
                                        select e;
 
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                employees = employees.Where(e => e.LastName.Contains(searchString)
+                                                || e.FirstName.Contains(searchString)
+                                                || e.MiddleName.Contains(searchString)
+                                                || e.Birthday.ToString().Contains(searchString)
+                                                || e.Speciality.Contains(searchString)
+                                                || e.EmploymentDate.ToString().Contains(searchString));
+            }
+
             switch (sortOrder)
             {
                 case "id":
