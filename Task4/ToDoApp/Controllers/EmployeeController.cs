@@ -1,17 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ToDoApp.Interfaces;
 using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly EmployeeDbContext _employeeDbContext;
+        //private readonly EmployeeDbContext _employeeDbContext;
+        private readonly IEmployeeService _employeeService;
+        //private readonly Logger _logger;
 
-        public EmployeeController(EmployeeDbContext employeeDbContext)
+        public EmployeeController(IEmployeeService service)
         {
-            _employeeDbContext = employeeDbContext;
+            //_employeeDbContext = employeeDbContext;
+            _employeeService = service;
+            //_logger = logger;
         }
-
+        /*
         #region API
         [HttpGet]
         [Route("GetAllEmployees")]
@@ -62,24 +67,42 @@ namespace ToDoApp.Controllers
             }
         }
         #endregion
-
+        */
         #region Actions
+        
         // GET: EmployeeController
-        public ActionResult Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            List<Employee> employeeList = [.. _employeeDbContext.Employees];
-            return View(employeeList);
-        }
+            try
+            {
+                ViewData["CurrentSort"] = sortOrder;
+                ViewData["IdSortParm"] = sortOrder == "id" ? "id" : "";
+                ViewData["LastNameSortParm"] = sortOrder == "lastName" ? "lastName_desc" : "lastName";
+                ViewData["FirstNameSortParm"] = sortOrder == "firstName" ? "firstName_desc" : "firstName";
+                ViewData["MiddleNameSortParm"] = sortOrder == "middleName" ? "middleName_desc" : "middleName";
+                ViewData["BirthdaySortParm"] = sortOrder == "birthday" ? "birthday_desc" : "birthday";
+                ViewData["SpecialitySortParm"] = sortOrder == "speciality" ? "speciality_desc" : "speciality";
+                ViewData["EmploymentDateSortParm"] = sortOrder == "employmentDate" ? "employmentDate_desc" : "employmentDate";
 
-        // GET: EmployeeController/Details/5
-        public ActionResult Details(int id)
-        {
-            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
-            return View(employee);
+                ViewData["CurrentFilter"] = searchString;
+
+                List<Employee> employeeList = await _employeeService.GetAllAsync(searchString, sortOrder);
+                if (employeeList.Count == 0)
+                {
+                    TempData["InfoMessage"] = "No employees available for now.";
+                    //_logger.Add("No employees available for now.");                   
+                }
+                return View(employeeList);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }           
         }
 
         // GET: EmployeeController/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -87,29 +110,44 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Employee employee)
+        public async Task<IActionResult> Create(Employee employee)
         {
             try
             {
-                _employeeDbContext.Employees.Add(employee);
-                _employeeDbContext.SaveChanges();
+                await _employeeService.CreateAsync(employee);
+                //TempData["SuccessMessage"] = $"Employee with id {_employeeService.GetbyIdAsync(id)} created successfully.";
+                TempData["SuccessMessage"] = $"Employee created successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                TempData["ErrorMessage"] = ex.Message;
                 return View();
             }
         }
 
         // GET: EmployeeController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
-            return View(employee);
+            try
+            {
+                Employee employee = await _employeeService.GetByIdAsync(id);
+                if (employee == null)
+                {
+                    TempData["ErrorMessage"] = "Employee details not available with the Id : " + id;
+                    return RedirectToAction("Index");
+                }
+                return View(employee);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }
         }
 
         // POST: EmployeeController/Edit/5
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, Employee employee)
         {
@@ -118,42 +156,60 @@ namespace ToDoApp.Controllers
                 _employeeDbContext.Employees.Add(employee);
                 _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _employeeDbContext.SaveChanges();
+                TempData["SuccessMessage"] = "Employee updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }
+        }*/
+
+        // GET: EmployeeController/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                Employee employee = await _employeeService.GetByIdAsync(id);
+                if (employee == null)
+                {
+                    TempData["ErrorMessage"] = "Employee details not available with the Id : " + id;
+                    return RedirectToAction("Index");
+                }
+                return View(employee);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
                 return View();
             }
         }
 
         // GET: EmployeeController/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
+            Employee employee = await _employeeService.GetByIdAsync(id);
             return View(employee);
         }
 
         // POST: EmployeeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(int id, IFormCollection collection)
         {
             try
             {
-                Employee employee = _employeeDbContext.Employees.FirstOrDefault(emp => emp.Id == id);
-                if (employee != null)
-                {
-                    _employeeDbContext.Remove(employee);
-                    _employeeDbContext.SaveChanges();
-                }
+                await _employeeService.DeleteAsync(id);
+                TempData["SuccessMessage"] = "Employee deleted successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                TempData["ErrorMessage"] = ex.Message;
                 return View();
             }
         }
         #endregion
-
     }
 }

@@ -6,44 +6,92 @@
 
 <h1>Employees</h1>
 
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">
+        <strong>Information ! </strong>   @TempData["InfoMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <strong>Success ! </strong>   @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error ! </strong>   @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+
 <p>
-    <a asp-action="Create">Create Employee</a>
+    <a asp-action="Create" class="btn btn-primary">Create Employee</a>
 </p>
-<table class="table">
-    <thead>
+
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" class="btn btn-primary" value="Search" />
+    </p>
+}
+
+<form asp-action="Index">
+    <p>
+        Search: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
+        <input type="submit" value="Search" />
+    </p>
+</form>
+
+<table class="table table-bordered table-hover table-striped">
+
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
+                @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                @Html.ActionLink("Last Name", "Index", new { sortOrder = @ViewData["LastNameSortParm"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MiddleName)
+                @Html.ActionLink("First Name", "Index", new { sortOrder = @ViewData["FirstNameSortParm"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Birthday)
+                @Html.ActionLink("Middle Name", "Index", new { sortOrder = @ViewData["MiddleNameSortParm"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Speciality)
+                @Html.ActionLink("Birthday", "Index", new { sortOrder = @ViewData["BirthdaySortParm"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EmploymentDate)
+                @Html.ActionLink("Speciality", "Index", new { sortOrder = @ViewData["SpecialitySortParm"] })
+            </th>
+            <th>
+                @Html.ActionLink("Employment date", "Index", new { sortOrder = @ViewData["EmploymentDateSortParm"] })
             </th>
             <th>
                 Actions
             </th>
-            <th></th>
         </tr>
-    </thead>
-    <tbody>
+
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
+                @Html.DisplayFor(modelItem => item.Id)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.MiddleName)
@@ -58,9 +106,9 @@
                 @Html.DisplayFor(modelItem => item.EmploymentDate)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
             </td>
         </tr>
 }

@@ -2,13 +2,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Areas.Identity.Data;
 using ToDoApp.Data;
+using ToDoApp.Interfaces;
 using ToDoApp.Models;
+using ToDoApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ToDoAppAuthContextConnection") ?? throw new InvalidOperationException("Connection string 'ToDoAppAuthContextConnection' not found.");
 
 builder.Services.AddDbContext<ToDoAppAuthContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<EmployeeDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ToDoDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<LoggerDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IToDoService, ToDoService>();
 
 builder.Services.AddDefaultIdentity<ToDoAppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ToDoAppAuthContext>();
 

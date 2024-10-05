@@ -7,24 +7,24 @@ namespace ToDoApp.Models
     public class ToDo()
     {
         [Key]
-        [Column(TypeName = "int")]
+        //[Column(TypeName = "int")]
         public int Id { get; set;}
-        [Required]
+        /*[Required]
         [Column(TypeName = "varchar(50)")]
-        [DisplayName("Name")]
+        [DisplayName("Name")]*/
         public required string Name { get; set;}
-        [Required]
+        /*[Required]
         [Column(TypeName = "varchar(100)")]
-        [DisplayName("Description")]
+        [DisplayName("Description")]*/
         public required string Description { get; set; }
 
-        [Column(TypeName = "boolean")]
-        [DisplayName("IsClosed")]
+        /*[Column(TypeName = "bit")]
+        [DisplayName("IsClosed")]*/
         public bool IsClosed { get; set;}
 
-        [Required]
+        /*[Required]
         [Column(TypeName = "varchar(50)")]
-        [DisplayName("EmployeeId")]
+        [DisplayName("EmployeeId")]*/
         public int EmployeeId { get; set; }
     }
 }
