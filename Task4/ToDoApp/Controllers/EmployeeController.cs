@@ -6,13 +6,11 @@ namespace ToDoApp.Controllers
 {
     public class EmployeeController : Controller
     {
-        //private readonly EmployeeDbContext _employeeDbContext;
         private readonly IEmployeeService _employeeService;
         //private readonly Logger _logger;
 
         public EmployeeController(IEmployeeService service)
         {
-            //_employeeDbContext = employeeDbContext;
             _employeeService = service;
             //_logger = logger;
         }
@@ -116,7 +114,6 @@ namespace ToDoApp.Controllers
             try
             {
                 await _employeeService.CreateAsync(employee);
-                //TempData["SuccessMessage"] = $"Employee with id {_employeeService.GetbyIdAsync(id)} created successfully.";
                 TempData["SuccessMessage"] = $"Employee created successfully.";
                 return RedirectToAction(nameof(Index));
             }
@@ -148,16 +145,14 @@ namespace ToDoApp.Controllers
         }
 
         // POST: EmployeeController/Edit/5
-        /*[HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Employee employee)
+        public async Task<IActionResult> Edit(int id, Employee employee)
         {
             try
             {
-                _employeeDbContext.Employees.Add(employee);
-                _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                _employeeDbContext.SaveChanges();
-                TempData["SuccessMessage"] = "Employee updated successfully.";
+                await _employeeService.UpdateAsync(employee);
+                TempData["SuccessMessage"] = $"Employee with id {employee.Id} updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -165,7 +160,7 @@ namespace ToDoApp.Controllers
                 TempData["ErrorMessage"] = ex.Message;
                 return View();
             }
-        }*/
+        }
 
         // GET: EmployeeController/Details/5
         public async Task<IActionResult> Details(int id)
@@ -202,7 +197,7 @@ namespace ToDoApp.Controllers
             try
             {
                 await _employeeService.DeleteAsync(id);
-                TempData["SuccessMessage"] = "Employee deleted successfully.";
+                TempData["SuccessMessage"] = $"Employee with id {id} deleted successfully.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

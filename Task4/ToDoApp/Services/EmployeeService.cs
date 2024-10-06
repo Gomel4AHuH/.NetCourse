@@ -76,5 +76,11 @@ namespace ToDoApp.Services
             _employeeContext.Employees.Add(employee);
             await _employeeContext.SaveChangesAsync();
         }
+
+        public async Task UpdateAsync(Employee employee)
+        {
+            _employeeContext.Update(employee);
+            await _employeeContext.SaveChangesAsync();
+        }
     }    
 }
