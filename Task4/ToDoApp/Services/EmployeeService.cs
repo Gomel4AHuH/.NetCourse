@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
+using PagedList;
 
 namespace ToDoApp.Services
 {
@@ -13,69 +14,47 @@ namespace ToDoApp.Services
             _employeeContext = context;
         }
 
-        public async Task<List<Employee>> GetAllAsync(string searchString, string sortOrder)
+        public async Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
-            //List<Employee> employees = [.. _employeeContext.Employees];
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+
             IQueryable<Employee> employees = from e in _employeeContext.Employees
                                        select e;
 
             if (!String.IsNullOrEmpty(searchString))
             {
                 employees = employees.Where(e => e.LastName.Contains(searchString)
-                                                || e.FirstName.Contains(searchString)
-                                                || e.MiddleName.Contains(searchString)
-                                                || e.Birthday.ToString().Contains(searchString)
-                                                || e.Speciality.Contains(searchString)
-                                                || e.EmploymentDate.ToString().Contains(searchString));
+                                              || e.FirstName.Contains(searchString)
+                                              || e.MiddleName.Contains(searchString)
+                                              || e.Birthday.ToString().Contains(searchString)
+                                              || e.Speciality.Contains(searchString)
+                                              || e.EmploymentDate.ToString().Contains(searchString));
             }
 
-            switch (sortOrder)
+            employees = sortOrder switch
             {
-                case "id":
-                    employees = employees.OrderBy(e => e.Id);
-                    break;
-                case "lastName":
-                    employees = employees.OrderBy(e => e.LastName);
-                    break;
-                case "lastName_desc":
-                    employees = employees.OrderByDescending(e => e.LastName);
-                    break;
-                case "firstName":
-                    employees = employees.OrderBy(e => e.FirstName);
-                    break;
-                case "firstName_desc":
-                    employees = employees.OrderByDescending(e => e.FirstName);
-                    break;
-                case "middleName":
-                    employees = employees.OrderBy(e => e.MiddleName);
-                    break;
-                case "middleName_desc":
-                    employees = employees.OrderByDescending(e => e.MiddleName);
-                    break;
-                case "birthday":
-                    employees = employees.OrderBy(e => e.Birthday);
-                    break;
-                case "birthday_desc":
-                    employees = employees.OrderByDescending(e => e.Birthday);
-                    break;
-                case "speciality":
-                    employees = employees.OrderBy(e => e.Speciality);
-                    break;
-                case "speciality_desc":
-                    employees = employees.OrderByDescending(e => e.Speciality);
-                    break;
-                case "employmentDate":
-                    employees = employees.OrderBy(e => e.EmploymentDate);
-                    break;
-                case "employmentDate_desc":
-                    employees = employees.OrderByDescending(e => e.EmploymentDate);
-                    break;
-                default:
-                    employees = employees.OrderBy(e => e.Id);
-                    break;
-            }
+                "id" => employees.OrderBy(e => e.Id),
+                "lastName" => employees.OrderBy(e => e.LastName),
+                "lastName_desc" => employees.OrderByDescending(e => e.LastName),
+                "firstName" => employees.OrderBy(e => e.FirstName),
+                "firstName_desc" => employees.OrderByDescending(e => e.FirstName),
+                "middleName" => employees.OrderBy(e => e.MiddleName),
+                "middleName_desc" => employees.OrderByDescending(e => e.MiddleName),
+                "birthday" => employees.OrderBy(e => e.Birthday),
+                "birthday_desc" => employees.OrderByDescending(e => e.Birthday),
+                "speciality" => employees.OrderBy(e => e.Speciality),
+                "speciality_desc" => employees.OrderByDescending(e => e.Speciality),
+                "employmentDate" => employees.OrderBy(e => e.EmploymentDate),
+                "employmentDate_desc" => employees.OrderByDescending(e => e.EmploymentDate),
+                _ => employees.OrderBy(e => e.Id),
+            };
 
-            return [.. employees];
+            int pageSize = 5;
+            return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
+            //return [.. employees];
         }
 
         public async Task<Employee> GetByIdAsync(int id)

@@ -5,7 +5,7 @@ namespace ToDoApp.Interfaces
 {
     public interface IEmployeeService
     {
-        Task<List<Employee>> GetAllAsync(string searchString, string sortOrder);
+        Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber);
         Task<Employee> GetByIdAsync(int id);
         //Task<Employee> GetDetailsAsync(int? id, string searchString, string sortOrder, int? pageNumber);
         Task CreateAsync(Employee employee);

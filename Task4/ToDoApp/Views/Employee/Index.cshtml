@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ToDoApp.Models.Employee>
+﻿@using ToDoApp.Services
+@model PaginatedList<ToDoApp.Models.Employee>
 
 @{
     ViewData["Title"] = "Index";
@@ -43,11 +44,12 @@ else if (TempData["ErrorMessage"] != null)
     <p>
         Find by name: @Html.TextBox("SearchString")
         <input type="submit" class="btn btn-primary" value="Search" />
+        <a asp-action="Index" class="btn btn-primary">Cancel search</a>
     </p>
 }
 
 <table class="table table-bordered table-hover table-striped">
-
+    <tbody>
         <tr>
             <th>
                 @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
@@ -107,3 +109,23 @@ else if (TempData["ErrorMessage"] != null)
 }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>

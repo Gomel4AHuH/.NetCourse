@@ -6,20 +6,56 @@
 
 <h1>ToDos</h1>
 
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">
+        <strong>Information ! </strong>   @TempData["InfoMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <strong>Success ! </strong>   @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error ! </strong>   @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
 <p>
-    <a asp-action="Create">Create ToDo</a>
+    <a asp-action="Create" class="btn btn-primary">Create ToDo</a>
 </p>
-<table class="table">
-    <thead>
+
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" class="btn btn-primary" value="Search" />
+    </p>
+}
+
+<table class="table table-bordered table-hover table-striped">
+    <tbody>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.ActionLink("Name", "Index", new { sortOrder = @ViewData["NameSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.ActionLink("Description", "Index", new { sortOrder = @ViewData["DescriptionSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
                 Done
@@ -32,8 +68,7 @@
             </th>
             <th></th>
         </tr>
-    </thead>
-    <tbody>
+
 @foreach (var item in Model) {
         <tr>
             <td>
@@ -52,7 +87,9 @@
                 @Html.DisplayFor(modelItem => item.EmployeeId)
             </td>
             <td>
+                <a asp-action="Close" asp-route-id="@item.Id" class="btn btn-primary">Close</a>
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Duplicate" asp-route-id="@item.Id" class="btn btn-primary">Duplicate</a>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
             </td>

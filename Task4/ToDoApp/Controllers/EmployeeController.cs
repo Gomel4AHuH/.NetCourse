@@ -72,7 +72,7 @@ namespace ToDoApp.Controllers
         #region Actions
         
         // GET: EmployeeController
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace ToDoApp.Controllers
 
                 ViewData["CurrentFilter"] = searchString;
 
-                List<Employee> employeeList = await _employeeService.GetAllAsync(searchString, sortOrder);
+                List<Employee> employeeList = await _employeeService.GetAllAsync(sortOrder, searchString, pageNumber);
                 if (employeeList.Count == 0)
                 {
                     TempData["InfoMessage"] = "No employees available for now.";
