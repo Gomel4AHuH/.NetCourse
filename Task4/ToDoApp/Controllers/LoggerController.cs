@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToDoApp.Models;
+using ToDoApp.Data;
 
 namespace ToDoApp.Controllers
 {
     public class LoggerController : Controller
     {
-        private readonly LoggerDbContext _loggerDbContext;
+        private readonly ToDoAppDbContext _context;
 
-        public LoggerController(LoggerDbContext loggerDbContext)
+        public LoggerController(ToDoAppDbContext loggerDbContext)
         {
-            _loggerDbContext = loggerDbContext;
+            _context = loggerDbContext;
         }
 
         // GET: LoggerController

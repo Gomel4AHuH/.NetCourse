@@ -21,7 +21,7 @@ namespace ToDoApp.Models
 
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Middle name")]
-        public required string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
         [Required]
         [Column(TypeName = "date")]
         [DisplayName("Birthday")]

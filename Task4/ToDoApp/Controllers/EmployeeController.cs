@@ -7,68 +7,79 @@ namespace ToDoApp.Controllers
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService _employeeService;
-        //private readonly Logger _logger;
+        //private readonly ILoggerService _logger;
+        private string Message;
 
         public EmployeeController(IEmployeeService service)
         {
             _employeeService = service;
             //_logger = logger;
         }
-        
-        /*
+
         #region API
         [HttpGet]
-        [Route("GetAllEmployees")]
-        public List<Employee> GetAll()
+        [Route("GetAll")]        
+        public async Task<ActionResult<IEnumerable<Employee>>> GetAll()
         {
-            return [.. _employeeDbContext.Employees];
-        }
-        
-        [HttpPost]
-        [Route("AddEmployee")]
-        public string AddEmployee(Employee employee)
-        {
-            _employeeDbContext.Employees.Add(employee);
-            _employeeDbContext.SaveChanges();
-            return "Employee added.";
+            return await _employeeService.GetAllAsync();
         }
 
         [HttpGet]
-        [Route("GetEmployee")]
-        public Employee GetEmployee(int id)
+        [Route("GetById")]
+        public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            return _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                return NotFound("Employee not found.");
+            }
+
+            return employee;
         }
 
         [HttpPost]
-        [Route("UpdateEmployee")]
-        public string UpdateEmployee(Employee employee)
+        [Route("Add")]
+        public async Task<ActionResult<Employee>> AddEmployee(Employee employee)
         {
-            _employeeDbContext.Entry(employee).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _employeeDbContext.SaveChanges();
-            return "Employee updated.";
+            await _employeeService.CreateAsync(employee);
+            return NoContent();
+        }
+        
+        [HttpPost]
+        [Route("Update")]
+        public async Task<IActionResult> UpdateEmployee(int id)
+        {
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                return NotFound("Employee not found.");
+            }
+
+            //await _employeeService.UpdateAsync(employee);
+
+            return NoContent();
         }
 
         [HttpDelete]
-        [Route("DeleteEmployee")]
-        public string DeleteEmployee(int id)
+        [Route("Delete")]
+        public async Task<IActionResult> DeleteEmployee(int id)
         {
-            Employee employee = _employeeDbContext.Employees.Where(emp => emp.Id == id).FirstOrDefault();
-            if (employee != null)
+            Employee employee = await _employeeService.GetByIdAsync(id);
+            if (employee == null)
             {
-                _employeeDbContext.Employees.Remove(employee);
-                _employeeDbContext.SaveChanges();
-                return "Employee deleted.";
+                return NotFound();
             }
-            else
-            {
-                return "Employee not found.";
-            }
+
+            await _employeeService.DeleteAsync(id);
+
+            return NoContent();
         }
         #endregion
-        */
+
         #region Actions
-        
+
         // GET: EmployeeController
         public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
@@ -89,8 +100,9 @@ namespace ToDoApp.Controllers
                 if (employeeList.Count == 0)
                 {
                     TempData["InfoMessage"] = "No employees available for now.";
-                    //_logger.Add("No employees available for now.");                   
+                    //_logger.Add("No employees available for now.");
                 }
+                //await _logger.CreateAsync("No employees available for now.");
                 return View(employeeList);
             }
             catch (Exception ex)
@@ -152,7 +164,9 @@ namespace ToDoApp.Controllers
             try
             {
                 await _employeeService.UpdateAsync(employee);
-                TempData["SuccessMessage"] = $"Employee with id {employee.Id} updated successfully.";
+                Message = $"Employee with id {employee.Id} updated successfully.";
+                TempData["SuccessMessage"] = Message;
+                //_logger.Add(Message);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
