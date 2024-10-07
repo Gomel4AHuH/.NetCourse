@@ -38,6 +38,6 @@ namespace ToDoApp.Models
         [NotMapped]
         [DisplayName("Avatar image")]
         public IFormFile AvatarImage { get; set; }
-        //public List<ToDo> ToDos { get; set; }
+        public ICollection<ToDo> ToDos { get; set; } = new List<ToDo>();
     }
 }

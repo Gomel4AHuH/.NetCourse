@@ -213,6 +213,20 @@ namespace ToDoApp.Controllers
                 return View();
             }
         }
+
+        // GET: ToDoController/Close
+        public async Task<IActionResult> Close(int id)
+        {
+            await _toDoService.CloseAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: ToDoController/Duplicate
+        public async Task<IActionResult> Duplicate(int id)
+        {
+            await _toDoService.DuplicateAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
         #endregion
     }
 }
