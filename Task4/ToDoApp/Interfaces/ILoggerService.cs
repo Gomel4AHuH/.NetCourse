@@ -5,7 +5,8 @@ namespace ToDoApp.Interfaces
 
 {
     public interface ILoggerService
-    {        
-        Task CreateAsync(Logger logger);
+    {
+        Task<List<Logger>> GetAllAsync(string sortOrder, string searchString, int? pageNumber);
+        Task CreateAsync(string message);
     }
 }

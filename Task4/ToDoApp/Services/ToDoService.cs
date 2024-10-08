@@ -7,7 +7,6 @@ namespace ToDoApp.Services
 {
     public class ToDoService : IToDoService
     {
-        //private readonly ToDoDbContext _toDoContext;
         private readonly ToDoAppDbContext _context;
 
         public ToDoService(ToDoAppDbContext context)

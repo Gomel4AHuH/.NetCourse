@@ -30,6 +30,7 @@ namespace ToDoApp.Models
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Speciality")]
         public required string Speciality { get; set; }
+
         [Required]
         [Column(TypeName = "date")]
         [DisplayName("Employment date")]

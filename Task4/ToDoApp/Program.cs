@@ -9,8 +9,10 @@ var connectionString = builder.Configuration.GetConnectionString("ToDoAppAuthCon
 
 builder.Services.AddDbContext<ToDoAppAuthContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ToDoAppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<ToDoAppUser>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IToDoService, ToDoService>();
+builder.Services.AddScoped<ILoggerService, LoggerService>();
 
 builder.Services.AddDefaultIdentity<ToDoAppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ToDoAppAuthContext>();
 

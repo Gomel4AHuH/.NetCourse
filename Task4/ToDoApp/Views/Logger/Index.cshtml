@@ -1,39 +1,95 @@
-﻿@model IEnumerable<ToDoApp.Models.Logger>
+﻿@using ToDoApp.Data
+@model PaginatedList<ToDoApp.Models.Logger>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Logs</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">
+        <strong>Information ! </strong>   @TempData["InfoMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <strong>Success ! </strong>   @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+else if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error ! </strong>   @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" class="btn btn-primary" value="Search" />
+        <a asp-action="Index" class="btn btn-primary">Cancel search</a>
+    </p>
+}
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>
+
+<hr/>
+
+<table class="table table-bordered table-hover table-striped">
+    <tbody>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.ActionLink("Message", "Index", new { sortOrder = @ViewData["MessageSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Message)
+                @Html.ActionLink("Action DateTime", "Index", new { sortOrder = @ViewData["DateSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ActionDateTime)
+                @Html.ActionLink("Author", "Index", new { sortOrder = @ViewData["AuthorSortParm"], searchString = @ViewData["CurrentFilter"] })
             </th>
         </tr>
-    </thead>
-    <tbody>
+
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Message)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ActionDateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Author)
             </td>
         </tr>
 }

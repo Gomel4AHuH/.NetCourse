@@ -7,7 +7,6 @@ namespace ToDoApp.Services
 {
     public class EmployeeService : IEmployeeService
     {
-        //private readonly EmployeeDbContext _employeeContext;
         private readonly ToDoAppDbContext _context;
 
         public EmployeeService(ToDoAppDbContext context)
