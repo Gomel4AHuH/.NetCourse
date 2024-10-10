@@ -41,6 +41,8 @@ namespace ToDoApp.Services
                 "name_desc" => toDos.OrderByDescending(e => e.Name),
                 "description" => toDos.OrderBy(e => e.Description),
                 "description_desc" => toDos.OrderByDescending(e => e.Description),
+                "employeeId" => toDos.OrderBy(e => e.EmployeeId),
+                "employeeId_desc" => toDos.OrderByDescending(e => e.EmployeeId),
                 _ => toDos.OrderBy(e => e.Id),
             };
 

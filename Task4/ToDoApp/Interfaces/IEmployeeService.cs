@@ -8,8 +8,9 @@ namespace ToDoApp.Interfaces
         Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber);
         Task<List<Employee>> GetAllAsync();
         Task<Employee> GetByIdAsync(int id);
-        Task CreateAsync(Employee employee);
-        Task UpdateAsync(Employee employee);
+        Task CreateAsync(EmployeeVM employeeVM);
+        Task UpdateAsync(EmployeeVM employeeVM);
         Task DeleteAsync(int id);
+        Task CreateToDoAsync(ToDo toDo, int id);
     }
 }

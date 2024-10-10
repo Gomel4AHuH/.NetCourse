@@ -1,12 +1,8 @@
-﻿@model ToDoApp.Models.Employee
+﻿@model ToDoApp.Models.EmployeeVM
 
 @{
     ViewData["Title"] = "Create";
 }
-
-<h1>Create</h1>
-
-<h4>Employee</h4>
 
 @if (TempData["ErrorMessage"] != null)
 {
@@ -18,50 +14,67 @@
     </div>
 }
 
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+    <div class="col-md-8 mx-auto rounded border p-3">
+        <h2 class="text-center mb-5">New employee</h2>
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Last name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="LastName">
+                    <span asp-validation-for="LastName" class="text-danger"/>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>            
-            <div class="form-group">
-                <label asp-for="MiddleName" class="control-label"></label>
-                <input asp-for="MiddleName" class="form-control" />
-                <span asp-validation-for="MiddleName" class="text-danger"></span>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">First name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="FirstName">
+                    <span asp-validation-for="FirstName" class="text-danger" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Birthday" class="control-label"></label>
-                <input type="date" asp-for="Birthday" class="form-control" />
-                <span asp-validation-for="Birthday" class="text-danger"></span>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Middle name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="MiddleName">
+                    <span asp-validation-for="MiddleName" class="text-danger" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Speciality" class="control-label"></label>
-                <input asp-for="Speciality" class="form-control" />
-                <span asp-validation-for="Speciality" class="text-danger"></span>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Birthday</label>
+                <div class="col-sm-8">
+                    <input type="date" class="form-control" asp-for="Birthday">
+                    <span asp-validation-for="Birthday" class="text-danger" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="EmploymentDate" class="control-label"></label>
-                <input type="date" asp-for="EmploymentDate" class="form-control" />
-                <span asp-validation-for="EmploymentDate" class="text-danger"></span>                
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Speciality</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="Speciality">
+                    <span asp-validation-for="Speciality" class="text-danger" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AvatarImage" class="control-label"></label>
-                <input asp-for="AvatarImage" class="form-control" />
-                <span asp-validation-for="AvatarImage" class="text-danger"></span>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employment date</label>
+                <div class="col-sm-8">
+                    <input type="date" class="form-control" asp-for="EmploymentDate">
+                    <span asp-validation-for="EmploymentDate" class="text-danger" />
+                </div>
             </div>
-            <br/>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employee photo</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="EmployeePhoto">
+                    <span asp-validation-for="EmployeePhoto" class="text-danger" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <input type="submit" value="Create" class="btn btn-primary"/>
+                </div>
+                <div class="col-sm-4 d-grid">
+                    <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+                </div>                
             </div>
         </form>
     </div>

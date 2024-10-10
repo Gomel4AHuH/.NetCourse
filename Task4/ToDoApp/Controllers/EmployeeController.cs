@@ -1,21 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
+using ToDoApp.Services;
 
 namespace ToDoApp.Controllers
 {
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService _employeeService;
+        private readonly IToDoService _toDoService;
         private readonly ILoggerService _logger;
+
         //private readonly UserManager<ToDoAppUser> _userManager;
         private string Message = "";
 
         //public EmployeeController(IEmployeeService service, ILoggerService logger, UserManager<ToDoAppUser> userManager)
-        public EmployeeController(IEmployeeService service, ILoggerService logger)
+        public EmployeeController(IEmployeeService service, ILoggerService logger, IToDoService toDoService)
         {
             _employeeService = service;
             _logger = logger;
+            _toDoService = toDoService;
         }
 
         /*public async Task<string> GetUserMail()
@@ -48,9 +52,9 @@ namespace ToDoApp.Controllers
 
         [HttpPost]
         [Route("Add")]
-        public async Task<ActionResult<Employee>> AddEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> AddEmployee(EmployeeVM employeeVM)
         {
-            await _employeeService.CreateAsync(employee);
+            await _employeeService.CreateAsync(employeeVM);
             return NoContent();
         }
         
@@ -133,12 +137,13 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Employee employee)
-        {
+        public async Task<IActionResult> Create(EmployeeVM employeeVM)
+        {            
             try
             {
-                await _employeeService.CreateAsync(employee);
-                Message = $"Employee with id {employee.Id} created successfully.";
+                await _employeeService.CreateAsync(employeeVM);
+                //Message = $"Employee with id {employeeVM.Id} created successfully.";
+                Message = $"Employee created successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));
@@ -177,12 +182,13 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Employee employee)
+        public async Task<IActionResult> Edit(int id, EmployeeVM employeeVM)
         {
             try
             {
-                await _employeeService.UpdateAsync(employee);
-                Message = $"Employee with id {employee.Id} updated successfully.";
+                await _employeeService.UpdateAsync(employeeVM);
+                //Message = $"Employee with id {employee.Id} updated successfully.";
+                Message = $"Employee updated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));
@@ -236,6 +242,33 @@ namespace ToDoApp.Controllers
                 Message = $"Employee with id {id} deleted successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                await _logger.CreateAsync(ex.Message);
+                return View();
+            }
+        }
+
+        // GET: ToDoController/Create
+        public ActionResult CreateToDo()
+        {
+            return View();
+        }
+
+        // POST: ToDoController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateToDo(ToDo toDo, int id)
+        {
+            try
+            {
+                await _employeeService.CreateToDoAsync(toDo, id);
+                Message = "ToDo created successfully.";
+                TempData["SuccessMessage"] = Message;
+                //await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

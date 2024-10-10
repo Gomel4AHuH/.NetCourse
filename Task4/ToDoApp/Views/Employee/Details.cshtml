@@ -4,8 +4,6 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Employee details</h1>
-
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger">
@@ -16,49 +14,59 @@
     </div>
 }
 
-<hr />
+<div class="row">
+    <div class="col-md-8 mx-auto rounded border p-3">
+        <h2 class="text-center mb-5">Employee details</h2>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Last name</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.LastName)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">First name</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.FirstName)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Middle name</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.MiddleName)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Birthday</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.Birthday)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Speciality</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.Speciality)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employment date</label>
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.EmploymentDate)
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employment date</label>
+                <div class="col-sm-8">
+                    <img src="/photos/@Model.EmployeePhotoPath" style="width:50px;height:50px;border-radius:50%" />
+                </div>
+            </div>
 
-<div>
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MiddleName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MiddleName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Birthday)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Birthday)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Speciality)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Speciality)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EmploymentDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EmploymentDate)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+            <div class="row">
+               <div class="offset-sm-4 col-sm-4 d-grid">
+                   <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
+               </div>
+               <div class="col-sm-4 d-grid">
+                   <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+               </div>
+            </div>
+    </div>
 </div>

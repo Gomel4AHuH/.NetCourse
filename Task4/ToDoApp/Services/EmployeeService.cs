@@ -8,10 +8,12 @@ namespace ToDoApp.Services
     public class EmployeeService : IEmployeeService
     {
         private readonly ToDoAppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public EmployeeService(ToDoAppDbContext context)
+        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         public async Task<List<Employee>> GetAllAsync()
@@ -74,16 +76,48 @@ namespace ToDoApp.Services
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task CreateAsync(Employee employee)
+        public async Task CreateAsync(EmployeeVM employeeVM)
         {
-            _context.Employees.Add(employee);
+            _context.Employees.Add(CopyEmployeeData(employeeVM));
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Employee employee)
+        public async Task UpdateAsync(EmployeeVM employeeVM)
         {
-            _context.Update(employee);
+            _context.Update(CopyEmployeeData(employeeVM));
             await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateToDoAsync(ToDo toDo, int id)
+        {
+            toDo.EmployeeId = id;
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
+        }
+
+        private Employee CopyEmployeeData(EmployeeVM employeeVM)
+        {
+            string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+            fileName += Path.GetExtension(employeeVM.EmployeePhoto!.FileName);
+
+            string fullPath = _environment.WebRootPath + "/photos/" + fileName;
+            using (var stream = System.IO.File.Create(fullPath))
+            {
+                employeeVM.EmployeePhoto.CopyTo(stream);
+            }
+
+            Employee employee = new()
+            {
+                LastName = employeeVM.LastName,
+                FirstName = employeeVM.FirstName,
+                MiddleName = employeeVM.MiddleName,
+                Birthday = employeeVM.Birthday,
+                Speciality = employeeVM.Speciality,
+                EmploymentDate = employeeVM.EmploymentDate,
+                EmployeePhotoPath = fileName
+            };
+
+            return employee;
         }
     }    
 }

@@ -26,27 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Languages\Russian.Designer.cs">
-      <DependentUpon>Russian.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Languages\English.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>English.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Languages\Russian.resx">
-      <LastGenOutput>Russian.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Languages\English.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>English.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <Folder Include="wwwroot\photos\" />
   </ItemGroup>
 
 </Project>

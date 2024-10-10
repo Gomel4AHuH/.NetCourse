@@ -38,13 +38,13 @@ namespace ToDoApp.Controllers
             return toDo;
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("Add")]
         public async Task<ActionResult<ToDo>> AddToDo(ToDo toDo)
         {
             await _toDoService.CreateAsync(toDo);
             return NoContent();
-        }
+        }*/
 
         [HttpPost]
         [Route("Update")]
@@ -88,6 +88,7 @@ namespace ToDoApp.Controllers
                 ViewData["IdSortParm"] = sortOrder == "id" ? "id" : "";
                 ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
                 ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
+                ViewData["EmployeeIdSortParm"] = sortOrder == "employeeId" ? "employeeId_desc" : "employeeId";
 
                 ViewData["CurrentFilter"] = searchString;
 
@@ -116,7 +117,7 @@ namespace ToDoApp.Controllers
         }
 
         // POST: ToDoController/Create
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ToDo toDo)
         {
@@ -134,7 +135,7 @@ namespace ToDoApp.Controllers
                 await _logger.CreateAsync(ex.Message);
                 return View();
             }
-        }
+        }*/
 
         // GET: ToDoController/Edit/5
         public async Task<IActionResult> Edit(int id)

@@ -39,97 +39,105 @@ else if (TempData["ErrorMessage"] != null)
     <a asp-action="Create" class="btn btn-primary">Create Employee</a>
 </p>
 
-@using (Html.BeginForm())
+@if (Model.Count != 0)
 {
-    <p>
-        Find by name: @Html.TextBox("SearchString")
-        <input type="submit" class="btn btn-primary" value="Search" />
-        <a asp-action="Index" class="btn btn-primary">Cancel search</a>
-    </p>
-}
-
-@{
+    @using (Html.BeginForm())
+    {
+        <p>
+            Find by name: @Html.TextBox("SearchString")
+            <input type="submit" class="btn btn-primary" value="Search" />
+            <a asp-action="Index" class="btn btn-primary">Cancel search</a>
+        </p>
+    }
+    
     var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";    
+
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="@(Model.PageIndex - 1)"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="@(Model.PageIndex + 1)"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+
+    <hr/>
+
+    <table class="table table-bordered table-hover table-striped">
+        <tbody>
+            <tr>
+                <th>
+                    @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    Photo
+                </th>
+                <th>
+                    @Html.ActionLink("Last Name", "Index", new { sortOrder = @ViewData["LastNameSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("First Name", "Index", new { sortOrder = @ViewData["FirstNameSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Middle Name", "Index", new { sortOrder = @ViewData["MiddleNameSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Birthday", "Index", new { sortOrder = @ViewData["BirthdaySortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Speciality", "Index", new { sortOrder = @ViewData["SpecialitySortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Employment date", "Index", new { sortOrder = @ViewData["EmploymentDateSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    Actions
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        <img src="/photos/@item.EmployeePhotoPath" style="width:50px;height:50px;border-radius:50%" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MiddleName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Birthday)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Speciality)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EmploymentDate)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                        <a asp-action="CreateToDo" asp-route-id="@item.Id" class="btn btn-primary">Create ToDo</a>
+                        <a asp-action="ViewToDos" asp-route-id="@item.Id" class="btn btn-success">View ToDos</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex - 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-primary @prevDisabled">
-    Previous
-</a>
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex + 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-primary @nextDisabled">
-    Next
-</a>
-
-<hr/>
-
-<table class="table table-bordered table-hover table-striped">
-    <tbody>
-        <tr>
-            <th>
-                @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Last Name", "Index", new { sortOrder = @ViewData["LastNameSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("First Name", "Index", new { sortOrder = @ViewData["FirstNameSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Middle Name", "Index", new { sortOrder = @ViewData["MiddleNameSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Birthday", "Index", new { sortOrder = @ViewData["BirthdaySortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Speciality", "Index", new { sortOrder = @ViewData["SpecialitySortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Employment date", "Index", new { sortOrder = @ViewData["EmploymentDateSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                Actions
-            </th>
-        </tr>
-
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MiddleName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Birthday)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Speciality)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EmploymentDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
-                <a asp-action="CreateToDo" asp-route-id="@item.Id" class="btn btn-primary">Create ToDo</a>
-                <a asp-action="ViewToDos" asp-route-id="@item.Id" class="btn btn-success">View ToDos</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
