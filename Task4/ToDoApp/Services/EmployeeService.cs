@@ -2,6 +2,8 @@
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 using ToDoApp.Data;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace ToDoApp.Services
 {
@@ -58,7 +60,7 @@ namespace ToDoApp.Services
                 _ => employees.OrderBy(e => e.Id),
             };
 
-            int pageSize = 5;
+            int pageSize = 10;
             return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
 
@@ -72,39 +74,69 @@ namespace ToDoApp.Services
             Employee employee = await _context.Employees.FindAsync(id);
             if (employee != null)
             {
+                DeletePhoto(employee.EmployeePhotoPath);
                 _context.Employees.Remove(employee);
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task CreateAsync(EmployeeVM employeeVM)
+
+        private void DeletePhoto(string fileName)
         {
-            _context.Employees.Add(CopyEmployeeData(employeeVM));
-            await _context.SaveChangesAsync();
+            string oldFullPath = _environment.WebRootPath + "/photos/" + fileName;
+            System.IO.File.Delete(oldFullPath);
         }
 
-        public async Task UpdateAsync(EmployeeVM employeeVM)
-        {
-            _context.Update(CopyEmployeeData(employeeVM));
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task CreateToDoAsync(ToDo toDo, int id)
-        {
-            toDo.EmployeeId = id;
-            _context.ToDos.Add(toDo);
-            await _context.SaveChangesAsync();
-        }
-
-        private Employee CopyEmployeeData(EmployeeVM employeeVM)
+        private string CreatePhoto(EmployeeVM employeeVM)
         {
             string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            fileName += Path.GetExtension(employeeVM.EmployeePhoto!.FileName);
+            fileName += Path.GetExtension(employeeVM.EmployeePhoto.FileName);
 
             string fullPath = _environment.WebRootPath + "/photos/" + fileName;
             using (var stream = System.IO.File.Create(fullPath))
             {
                 employeeVM.EmployeePhoto.CopyTo(stream);
             }
+
+            return fileName;
+        }
+
+        public async Task CreateAsync(EmployeeVM employeeVM)
+        {
+            _context.Employees.Add(EmployeeVMToEmployee(employeeVM));
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(EmployeeVM employeeVM, Employee employee)
+        {
+            string fileName = employee.EmployeePhotoPath;
+            if (employeeVM.EmployeePhoto != null)
+            {
+                DeletePhoto(fileName);
+                fileName = CreatePhoto(employeeVM);
+            }
+
+            employee.LastName = employeeVM.LastName;
+            employee.FirstName = employeeVM.FirstName;
+            employee.MiddleName = employeeVM.MiddleName;
+            employee.Birthday = employeeVM.Birthday;
+            employee.Speciality = employeeVM.Speciality;
+            employee.EmploymentDate = employeeVM.EmploymentDate;
+            employee.EmployeePhotoPath = fileName;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateToDoAsync(ToDo toDo, int id)
+        {
+            toDo.EmployeeId = id;
+            toDo.Id = 0;
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
+        }
+
+        private Employee EmployeeVMToEmployee(EmployeeVM employeeVM)
+        {
+            string fileName = CreatePhoto(employeeVM);            
 
             Employee employee = new()
             {
@@ -118,6 +150,22 @@ namespace ToDoApp.Services
             };
 
             return employee;
+        }
+
+        public EmployeeVM EmployeeToEmployeeVM(Employee employee)
+        {
+
+            EmployeeVM employeeVM = new()
+            {
+                LastName = employee.LastName,
+                FirstName = employee.FirstName,
+                MiddleName = employee.MiddleName,
+                Birthday = employee.Birthday,
+                Speciality = employee.Speciality,
+                EmploymentDate = employee.EmploymentDate
+            };
+
+            return employeeVM;
         }
     }    
 }

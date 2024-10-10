@@ -117,7 +117,7 @@ namespace ToDoApp.Controllers
         }
 
         // POST: ToDoController/Create
-        /*[HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ToDo toDo)
         {
@@ -135,7 +135,7 @@ namespace ToDoApp.Controllers
                 await _logger.CreateAsync(ex.Message);
                 return View();
             }
-        }*/
+        }
 
         // GET: ToDoController/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -239,6 +239,25 @@ namespace ToDoApp.Controllers
             {
                 await _toDoService.CloseAsync(id);
                 Message = $"ToDo with id {id} closed successfully.";
+                TempData["SuccessMessage"] = Message;
+                await _logger.CreateAsync(Message);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                await _logger.CreateAsync(ex.Message);
+                return View();
+            }
+        }
+
+        // GET: ToDoController/Close
+        public async Task<IActionResult> Open(int id)
+        {
+            try
+            {
+                await _toDoService.OpenAsync(id);
+                Message = $"ToDo with id {id} opened successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));

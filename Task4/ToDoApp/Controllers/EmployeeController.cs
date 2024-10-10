@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
-using ToDoApp.Services;
 
 namespace ToDoApp.Controllers
 {
@@ -142,7 +141,6 @@ namespace ToDoApp.Controllers
             try
             {
                 await _employeeService.CreateAsync(employeeVM);
-                //Message = $"Employee with id {employeeVM.Id} created successfully.";
                 Message = $"Employee created successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
@@ -169,7 +167,12 @@ namespace ToDoApp.Controllers
                     await _logger.CreateAsync(Message);
                     return RedirectToAction("Index");
                 }
-                return View(employee);
+
+                EmployeeVM employeeVM = _employeeService.EmployeeToEmployeeVM(employee);
+
+                ViewData["EmployeePhotoPath"] = employee.EmployeePhotoPath;
+
+                return View(employeeVM);
             }
             catch (Exception ex)
             {
@@ -186,9 +189,9 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _employeeService.UpdateAsync(employeeVM);
-                //Message = $"Employee with id {employee.Id} updated successfully.";
-                Message = $"Employee updated successfully.";
+                Employee employee = await _employeeService.GetByIdAsync(id);
+                await _employeeService.UpdateAsync(employeeVM, employee);
+                Message = $"Employee with id {id} updated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));
@@ -252,13 +255,13 @@ namespace ToDoApp.Controllers
             }
         }
 
-        // GET: ToDoController/Create
+        // GET: EmployeeController/Create
         public ActionResult CreateToDo()
         {
             return View();
         }
 
-        // POST: ToDoController/Create
+        // POST: EmployeeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateToDo(ToDo toDo, int id)
@@ -266,9 +269,9 @@ namespace ToDoApp.Controllers
             try
             {
                 await _employeeService.CreateToDoAsync(toDo, id);
-                Message = "ToDo created successfully.";
+                Message = $"ToDo for employee with id {id} created successfully.";
                 TempData["SuccessMessage"] = Message;
-                //await _logger.CreateAsync(Message);
+                await _logger.CreateAsync(Message);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

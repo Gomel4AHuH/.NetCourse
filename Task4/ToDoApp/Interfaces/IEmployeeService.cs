@@ -9,8 +9,9 @@ namespace ToDoApp.Interfaces
         Task<List<Employee>> GetAllAsync();
         Task<Employee> GetByIdAsync(int id);
         Task CreateAsync(EmployeeVM employeeVM);
-        Task UpdateAsync(EmployeeVM employeeVM);
+        Task UpdateAsync(EmployeeVM employeeVM, Employee employee);
         Task DeleteAsync(int id);
         Task CreateToDoAsync(ToDo toDo, int id);
+        EmployeeVM EmployeeToEmployeeVM(Employee employee);
     }
 }

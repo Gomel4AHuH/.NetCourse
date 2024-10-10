@@ -35,13 +35,18 @@ else if (TempData["ErrorMessage"] != null)
     </div>
 }
 
+<p>
+    <a asp-action="Index" class="btn btn-primary text-center">Export to json</a>
+</p>
+
 @using (Html.BeginForm())
 {
     <p>
         Find by name: @Html.TextBox("SearchString")
         <input type="submit" class="btn btn-primary" value="Search" />
         <a asp-action="Index" class="btn btn-primary">Cancel search</a>
-    </p>
+
+    </p>    
 }
 
 @{
@@ -50,17 +55,18 @@ else if (TempData["ErrorMessage"] != null)
 }
 
 <a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex - 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-primary @prevDisabled">
+    asp-route-sortOrder="@ViewData["CurrentSort"]"
+    asp-route-pageNumber="@(Model.PageIndex - 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-primary @prevDisabled">
     Previous
 </a>
+
 <a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex + 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-primary @nextDisabled">
+    asp-route-sortOrder="@ViewData["CurrentSort"]"
+    asp-route-pageNumber="@(Model.PageIndex + 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-primary @nextDisabled">
     Next
 </a>
 

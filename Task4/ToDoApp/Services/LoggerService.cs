@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using ToDoApp.Areas.Identity.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;

@@ -86,6 +86,16 @@ namespace ToDoApp.Services
             }
         }
 
+        public async Task OpenAsync(int id)
+        {
+            ToDo toDo = await _context.ToDos.FindAsync(id);
+            if (toDo != null)
+            {
+                toDo.IsClosed = false;
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task DuplicateAsync(int id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);

@@ -11,6 +11,7 @@ namespace ToDoApp.Interfaces
         Task UpdateAsync(ToDo toDo);
         Task DeleteAsync(int id);
         Task CloseAsync(int id);
+        Task OpenAsync(int id);
         Task DuplicateAsync(int id);
     }
 }
