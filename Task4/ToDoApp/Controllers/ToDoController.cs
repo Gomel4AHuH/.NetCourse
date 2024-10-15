@@ -20,10 +20,10 @@ namespace ToDoApp.Controllers
             _userManager = userManager;
         }
 
-        private async Task<string> GetUserMail()
+        private string GetUserMail()
         {
-            ToDoAppUser user = await _userManager.GetUserAsync(User);
-            return user.Email;
+            string name = _userManager.GetUserName(User);
+            return name;
         }
 
         #region API
@@ -90,7 +90,7 @@ namespace ToDoApp.Controllers
 
         #region Actions
         // GET: ToDoController
-        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber, int id)
         {
             try
             {
@@ -99,16 +99,22 @@ namespace ToDoApp.Controllers
                 ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
                 ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
                 ViewData["EmployeeIdSortParm"] = sortOrder == "employeeId" ? "employeeId_desc" : "employeeId";
+                ViewData["StatusSortParm"] = sortOrder == "status" ? "status_desc" : "status";
 
                 ViewData["CurrentFilter"] = searchString;
 
-                List<ToDo> toDoList = await _toDoService.GetAllAsync(sortOrder, searchString, pageNumber);
+                ViewData["Id"] = id;
+
+                List<ToDo> toDoList;
+
+                toDoList = await _toDoService.GetAllAsync(sortOrder, searchString, pageNumber, id);
 
                 if (toDoList.Count == 0)
                 {
                     Message = "No todos available for now.";
                     TempData["InfoMessage"] = Message;
                 }
+
 
                 return View(toDoList);
             }
@@ -121,9 +127,10 @@ namespace ToDoApp.Controllers
         }
         
         // GET: ToDoController/Create
-        public ActionResult Create()
+        public ActionResult Create(int employeeId)
         {
-            return View();
+            ViewData["EmployeeId"] = employeeId;
+            return View(new Models.ToDo { Name = "", Description = "", EmployeeId = employeeId });
         }
 
         // POST: ToDoController/Create
@@ -134,10 +141,10 @@ namespace ToDoApp.Controllers
             try
             {
                 await _toDoService.CreateAsync(toDo);
-                Message = "ToDo created successfully.";
+                Message = $"ToDo with id {toDo.Id} created successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ToDo", new { id = toDo.EmployeeId });
             }
             catch (Exception ex)
             {
@@ -181,7 +188,7 @@ namespace ToDoApp.Controllers
                 Message = $"ToDo with id {toDo.Id} updated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ToDo", new { id = toDo.EmployeeId });
             }
             catch (Exception ex)
             {
@@ -228,11 +235,12 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _toDoService.DeleteAsync(id);
+                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
+                await _toDoService.DeleteAsync(id);                
                 Message = $"ToDo with id {id} deleted successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {
@@ -243,15 +251,17 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoController/Close
-        public async Task<IActionResult> Close(int id)
+        public async Task<IActionResult> StatusChange(int id, bool status)
         {
             try
             {
-                await _toDoService.CloseAsync(id);
-                Message = $"ToDo with id {id} closed successfully.";
+                await _toDoService.StatusChangeAsync(id);
+                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
+                string strStatus = status ? "Opened" : "Closed";
+                Message = $"ToDo status with id {id} was changed to '{strStatus}' successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {
@@ -259,26 +269,7 @@ namespace ToDoApp.Controllers
                 await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
-        }
-
-        // GET: ToDoController/Close
-        public async Task<IActionResult> Open(int id)
-        {
-            try
-            {
-                await _toDoService.OpenAsync(id);
-                Message = $"ToDo with id {id} opened successfully.";
-                TempData["SuccessMessage"] = Message;
-                await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
-                return View();
-            }
-        }
+        }        
 
         // GET: ToDoController/Duplicate
         public async Task<IActionResult> Duplicate(int id)
@@ -286,10 +277,11 @@ namespace ToDoApp.Controllers
             try
             {
                 await _toDoService.DuplicateAsync(id);
+                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
                 Message = $"ToDo with id {id} duplicated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {

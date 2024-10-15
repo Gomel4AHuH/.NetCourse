@@ -60,16 +60,15 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="offset-sm-4 col-sm-4 d-grid">
-                <form asp-action="Delete">
-                    <input type="submit" value="Delete" class="btn btn-danger" />
+        <form asp-action="Delete">
+            <div class="row">
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <input type="submit" asp-action="Delete" value="Delete" class="btn btn-danger" />
+                </div>
+                <div class="col-sm-4 d-grid">
                     <a asp-action="Index" class="btn btn-primary">Back to employees</a>
-                </form>
-            </div>
-            <div class="col-sm-4 d-grid">
-
-            </div>
-        </div>
+                </div>
+            </div>        
+        </form>
     </div>
 </div>

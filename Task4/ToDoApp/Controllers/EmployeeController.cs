@@ -25,9 +25,7 @@ namespace ToDoApp.Controllers
 
         private string GetUserMail()
         {
-            //ToDoAppUser user = await _userManager.GetUserAsync(User);
             string name = _userManager.GetUserName(User);
-            //return user.Email;
             return name;
         }
 
@@ -173,7 +171,6 @@ namespace ToDoApp.Controllers
                 EmployeeVM employeeVM = _employeeService.EmployeeToEmployeeVM(employee);
 
                 ViewData["EmployeePhotoPath"] = employee.EmployeePhotoPath;
-                employeeVM.ToDos = await _toDoService.GetAllByEmployeeIdAsync(employee.Id);
 
                 return View(employeeVM);
             }
@@ -220,7 +217,7 @@ namespace ToDoApp.Controllers
                     await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                     return RedirectToAction("Index");
                 }
-                employee.ToDos = await _toDoService.GetAllByEmployeeIdAsync(employee.Id);
+
                 return View(employee);
             }
             catch (Exception ex)

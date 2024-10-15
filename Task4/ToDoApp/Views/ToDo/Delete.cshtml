@@ -18,13 +18,13 @@
     <div class="col-md-8 mx-auto rounded border p-3">
         <h2 class="text-center mb-5">Delete todo</h2>
         <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Name)</label>
+            <label class="col-sm-4 col-form-label">Name</label>
             <div class="col-sm-8">
                 @Html.DisplayFor(model => model.Name)
             </div>
         </div>
         <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Description)</label>
+            <label class="col-sm-4 col-form-label">Description</label>
             <div class="col-sm-8">
                 @Html.DisplayFor(model => model.Description)
             </div>
@@ -35,22 +35,16 @@
                 @Html.DisplayFor(model => model.IsClosed)
             </div>
         </div>
-        <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Employee id)</label>
-            <div class="col-sm-8">
-                @Html.DisplayFor(model => model.EmployeeId)
-            </div>
-        </div>        
 
-        <div class="row">
-            <div class="offset-sm-4 col-sm-4 d-grid">
-                <form asp-action="Delete">
-                    <input type="submit" value="Delete" class="btn btn-danger" />
-                    <a asp-action="Index" class="btn btn-primary">Back to todos</a>
-                </form>
+        <form asp-action="Delete">
+            <div class="row">
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <input type="submit" asp-route-id="@Model?.Id" value="Delete" class="btn btn-danger" />
+                </div>
+                <div class="col-sm-4 d-grid">
+                    <a asp-action="Index" asp-route-id="@Model?.EmployeeId" class="btn btn-primary">Back to todos</a>
+                </div>
             </div>
-            <div class="col-sm-4 d-grid">
-            </div>
-        </div>
+        </form>
     </div>
 </div>

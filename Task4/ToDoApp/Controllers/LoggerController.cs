@@ -20,10 +20,10 @@ namespace ToDoApp.Controllers
             _userManager = userManager;
         }
 
-        private async Task<string> GetUserMail()
+        private string GetUserMail()
         {
-            ToDoAppUser user = await _userManager.GetUserAsync(User);
-            return user.Email;
+            string name = _userManager.GetUserName(User);
+            return name;
         }
 
         // GET: LoggerController

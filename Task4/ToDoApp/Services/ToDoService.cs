@@ -18,15 +18,26 @@ namespace ToDoApp.Services
         {
             return await _context.ToDos.ToListAsync();
         }
-        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
+        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber, int id)
         {
             if (searchString != null)
             {
                 pageNumber = 1;
-            }                        
+            }
 
-            IQueryable<ToDo> toDos = from e in _context.ToDos
-                                     select e;            
+            IQueryable<ToDo> toDos;
+
+            if (id != 0)
+            {
+                toDos = from e in _context.ToDos
+                        where e.EmployeeId == id
+                        select e;
+            }
+            else
+            {
+                toDos = from e in _context.ToDos
+                        select e;            
+            }
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -44,6 +55,8 @@ namespace ToDoApp.Services
                 "description_desc" => toDos.OrderByDescending(e => e.Description),
                 "employeeId" => toDos.OrderBy(e => e.EmployeeId),
                 "employeeId_desc" => toDos.OrderByDescending(e => e.EmployeeId),
+                "status" => toDos.OrderBy(e => e.IsClosed),
+                "status_desc" => toDos.OrderByDescending(e => e.IsClosed),
                 _ => toDos.OrderBy(e => e.Id),
             };
 
@@ -65,6 +78,16 @@ namespace ToDoApp.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task DeleteAllByEmployeeIdAsync(int id)
+        {
+            /*ToDo toDo = await _context.ToDos.ForEachAsync
+            if (toDo != null)
+            {
+                _context.ToDos.Remove(toDo);
+                await _context.SaveChangesAsync();
+            }*/
+        }
         public async Task CreateAsync(ToDo toDo)
         {
             _context.ToDos.Add(toDo);
@@ -77,26 +100,16 @@ namespace ToDoApp.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task CloseAsync(int id)
+        public async Task StatusChangeAsync(int id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
             if (toDo != null)
             {
-                toDo.IsClosed = true;
+                toDo.IsClosed = !toDo.IsClosed;
                 await _context.SaveChangesAsync();
             }
         }
-
-        public async Task OpenAsync(int id)
-        {
-            ToDo toDo = await _context.ToDos.FindAsync(id);
-            if (toDo != null)
-            {
-                toDo.IsClosed = false;
-                await _context.SaveChangesAsync();
-            }
-        }
-
+        
         public async Task DuplicateAsync(int id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
@@ -108,13 +121,18 @@ namespace ToDoApp.Services
             }
         }
 
-        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(int id)
+        public async Task<int> GetEmployeeIdAsync(int id)
         {
-            IQueryable<ToDo> toDos = from e in _context.ToDos
-                                     where e.EmployeeId == id
-                                     select e;
+            ToDo toDo = await _context.ToDos.FindAsync(id);
 
-            return await toDos.ToListAsync();
+            int employeeId = 0;
+
+            if (toDo != null)
+            {
+                employeeId = toDo.EmployeeId;
+            }
+
+            return employeeId;
         }
     }
 }

@@ -17,122 +17,56 @@
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
         <h2 class="text-center mb-5">Employee details</h2>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Last name</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.LastName)
-                </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Last name</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.LastName)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">First name</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.FirstName)
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">First name</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.FirstName)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Middle name</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.MiddleName)
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Middle name</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.MiddleName)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Birthday</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.Birthday)
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Birthday</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.Birthday)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Speciality</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.Speciality)
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Speciality</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.Speciality)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Employment date</label>
-                <div class="col-sm-8">
-                    @Html.DisplayFor(model => model.EmploymentDate)
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Employment date</label>
+            <div class="col-sm-8">
+                @Html.DisplayFor(model => model.EmploymentDate)
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Employee photo</label>
-                <div class="col-sm-8">
-                    <img src="/photos/@Model.EmployeePhotoPath" style="width:50px;height:50px;border-radius:50%" />
-                </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Employee photo</label>
+            <div class="col-sm-8">
+                <img src="/photos/@Model.EmployeePhotoPath" style="width:50px;height:50px;border-radius:50%" />
             </div>
-
-            <div class="row">
-                <div class="offset-sm-4 col-sm-4 d-grid">
-                    <a asp-action="Index" class="btn btn-primary">Back to employees</a>
-                </div>
+        </div>
+        
+        <div class="row">
+            <div class="offset-sm-4 col-sm-4 d-grid">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
             </div>
-
-        <hr />
-
-        @if (Model.ToDos != null && Model.ToDos.Any())
-        {
-            <table class="table table-bordered table-hover table-striped">
-                <tbody>
-                    <tr>
-                        <th>
-                            @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
-                        </th>
-                        <th>
-                            @Html.ActionLink("Name", "Index", new { sortOrder = @ViewData["NameSortParm"], searchString = @ViewData["CurrentFilter"] })
-                        </th>
-                        <th>
-                            @Html.ActionLink("Description", "Index", new { sortOrder = @ViewData["DescriptionSortParm"], searchString = @ViewData["CurrentFilter"] })
-                        </th>
-                        <th>
-                            Status
-                        </th>
-                        <th>
-                            @Html.ActionLink("Employee Id", "Index", new { sortOrder = @ViewData["EmployeeIdSortParm"], searchString = @ViewData["CurrentFilter"] })
-                        </th>
-                        <th>
-                            Actions
-                        </th>
-                    </tr>
-
-                    @foreach (var item in Model.ToDos)
-                    {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Id)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Name)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Description)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.IsClosed)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.EmployeeId)
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
-                                <a asp-action="Duplicate" asp-route-id="@item.Id" class="btn btn-primary">Duplicate</a>
-                                @if (item.IsClosed)
-                                {
-                                    <a asp-action="Open" asp-route-id="@item.Id" class="btn btn-primary">Open</a>
-                                }
-                                else
-                                {
-                                    <a asp-action="Close" asp-route-id="@item.Id" class="btn btn-primary">Close</a>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No ToDos avaliable for the employee.</p>
-        }
+            <div class="col-sm-4 d-grid">
+                <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+            </div>
+        </div>
     </div>
 </div>

@@ -18,13 +18,13 @@
     <div class="col-md-8 mx-auto rounded border p-3">
         <h2 class="text-center mb-5">Employee details</h2>
         <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Name)</label>
+            <label class="col-sm-4 col-form-label">Name</label>
             <div class="col-sm-8">
                 @Html.DisplayFor(model => model.Name)
             </div>
         </div>
         <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Description)</label>
+            <label class="col-sm-4 col-form-label">Description</label>
             <div class="col-sm-8">
                 @Html.DisplayFor(model => model.Description)
             </div>
@@ -35,19 +35,13 @@
                 @Html.DisplayFor(model => model.IsClosed)
             </div>
         </div>
-        <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Employee id</label>
-            <div class="col-sm-8">
-                @Html.DisplayFor(model => model.EmployeeId)
-            </div>
-        </div>        
 
         <div class="row">
             <div class="offset-sm-4 col-sm-4 d-grid">
                 <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
             </div>
             <div class="col-sm-4 d-grid">
-                <a asp-action="Index" class="btn btn-primary">Back to todos</a>
+                <a asp-action="Index" asp-route-id="@Model?.EmployeeId" class="btn btn-primary">Back to todos</a>
             </div>
         </div>
     </div>

@@ -19,14 +19,14 @@
         <h2 class="text-center mb-5">Edit todo</h2>
         <form asp-action="Edit">
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Name)</label>
+                <label class="col-sm-4 col-form-label">Name</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="Name">
                     <span asp-validation-for="Name" class="text-danger" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Description)</label>
+                <label class="col-sm-4 col-form-label">Description</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="Description">
                     <span asp-validation-for="Description" class="text-danger" />
@@ -38,20 +38,14 @@
                     <input class="form-check-input" asp-for="IsClosed" />
                 </div>
             </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Employee id</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="EmployeeId">
-                    <span asp-validation-for="EmployeeId" class="text-danger" />
-                </div>
-            </div>            
+            <input type="hidden" asp-for="EmployeeId">
 
             <div class="row">
                 <div class="offset-sm-4 col-sm-4 d-grid">
                     <input type="submit" value="Save" class="btn btn-primary" />
                 </div>
                 <div class="col-sm-4 d-grid">
-                    <a asp-action="Index" class="btn btn-primary">Back to todos</a>
+                    <a asp-action="Index" asp-route-id="@Model?.EmployeeId" class="btn btn-primary">Back to todos</a>
                 </div>
             </div>
         </form>
