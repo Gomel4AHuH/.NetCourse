@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Edit";
+    var paginatedToDos = Model.ToDos as ToDoApp.Data.PaginatedList<ToDoApp.Models.ToDo>;
 }
 
 @if (TempData["ErrorMessage"] != null)
@@ -82,6 +83,98 @@
                 </div>
             </div>
         </form>
+
+        <hr />
+
+        @if (paginatedToDos != null && paginatedToDos.HasPreviousPage && paginatedToDos.HasNextPage)
+        {
+            var prevDisabled = !paginatedToDos.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !paginatedToDos.HasNextPage ? "disabled" : "";
+
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(paginatedToDos.PageIndex - 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-primary @prevDisabled">
+                Previous
+            </a>
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(paginatedToDos.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-primary @nextDisabled">
+                Next
+            </a>
+        }
+        
+        <table class="table table-bordered table-hover table-striped">
+            <tbody>
+                <tr>
+                    <th>
+                        @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Name", "Index", new { sortOrder = @ViewData["NameSortParm"], searchString = @ViewData["CurrentFilter"] })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Description", "Index", new { sortOrder = @ViewData["DescriptionSortParm"], searchString = @ViewData["CurrentFilter"] })
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                    <th>
+                        @Html.ActionLink("Employee Id", "Index", new { sortOrder = @ViewData["EmployeeIdSortParm"], searchString = @ViewData["CurrentFilter"] })
+                    </th>
+                    <th>
+                        <a asp-action="Create" class="btn btn-primary">+ New todo</a>
+                    </th>
+                </tr>
+
+            @if (Model.ToDos != null && Model.ToDos.Any())
+            {
+                @foreach (var item in Model.ToDos)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsClosed)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EmployeeId)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                            <a asp-action="Duplicate" asp-route-id="@item.Id" class="btn btn-primary">Duplicate</a>
+                            @if (item.IsClosed)
+                            {
+                                <a asp-action="Open" asp-route-id="@item.Id" class="btn btn-primary">Open</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Close" asp-route-id="@item.Id" class="btn btn-primary">Close</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    No ToDos avaliable for the employee.
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>
 

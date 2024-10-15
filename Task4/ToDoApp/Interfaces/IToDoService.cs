@@ -13,5 +13,6 @@ namespace ToDoApp.Interfaces
         Task CloseAsync(int id);
         Task OpenAsync(int id);
         Task DuplicateAsync(int id);
+        Task<List<ToDo>> GetAllByEmployeeIdAsync(int id);
     }
 }

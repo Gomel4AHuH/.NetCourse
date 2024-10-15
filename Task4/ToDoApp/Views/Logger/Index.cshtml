@@ -35,69 +35,95 @@ else if (TempData["ErrorMessage"] != null)
     </div>
 }
 
-<p>
-    <a asp-action="Index" class="btn btn-primary text-center">Export to json</a>
-</p>
-
 @using (Html.BeginForm())
 {
     <p>
         Find by name: @Html.TextBox("SearchString")
         <input type="submit" class="btn btn-primary" value="Search" />
         <a asp-action="Index" class="btn btn-primary">Cancel search</a>
-
-    </p>    
+    </p>
 }
 
-@{
+@if (Model.Count != 0)
+{
+
     var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
     var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    var firstDisabled = (Model.PageIndex == 1) ? "disabled" : "";
+    var lastDisabled = (Model.PageIndex == Model.TotalPages) ? "disabled" : "";
+    
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="1"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @firstDisabled">
+        First
+    </a>
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.TotalPages)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @lastDisabled">
+        Last
+    </a>
+
+    <hr />
+
+    <table class="table table-bordered table-hover table-striped">
+        <tbody>
+            <tr>
+                <th>
+                    @Html.ActionLink("Message", "Index", new { sortOrder = @ViewData["MessageSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Action DateTime", "Index", new { sortOrder = @ViewData["DateSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+                <th>
+                    @Html.ActionLink("Author", "Index", new { sortOrder = @ViewData["AuthorSortParm"], searchString = @ViewData["CurrentFilter"] })
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Message)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ActionDateTime)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Author)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-
-<a asp-action="Index"
-    asp-route-sortOrder="@ViewData["CurrentSort"]"
-    asp-route-pageNumber="@(Model.PageIndex - 1)"
-    asp-route-currentFilter="@ViewData["CurrentFilter"]"
-    class="btn btn-primary @prevDisabled">
-    Previous
-</a>
-
-<a asp-action="Index"
-    asp-route-sortOrder="@ViewData["CurrentSort"]"
-    asp-route-pageNumber="@(Model.PageIndex + 1)"
-    asp-route-currentFilter="@ViewData["CurrentFilter"]"
-    class="btn btn-primary @nextDisabled">
-    Next
-</a>
-
-<hr/>
-
-<table class="table table-bordered table-hover table-striped">
-    <tbody>
-        <tr>
-            <th>
-                @Html.ActionLink("Message", "Index", new { sortOrder = @ViewData["MessageSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Action DateTime", "Index", new { sortOrder = @ViewData["DateSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-            <th>
-                @Html.ActionLink("Author", "Index", new { sortOrder = @ViewData["AuthorSortParm"], searchString = @ViewData["CurrentFilter"] })
-            </th>
-        </tr>
-
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Message)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ActionDateTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author)
-            </td>
-        </tr>
+else
+{
+    <table class="table table-bordered table-hover table-striped">
+        <tbody>
+            <tr>
+                No logs avaliable for now.
+            </tr>
+        </tbody>
+    </table>    
 }
-    </tbody>
-</table>

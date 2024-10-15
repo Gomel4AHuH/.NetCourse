@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace ToDoApp.Models
 {
-    public class Logger(string message)
+    public class Logger()
     {
         [Key]
         [Column(TypeName = "int")]
@@ -13,7 +13,7 @@ namespace ToDoApp.Models
         [Required]
         [Column(TypeName = "varchar(200)")]
         [DisplayName("Message")]
-        public string Message { get; set; } = message;
+        public string Message { get; set; }
 
         [Required]
         [Column(TypeName = "datetime")]
@@ -23,6 +23,6 @@ namespace ToDoApp.Models
         [Required]
         [Column(TypeName = "varchar(200)")]
         [DisplayName("Author")]
-        public string Author { get; set; } = "email";
+        public string Author { get; set; }
     }
 }

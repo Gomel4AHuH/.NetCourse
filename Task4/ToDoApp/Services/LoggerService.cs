@@ -14,9 +14,14 @@ namespace ToDoApp.Services
             _context = context;
         }
 
-        public async Task CreateAsync(string message)
+        public async Task CreateAsync(string message, string user)
         {
-            Logger logger = new(message);
+            Logger logger = new()
+            {
+                Message = message,
+                Author = user
+            };
+            
             _context.Loggers.Add(logger);
             await _context.SaveChangesAsync();
         }
@@ -49,7 +54,7 @@ namespace ToDoApp.Services
                 _ => loggers.OrderBy(e => e.Id),
             };
 
-            int pageSize = 10;
+            int pageSize = 15;
             return await PaginatedList<Logger>.CreateAsync(loggers.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
     }

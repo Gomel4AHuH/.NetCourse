@@ -61,12 +61,78 @@
             </div>
 
             <div class="row">
-               <div class="offset-sm-4 col-sm-4 d-grid">
-                   <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
-               </div>
-               <div class="col-sm-4 d-grid">
-                   <a asp-action="Index" class="btn btn-primary">Back to employees</a>
-               </div>
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <a asp-action="Index" class="btn btn-primary">Back to employees</a>
+                </div>
             </div>
+
+        <hr />
+
+        @if (Model.ToDos != null && Model.ToDos.Any())
+        {
+            <table class="table table-bordered table-hover table-striped">
+                <tbody>
+                    <tr>
+                        <th>
+                            @Html.ActionLink("Id", "Index", new { sortOrder = @ViewData["IdSortParm"], searchString = @ViewData["CurrentFilter"] })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Name", "Index", new { sortOrder = @ViewData["NameSortParm"], searchString = @ViewData["CurrentFilter"] })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Description", "Index", new { sortOrder = @ViewData["DescriptionSortParm"], searchString = @ViewData["CurrentFilter"] })
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            @Html.ActionLink("Employee Id", "Index", new { sortOrder = @ViewData["EmployeeIdSortParm"], searchString = @ViewData["CurrentFilter"] })
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+
+                    @foreach (var item in Model.ToDos)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Id)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IsClosed)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.EmployeeId)
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                                <a asp-action="Duplicate" asp-route-id="@item.Id" class="btn btn-primary">Duplicate</a>
+                                @if (item.IsClosed)
+                                {
+                                    <a asp-action="Open" asp-route-id="@item.Id" class="btn btn-primary">Open</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Close" asp-route-id="@item.Id" class="btn btn-primary">Close</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No ToDos avaliable for the employee.</p>
+        }
     </div>
 </div>

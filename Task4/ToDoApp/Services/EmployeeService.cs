@@ -2,8 +2,6 @@
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 using ToDoApp.Data;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 namespace ToDoApp.Services
 {
@@ -60,9 +58,9 @@ namespace ToDoApp.Services
                 _ => employees.OrderBy(e => e.Id),
             };
 
-            int pageSize = 10;
+            int pageSize = 7;
             return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
-        }
+        }       
 
         public async Task<Employee> GetByIdAsync(int id)
         {

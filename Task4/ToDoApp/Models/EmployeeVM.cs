@@ -28,5 +28,7 @@ namespace ToDoApp.Models
         public DateOnly EmploymentDate { get; set; }
 
         public IFormFile? EmployeePhoto { get; set; }
+
+        public ICollection<ToDo> ToDos { get; set; } = new List<ToDo>();
     }
 }

@@ -23,15 +23,16 @@ namespace ToDoApp.Services
             if (searchString != null)
             {
                 pageNumber = 1;
-            }
+            }                        
 
             IQueryable<ToDo> toDos = from e in _context.ToDos
-                                             select e;
+                                     select e;            
 
             if (!String.IsNullOrEmpty(searchString))
             {
                 toDos = toDos.Where(e => e.Name.Contains(searchString)
-                                              || e.Description.Contains(searchString));
+                                      || e.Description.Contains(searchString)
+                                      || e.EmployeeId.ToString().Contains(searchString));
             }
 
             toDos = sortOrder switch
@@ -46,7 +47,7 @@ namespace ToDoApp.Services
                 _ => toDos.OrderBy(e => e.Id),
             };
 
-            int pageSize = 10;
+            int pageSize = 15;
             return await PaginatedList<ToDo>.CreateAsync(toDos.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
 
@@ -105,6 +106,15 @@ namespace ToDoApp.Services
                 _context.ToDos.Add(toDo);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(int id)
+        {
+            IQueryable<ToDo> toDos = from e in _context.ToDos
+                                     where e.EmployeeId == id
+                                     select e;
+
+            return await toDos.ToListAsync();
         }
     }
 }

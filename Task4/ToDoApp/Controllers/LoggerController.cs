@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using ToDoApp.Areas.Identity.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 
@@ -8,12 +10,20 @@ namespace ToDoApp.Controllers
     {
         private readonly ILoggerService _loggerService;
         private readonly ILoggerService _logger;
+        private readonly UserManager<ToDoAppUser> _userManager;
         private string Message = "";
 
-        public LoggerController(ILoggerService loggerService, ILoggerService logger)
+        public LoggerController(ILoggerService loggerService, ILoggerService logger, UserManager<ToDoAppUser> userManager)
         {
             _loggerService = loggerService;
             _logger = logger;
+            _userManager = userManager;
+        }
+
+        private async Task<string> GetUserMail()
+        {
+            ToDoAppUser user = await _userManager.GetUserAsync(User);
+            return user.Email;
         }
 
         // GET: LoggerController
@@ -41,7 +51,7 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _logger.CreateAsync(ex.Message);
+                await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
