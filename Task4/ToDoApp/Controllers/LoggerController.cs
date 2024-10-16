@@ -55,5 +55,12 @@ namespace ToDoApp.Controllers
                 return View();
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Export()
+        {
+            await _loggerService.ExportAsync();
+            return View();
+        }
     }
 }

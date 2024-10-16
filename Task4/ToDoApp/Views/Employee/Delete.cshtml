@@ -8,9 +8,7 @@
 {
     <div class="alert alert-danger">
         <strong>Error ! </strong>   @TempData["ErrorMessage"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span>&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
     </div>
 }
 
@@ -60,15 +58,44 @@
             </div>
         </div>
 
-        <form asp-action="Delete">
-            <div class="row">
-                <div class="offset-sm-4 col-sm-4 d-grid">
-                    <input type="submit" asp-action="Delete" value="Delete" class="btn btn-danger" />
+        <div class="row">
+            <div class="offset-sm-4 col-sm-4 d-grid">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#warning">
+                    Delete
+                </button>
+            </div>
+            <div class="col-sm-4 d-grid">
+                <a asp-action="Index" class="btn btn-info">Back to employees</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Modal View-->
+<div class="modal fade" id="warning" tabindex="-1" role="dialog" aria-labelledby="warningTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="warningTitle">Warning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Current employee profile with it's todos will be deleted.
+                <br/>
+                Do you confirm?
+            </div>
+            <form asp-action="Delete">
+                <div class="modal-footer">
+                    <div class="offset-sm-4 col-sm-4 d-grid">
+                        <input type="submit" asp-action="Delete" value="Confirm" class="btn btn-danger"/>
+                    </div>
+                    <div class="col-sm-4 d-grid">
+                        <button type="button" class="btn btn-info" data-bs-dismiss="modal">Cancel</button>
+                    </<div>
                 </div>
-                <div class="col-sm-4 d-grid">
-                    <a asp-action="Index" class="btn btn-primary">Back to employees</a>
-                </div>
-            </div>        
-        </form>
+            </form>
+        </div>
     </div>
 </div>

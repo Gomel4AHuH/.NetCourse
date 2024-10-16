@@ -10,7 +10,7 @@ namespace ToDoApp.Interfaces
         Task CreateAsync(ToDo toDo);
         Task UpdateAsync(ToDo toDo);
         Task DeleteAsync(int id);
-        Task DeleteAllByEmployeeIdAsync(int id);
+        Task<string> GetIdsByEmployeeIdAsync(int id);
         Task StatusChangeAsync(int id);        
         Task DuplicateAsync(int id);
         Task<int> GetEmployeeIdAsync(int id);

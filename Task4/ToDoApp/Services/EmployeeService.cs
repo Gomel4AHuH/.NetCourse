@@ -9,11 +9,13 @@ namespace ToDoApp.Services
     {
         private readonly ToDoAppDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _configuration;
 
-        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment)
+        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment, IConfiguration configuration)
         {
             _context = context;
             _environment = environment;
+            _configuration = configuration;
         }
 
         public async Task<List<Employee>> GetAllAsync()
@@ -22,7 +24,7 @@ namespace ToDoApp.Services
         }
         public async Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
-            if (searchString != null)
+            if (!String.IsNullOrEmpty(searchString))
             {
                 pageNumber = 1;
             }
@@ -58,7 +60,7 @@ namespace ToDoApp.Services
                 _ => employees.OrderBy(e => e.Id),
             };
 
-            int pageSize = 7;
+            int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("Employee").Value);
             return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
         }       
 
@@ -73,6 +75,13 @@ namespace ToDoApp.Services
             if (employee != null)
             {
                 DeletePhoto(employee.EmployeePhotoPath);
+                IQueryable<ToDo> toDos = from e in _context.ToDos
+                                         where e.EmployeeId == id
+                                         select e;
+                foreach (ToDo toDo in toDos)
+                {
+                    _context.Remove(toDo);
+                }
                 _context.Employees.Remove(employee);
                 await _context.SaveChangesAsync();
             }

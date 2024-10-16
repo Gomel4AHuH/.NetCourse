@@ -2,16 +2,20 @@
 using ToDoApp.Interfaces;
 using ToDoApp.Data;
 using ToDoApp.Models;
+using PagedList;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ToDoApp.Services
 {
     public class ToDoService : IToDoService
     {
         private readonly ToDoAppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ToDoService(ToDoAppDbContext context)
+        public ToDoService(ToDoAppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<List<ToDo>> GetAllAsync()
@@ -20,7 +24,7 @@ namespace ToDoApp.Services
         }
         public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber, int id)
         {
-            if (searchString != null)
+            if (!String.IsNullOrEmpty(searchString))
             {
                 pageNumber = 1;
             }
@@ -60,7 +64,7 @@ namespace ToDoApp.Services
                 _ => toDos.OrderBy(e => e.Id),
             };
 
-            int pageSize = 15;
+            int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("ToDo").Value);
             return await PaginatedList<ToDo>.CreateAsync(toDos.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
 
@@ -79,14 +83,18 @@ namespace ToDoApp.Services
             }
         }
 
-        public async Task DeleteAllByEmployeeIdAsync(int id)
+        public async Task<string> GetIdsByEmployeeIdAsync(int id)
         {
-            /*ToDo toDo = await _context.ToDos.ForEachAsync
-            if (toDo != null)
+            List<int> ids = [];
+
+            IQueryable<ToDo> toDos = _context.ToDos.Where(e => e.EmployeeId == id);
+
+            foreach (ToDo toDo in toDos)
             {
-                _context.ToDos.Remove(toDo);
-                await _context.SaveChangesAsync();
-            }*/
+                ids.Add(toDo.Id);
+            }            
+
+            return String.Join(", ", ids);
         }
         public async Task CreateAsync(ToDo toDo)
         {

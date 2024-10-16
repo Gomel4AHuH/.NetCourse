@@ -8,5 +8,6 @@ namespace ToDoApp.Interfaces
     {
         Task<List<Logger>> GetAllAsync(string sortOrder, string searchString, int? pageNumber);
         Task CreateAsync(string message, string user);
+        Task ExportAsync();
     }
 }

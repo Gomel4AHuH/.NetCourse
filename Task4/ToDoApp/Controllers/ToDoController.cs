@@ -128,8 +128,7 @@ namespace ToDoApp.Controllers
         
         // GET: ToDoController/Create
         public ActionResult Create(int employeeId)
-        {
-            ViewData["EmployeeId"] = employeeId;
+        {            
             return View(new Models.ToDo { Name = "", Description = "", EmployeeId = employeeId });
         }
 

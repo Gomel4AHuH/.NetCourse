@@ -242,8 +242,9 @@ namespace ToDoApp.Controllers
         {
             try
             {
+                string ids = await _toDoService.GetIdsByEmployeeIdAsync(id);
                 await _employeeService.DeleteAsync(id);
-                Message = $"Employee with id {id} deleted successfully.";
+                Message = $"Employee with id {id} and todos with ids: {ids} deleted successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                 return RedirectToAction(nameof(Index));
