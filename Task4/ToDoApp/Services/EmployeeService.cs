@@ -64,19 +64,22 @@ namespace ToDoApp.Services
             return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
         }       
 
-        public async Task<Employee> GetByIdAsync(int id)
+        public async Task<Employee> GetByIdAsync(Guid id)
         {
             return await _context.Employees.FindAsync(id);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             Employee employee = await _context.Employees.FindAsync(id);
             if (employee != null)
             {
-                DeletePhoto(employee.EmployeePhotoPath);
+                if (employee.EmployeePhotoPath != null)
+                {
+                    DeletePhoto(employee.EmployeePhotoPath);
+                }                
                 IQueryable<ToDo> toDos = from e in _context.ToDos
-                                         where e.EmployeeId == id
+                                         where e.EmployeeId.CompareTo(id) == 0
                                          select e;
                 foreach (ToDo toDo in toDos)
                 {
@@ -95,16 +98,24 @@ namespace ToDoApp.Services
 
         private string CreatePhoto(EmployeeVM employeeVM)
         {
-            string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            fileName += Path.GetExtension(employeeVM.EmployeePhoto.FileName);
-
-            string fullPath = _environment.WebRootPath + "/photos/" + fileName;
-            using (var stream = System.IO.File.Create(fullPath))
+            if (employeeVM.EmployeePhoto != null)
             {
-                employeeVM.EmployeePhoto.CopyTo(stream);
-            }
+                string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                fileName += Path.GetExtension(employeeVM.EmployeePhoto.FileName);
 
-            return fileName;
+                string fullPath = _environment.WebRootPath + "/photos/" + fileName;
+                using (var stream = System.IO.File.Create(fullPath))
+                {
+                    employeeVM.EmployeePhoto.CopyTo(stream);
+                }
+
+                return fileName;
+            }
+            else
+            {
+                return "";
+            }
+            
         }
 
         public async Task CreateAsync(EmployeeVM employeeVM)
@@ -133,10 +144,10 @@ namespace ToDoApp.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task CreateToDoAsync(ToDo toDo, int id)
+        public async Task CreateToDoAsync(ToDo toDo, Guid id)
         {
             toDo.EmployeeId = id;
-            toDo.Id = 0;
+            toDo.Id = new Guid();
             _context.ToDos.Add(toDo);
             await _context.SaveChangesAsync();
         }

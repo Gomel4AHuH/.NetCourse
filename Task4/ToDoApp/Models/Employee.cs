@@ -7,13 +7,13 @@ namespace ToDoApp.Models
     public class Employee
     {
         [Key]
-        [Column(TypeName = "int")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(50)")]
         [DisplayName("First name")]
         public required string FirstName { get; set; }
+       
         [Required]
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Last name")]
@@ -22,10 +22,12 @@ namespace ToDoApp.Models
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Middle name")]
         public string? MiddleName { get; set; }
+                
         [Required]
         [Column(TypeName = "date")]
         [DisplayName("Birthday")]
         public DateOnly Birthday { get; set; }
+        
         [Required]
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Speciality")]
@@ -38,6 +40,5 @@ namespace ToDoApp.Models
 
         [DisplayName("Employee photo")]
         public string EmployeePhotoPath { get; set; }
-        public ICollection<ToDo> ToDos { get; set; } = new List<ToDo>();
     }
 }

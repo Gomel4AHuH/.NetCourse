@@ -6,19 +6,15 @@ using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
-    public class ToDoController : Controller
+    /*[Route("api/ToDo")]
+    [ApiController]*/
+    public class ToDoController(IToDoService toDoService, ILoggerService logger, UserManager<ToDoAppUser> userManager, IEmployeeService employeeService) : Controller
     {
-        private readonly IToDoService _toDoService;
-        private readonly ILoggerService _logger;
-        private readonly UserManager<ToDoAppUser> _userManager;
-        private string Message;
-
-        public ToDoController(IToDoService toDoService, ILoggerService logger, UserManager<ToDoAppUser> userManager)
-        {
-            _toDoService = toDoService;
-            _logger = logger;
-            _userManager = userManager;
-        }
+        private readonly IToDoService _toDoService = toDoService;
+        private readonly ILoggerService _logger = logger;
+        private readonly UserManager<ToDoAppUser> _userManager = userManager;
+        private readonly IEmployeeService _employeeService = employeeService;
+        private string? Message;
 
         private string GetUserMail()
         {
@@ -27,16 +23,31 @@ namespace ToDoApp.Controllers
         }
 
         #region API
+        /*
+        [HttpGet]
+        //[Route("GetById")]
+        public async Task<ActionResult<ToDo>> GetToDo(Guid id)
+        {
+            ToDo toDo = await _toDoService.GetByIdAsync(id);
+            
+            if (toDo == null)
+            {
+                return NotFound("ToDo not found.");
+            }
+
+            return toDo;
+        }
+        
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<ToDo>>> GetAll()
         {
             return await _toDoService.GetAllAsync();
         }
-
+        
         [HttpGet]
         [Route("GetById")]
-        public async Task<ActionResult<ToDo>> GetToDo(int id)
+        public async Task<ActionResult<ToDo>> GetToDo(Guid id)
         {
             ToDo toDo = await _toDoService.GetByIdAsync(id);
 
@@ -47,18 +58,18 @@ namespace ToDoApp.Controllers
 
             return toDo;
         }
-
-        /*[HttpPost]
+        
+        [HttpPost]
         [Route("Add")]
         public async Task<ActionResult<ToDo>> AddToDo(ToDo toDo)
         {
             await _toDoService.CreateAsync(toDo);
             return NoContent();
-        }*/
+        }
 
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdateToDo(int id)
+        public async Task<IActionResult> UpdateToDo(Guid id)
         {
             ToDo toDo = await _toDoService.GetByIdAsync(id);
 
@@ -67,14 +78,14 @@ namespace ToDoApp.Controllers
                 return NotFound("ToDo not found.");
             }
 
-            //await _toDoService.UpdateAsync(toDo);
+            await _toDoService.UpdateAsync(toDo);
 
             return NoContent();
         }
 
         [HttpDelete]
         [Route("Delete")]
-        public async Task<IActionResult> DeleteToDo(int id)
+        public async Task<IActionResult> DeleteToDo(Guid id)
         {
             ToDo toDo = await _toDoService.GetByIdAsync(id);
             if (toDo == null)
@@ -85,29 +96,25 @@ namespace ToDoApp.Controllers
             await _toDoService.DeleteAsync(id);
 
             return NoContent();
-        }
+        }*/
         #endregion
 
         #region Actions
         // GET: ToDoController
-        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber, int id)
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
             try
             {
                 ViewData["CurrentSort"] = sortOrder;
-                ViewData["IdSortParm"] = sortOrder == "id" ? "id" : "";
                 ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
                 ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
-                ViewData["EmployeeIdSortParm"] = sortOrder == "employeeId" ? "employeeId_desc" : "employeeId";
                 ViewData["StatusSortParm"] = sortOrder == "status" ? "status_desc" : "status";
 
                 ViewData["CurrentFilter"] = searchString;
-
-                ViewData["Id"] = id;
-
+                
                 List<ToDo> toDoList;
 
-                toDoList = await _toDoService.GetAllAsync(sortOrder, searchString, pageNumber, id);
+                toDoList = await _toDoService.GetAllAsync(sortOrder, searchString, pageNumber);
 
                 if (toDoList.Count == 0)
                 {
@@ -125,9 +132,42 @@ namespace ToDoApp.Controllers
                 return View();
             }
         }
-        
+
+        public async Task<IActionResult> IndexEmployee(string sortOrder, string searchString, int? pageNumber, Guid id)
+        {
+            try
+            {
+                ViewData["CurrentSort"] = sortOrder;
+                ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+                ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
+                ViewData["StatusSortParm"] = sortOrder == "status" ? "status_desc" : "status";
+
+                ViewData["CurrentFilter"] = searchString;
+
+                Employee employee = await _employeeService.GetByIdAsync(id);
+                ViewData["Employee"] = employee;
+
+                List<ToDo> toDoList = await _toDoService.GetAllByEmployeeIdAsync(sortOrder, searchString, pageNumber, id);
+
+                if (toDoList.Count == 0)
+                {
+                    Message = "No todos available for now.";
+                    TempData["InfoMessage"] = Message;
+                }
+
+
+                return View(toDoList);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
+                return View();
+            }
+        }
+
         // GET: ToDoController/Create
-        public ActionResult Create(int employeeId)
+        public ActionResult Create(Guid employeeId)
         {            
             return View(new Models.ToDo { Name = "", Description = "", EmployeeId = employeeId });
         }
@@ -143,7 +183,7 @@ namespace ToDoApp.Controllers
                 Message = $"ToDo with id {toDo.Id} created successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction("Index", "ToDo", new { id = toDo.EmployeeId });
+                return RedirectToAction("IndexEmployee", "ToDo", new { id = toDo.EmployeeId });
             }
             catch (Exception ex)
             {
@@ -154,7 +194,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoController/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             try
             {
@@ -164,7 +204,7 @@ namespace ToDoApp.Controllers
                     Message = "ToDo details not available with the Id : " + id;
                     TempData["ErrorMessage"] = Message;
                     await _logger.CreateAsync(Message, GetUserMail().ToString());
-                    return RedirectToAction("Index");
+                    return RedirectToAction("IndexEmployee");
                 }
                 return View(toDo);
             }
@@ -179,7 +219,7 @@ namespace ToDoApp.Controllers
         // POST: ToDoController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ToDo toDo)
+        public async Task<IActionResult> Edit(Guid id, ToDo toDo)
         {
             try
             {
@@ -187,7 +227,7 @@ namespace ToDoApp.Controllers
                 Message = $"ToDo with id {toDo.Id} updated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction("Index", "ToDo", new { id = toDo.EmployeeId });
+                return RedirectToAction("IndexEmployee", "ToDo", new { id = toDo.EmployeeId });
             }
             catch (Exception ex)
             {
@@ -198,7 +238,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoController/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             try
             {
@@ -208,7 +248,7 @@ namespace ToDoApp.Controllers
                     Message = "ToDo details not available with the Id : " + id;
                     TempData["ErrorMessage"] = Message;
                     await _logger.CreateAsync(Message, GetUserMail().ToString());
-                    return RedirectToAction("Index");
+                    return RedirectToAction("IndexEmployee");
                 }
                 return View(toDo);
             }
@@ -221,7 +261,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoController/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             ToDo toDo = await _toDoService.GetByIdAsync(id);
             return View(toDo);
@@ -230,16 +270,16 @@ namespace ToDoApp.Controllers
         // POST: ToDoController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(Guid id, IFormCollection collection)
         {
             try
             {
-                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
+                Guid employeeId = await _toDoService.GetEmployeeIdAsync(id);
                 await _toDoService.DeleteAsync(id);                
                 Message = $"ToDo with id {id} deleted successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction("Index", "ToDo", new { id = employeeId });
+                return RedirectToAction("IndexEmployee", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {
@@ -250,17 +290,17 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoController/Close
-        public async Task<IActionResult> StatusChange(int id, bool status)
+        public async Task<IActionResult> StatusChange(Guid id, bool status)
         {
             try
             {
                 await _toDoService.StatusChangeAsync(id);
-                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
+                Guid employeeId = await _toDoService.GetEmployeeIdAsync(id);
                 string strStatus = status ? "Opened" : "Closed";
                 Message = $"ToDo status with id {id} was changed to '{strStatus}' successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction("Index", "ToDo", new { id = employeeId });
+                return RedirectToAction("IndexEmployee", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {
@@ -271,16 +311,16 @@ namespace ToDoApp.Controllers
         }        
 
         // GET: ToDoController/Duplicate
-        public async Task<IActionResult> Duplicate(int id)
+        public async Task<IActionResult> Duplicate(Guid id)
         {
             try
             {
                 await _toDoService.DuplicateAsync(id);
-                int employeeId = await _toDoService.GetEmployeeIdAsync(id);
+                Guid employeeId = await _toDoService.GetEmployeeIdAsync(id);
                 Message = $"ToDo with id {id} duplicated successfully.";
                 TempData["SuccessMessage"] = Message;
                 await _logger.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction("Index", "ToDo", new { id = employeeId });
+                return RedirectToAction("IndexEmployee", "ToDo", new { id = employeeId });
             }
             catch (Exception ex)
             {

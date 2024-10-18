@@ -2,8 +2,6 @@
 using ToDoApp.Interfaces;
 using ToDoApp.Data;
 using ToDoApp.Models;
-using PagedList;
-using Microsoft.IdentityModel.Tokens;
 
 namespace ToDoApp.Services
 {
@@ -22,43 +20,38 @@ namespace ToDoApp.Services
         {
             return await _context.ToDos.ToListAsync();
         }
-        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber, int id)
+        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(string sortOrder, string searchString, int? pageNumber, Guid id)
+        {
+            IQueryable<ToDo> toDos = from e in _context.ToDos
+                                     where e.EmployeeId.CompareTo(id) == 0
+                                     select e;
+
+            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+        }
+
+        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
+        {
+            IQueryable<ToDo> toDos = from e in _context.ToDos
+                                     select e;
+
+            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+        }
+
+        private async Task<List<ToDo>> PreparePaginatedList(string sortOrder, string searchString, int? pageNumber, IQueryable<ToDo> toDos)
         {
             if (!String.IsNullOrEmpty(searchString))
             {
                 pageNumber = 1;
-            }
-
-            IQueryable<ToDo> toDos;
-
-            if (id != 0)
-            {
-                toDos = from e in _context.ToDos
-                        where e.EmployeeId == id
-                        select e;
-            }
-            else
-            {
-                toDos = from e in _context.ToDos
-                        select e;            
-            }
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
                 toDos = toDos.Where(e => e.Name.Contains(searchString)
-                                      || e.Description.Contains(searchString)
-                                      || e.EmployeeId.ToString().Contains(searchString));
+                                      || e.Description.Contains(searchString));
             }
 
             toDos = sortOrder switch
             {
-                "id" => toDos.OrderBy(e => e.Id),
                 "name" => toDos.OrderBy(e => e.Name),
                 "name_desc" => toDos.OrderByDescending(e => e.Name),
                 "description" => toDos.OrderBy(e => e.Description),
                 "description_desc" => toDos.OrderByDescending(e => e.Description),
-                "employeeId" => toDos.OrderBy(e => e.EmployeeId),
-                "employeeId_desc" => toDos.OrderByDescending(e => e.EmployeeId),
                 "status" => toDos.OrderBy(e => e.IsClosed),
                 "status_desc" => toDos.OrderByDescending(e => e.IsClosed),
                 _ => toDos.OrderBy(e => e.Id),
@@ -68,12 +61,12 @@ namespace ToDoApp.Services
             return await PaginatedList<ToDo>.CreateAsync(toDos.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
 
-        public async Task<ToDo> GetByIdAsync(int id)
+        public async Task<ToDo> GetByIdAsync(Guid id)
         {
             return await _context.ToDos.FindAsync(id);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
             if (toDo != null)
@@ -83,11 +76,11 @@ namespace ToDoApp.Services
             }
         }
 
-        public async Task<string> GetIdsByEmployeeIdAsync(int id)
+        public async Task<string> GetIdsByEmployeeIdAsync(Guid id)
         {
-            List<int> ids = [];
+            List<Guid> ids = [];
 
-            IQueryable<ToDo> toDos = _context.ToDos.Where(e => e.EmployeeId == id);
+            IQueryable<ToDo> toDos = _context.ToDos.Where(e => e.EmployeeId.CompareTo(id) == 0);
 
             foreach (ToDo toDo in toDos)
             {
@@ -108,7 +101,7 @@ namespace ToDoApp.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task StatusChangeAsync(int id)
+        public async Task StatusChangeAsync(Guid id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
             if (toDo != null)
@@ -118,22 +111,22 @@ namespace ToDoApp.Services
             }
         }
         
-        public async Task DuplicateAsync(int id)
+        public async Task DuplicateAsync(Guid id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
             if (toDo != null)
             {
-                toDo.Id = 0;
+                toDo.Id = new Guid();
                 _context.ToDos.Add(toDo);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task<int> GetEmployeeIdAsync(int id)
+        public async Task<Guid> GetEmployeeIdAsync(Guid id)
         {
             ToDo toDo = await _context.ToDos.FindAsync(id);
 
-            int employeeId = 0;
+            Guid employeeId = new();
 
             if (toDo != null)
             {

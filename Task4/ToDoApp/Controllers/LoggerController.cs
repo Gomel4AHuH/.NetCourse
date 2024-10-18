@@ -40,6 +40,10 @@ namespace ToDoApp.Controllers
 
                 List<Logger> loggerList = await _loggerService.GetAllAsync(sortOrder, searchString, pageNumber);
 
+                /*List<Logger> loggerListAll = await _loggerService.GetAllAsync(sortOrder, searchString, null);
+                List<Logger> loggerListAll = _loggerService.loggerSearchResult;
+                ViewData["LoggerListAll"] = loggerListAll.Count;*/
+
                 if (loggerList.Count == 0)
                 {
                     Message = "No logs available for now.";
@@ -57,9 +61,9 @@ namespace ToDoApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Export()
+        public async Task<IActionResult> Export(List<Logger> logs, int count)
         {
-            await _loggerService.ExportAsync();
+            await _loggerService.ExportAsync(logs);
             return View();
         }
     }

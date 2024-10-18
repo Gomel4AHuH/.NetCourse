@@ -6,22 +6,14 @@ using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
-    public class EmployeeController : Controller
+
+    public class EmployeeController(IEmployeeService service, ILoggerService loggerService, IToDoService toDoService, UserManager<ToDoAppUser> userManager) : Controller
     {
-        private readonly IEmployeeService _employeeService;
-        private readonly IToDoService _toDoService;
-        private readonly ILoggerService _loggerService;
-
-        private readonly UserManager<ToDoAppUser> _userManager;
-        private string Message = "";
-
-        public EmployeeController(IEmployeeService service, ILoggerService loggerService, IToDoService toDoService, UserManager<ToDoAppUser> userManager)
-        {
-            _employeeService = service;
-            _loggerService = loggerService;
-            _toDoService = toDoService;
-            _userManager = userManager;
-        }
+        private readonly IEmployeeService _employeeService = service;
+        private readonly IToDoService _toDoService = toDoService;
+        private readonly ILoggerService _loggerService = loggerService;
+        private readonly UserManager<ToDoAppUser> _userManager = userManager;
+        private string? Message;
 
         private string GetUserMail()
         {
@@ -30,16 +22,16 @@ namespace ToDoApp.Controllers
         }
 
         #region API
-        [HttpGet]
-        [Route("GetAll")]        
+        //[HttpGet("", Name = nameof(GetAll))]
+        //[Route("GetAll")]        
         public async Task<ActionResult<IEnumerable<Employee>>> GetAll()
         {
             return await _employeeService.GetAllAsync();
         }
 
-        [HttpGet]
-        [Route("GetById")]
-        public async Task<ActionResult<Employee>> GetEmployee(int id)
+        //[HttpGet("{id:int}", Name = nameof(GetEmployee))]
+        //[Route("GetById")]
+        public async Task<ActionResult<Employee>> GetEmployee(Guid id)
         {
             Employee employee = await _employeeService.GetByIdAsync(id);
 
@@ -50,18 +42,18 @@ namespace ToDoApp.Controllers
 
             return employee;
         }
-
-        [HttpPost]
-        [Route("Add")]
+        
+        //[HttpPost("{employeeVM}", Name = nameof(AddEmployee))]
+        //[Route("Add")]
         public async Task<ActionResult<Employee>> AddEmployee(EmployeeVM employeeVM)
         {
             await _employeeService.CreateAsync(employeeVM);
             return NoContent();
         }
-        
+        /*
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdateEmployee(int id)
+        public async Task<IActionResult> UpdateEmployee(Guid id)
         {
             Employee employee = await _employeeService.GetByIdAsync(id);
 
@@ -70,14 +62,15 @@ namespace ToDoApp.Controllers
                 return NotFound("Employee not found.");
             }
 
-            //await _employeeService.UpdateAsync(employee);
+            await _employeeService.UpdateAsync(employee);
 
             return NoContent();
-        }
-
-        [HttpDelete]
-        [Route("Delete")]
-        public async Task<IActionResult> DeleteEmployee(int id)
+        }*/
+        
+        //Access to the path 'D:\Work\Education\.NetCourse\Task4\ToDoApp\wwwroot\photos\' is denied.
+        //[HttpDelete("{id:int}", Name = nameof(DeleteEmployee))]
+        //[Route("Delete")]
+        public async Task<IActionResult> DeleteEmployee(Guid id)
         {
             Employee employee = await _employeeService.GetByIdAsync(id);
             if (employee == null)
@@ -92,14 +85,12 @@ namespace ToDoApp.Controllers
         #endregion
 
         #region Actions
-
         // GET: EmployeeController
         public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
             try
             {
                 ViewData["CurrentSort"] = sortOrder;
-                ViewData["IdSortParm"] = sortOrder == "id" ? "id" : "";
                 ViewData["LastNameSortParm"] = sortOrder == "lastName" ? "lastName_desc" : "lastName";
                 ViewData["FirstNameSortParm"] = sortOrder == "firstName" ? "firstName_desc" : "firstName";
                 ViewData["MiddleNameSortParm"] = sortOrder == "middleName" ? "middleName_desc" : "middleName";
@@ -130,7 +121,7 @@ namespace ToDoApp.Controllers
         // GET: EmployeeController/Create
         public IActionResult Create()
         {
-            return View();
+            return PartialView();
         }
 
         // POST: EmployeeController/Create
@@ -155,7 +146,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: EmployeeController/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             try
             {
@@ -185,7 +176,7 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EmployeeVM employeeVM)
+        public async Task<IActionResult> Edit(Guid id, EmployeeVM employeeVM)
         {
             try
             {
@@ -205,7 +196,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: EmployeeController/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             try
             {
@@ -219,6 +210,7 @@ namespace ToDoApp.Controllers
                 }
 
                 return View(employee);
+                //return PartialView("Details", employee);
             }
             catch (Exception ex)
             {
@@ -229,7 +221,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: EmployeeController/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             Employee employee = await _employeeService.GetByIdAsync(id);
             return View(employee);
@@ -238,7 +230,7 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(Guid id, IFormCollection collection)
         {
             try
             {
@@ -266,7 +258,7 @@ namespace ToDoApp.Controllers
         // POST: EmployeeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateToDo(ToDo toDo, int id)
+        public async Task<IActionResult> CreateToDo(ToDo toDo, Guid id)
         {
             try
             {

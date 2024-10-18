@@ -1,21 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Composition;
 using ToDoApp.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 
 namespace ToDoApp.Services
 {
-    public class LoggerService : ILoggerService
+    public class LoggerService(ToDoAppDbContext context, IConfiguration configuration) : ILoggerService
     {
-        private readonly ToDoAppDbContext _context;
-        private readonly IConfiguration _configuration;
-
-        public LoggerService(ToDoAppDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-        }
+        private readonly ToDoAppDbContext _context = context;
+        private readonly IConfiguration _configuration = configuration;
+        public IQueryable<Logger> loggersSearchResult;
 
         public async Task CreateAsync(string message, string user)
         {
@@ -36,34 +30,42 @@ namespace ToDoApp.Services
                 pageNumber = 1;
             }
 
-            IQueryable<Logger> loggers = from e in _context.Loggers
+            loggersSearchResult = from e in _context.Loggers
                                      select e;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                loggers = loggers.Where(e => e.Message.Contains(searchString)
-                                          || e.ActionDateTime.ToString().Contains(searchString)
-                                          || e.Author.Contains(searchString));
+                loggersSearchResult = loggersSearchResult.Where(e => e.Message.Contains(searchString)
+                                                             || e.ActionDateTime.ToString().Contains(searchString)
+                                                             || e.Author.Contains(searchString));
             }
 
-            loggers = sortOrder switch
+            loggersSearchResult = sortOrder switch
             {
-                "message" => loggers.OrderBy(e => e.Message),
-                "message_desc" => loggers.OrderByDescending(e => e.Message),
-                "date" => loggers.OrderBy(e => e.ActionDateTime),
-                "date_desc" => loggers.OrderByDescending(e => e.ActionDateTime),
-                "author" => loggers.OrderBy(e => e.Author),
-                "author_desc" => loggers.OrderByDescending(e => e.Author),
-                _ => loggers.OrderBy(e => e.Id),
+                "message" => loggersSearchResult.OrderBy(e => e.Message),
+                "message_desc" => loggersSearchResult.OrderByDescending(e => e.Message),
+                "date" => loggersSearchResult.OrderBy(e => e.ActionDateTime),
+                "date_desc" => loggersSearchResult.OrderByDescending(e => e.ActionDateTime),
+                "author" => loggersSearchResult.OrderBy(e => e.Author),
+                "author_desc" => loggersSearchResult.OrderByDescending(e => e.Author),
+                _ => loggersSearchResult.OrderBy(e => e.Id),
             };
 
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("Logger").Value);
-            return await PaginatedList<Logger>.CreateAsync(loggers.AsNoTracking(), pageNumber ?? 1, pageSize);
+            return await PaginatedList<Logger>.CreateAsync(loggersSearchResult.AsNoTracking(), pageNumber ?? 1, pageSize);
         }
 
-        public async Task ExportAsync()
+        public async Task ExportAsync(List<Logger> logs)
         {
-
-        }
+            try
+            {
+                //using FileStream? fs = new(fileName, FileMode.OpenOrCreate);
+                //await JsonSerializer.SerializeAsync(fs, logs);
+            }
+            catch (Exception ex)
+            {
+                //dialogService.ShowMessage(ex.Message);
+            }
+        }        
     }
 }

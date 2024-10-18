@@ -7,8 +7,7 @@ namespace ToDoApp.Models
     public class Logger()
     {
         [Key]
-        [Column(TypeName = "int")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(200)")]
