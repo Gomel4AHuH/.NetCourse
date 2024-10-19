@@ -4,73 +4,13 @@
     ViewData["Title"] = "Edit";
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        <strong>Error ! </strong>   @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
-    </div>
-}
+<partial name="_AlertMessages" />
 
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
-        <h2 class="text-center mb-5">Edit employee</h2>
         <form asp-action="Edit" enctype="multipart/form-data">
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Last name</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="LastName">
-                    <span asp-validation-for="LastName" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">First name</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="FirstName">
-                    <span asp-validation-for="FirstName" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Middle name</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="MiddleName">
-                    <span asp-validation-for="MiddleName" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Birthday</label>
-                <div class="col-sm-8">
-                    <input type="date" class="form-control" asp-for="Birthday">
-                    <span asp-validation-for="Birthday" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Speciality</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="Speciality">
-                    <span asp-validation-for="Speciality" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Employment date</label>
-                <div class="col-sm-8">
-                    <input type="date" class="form-control" asp-for="EmploymentDate">
-                    <span asp-validation-for="EmploymentDate" class="text-danger" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="offset-sm-4 col-sm-8">
-                    <img src="/photos/@ViewData["EmployeePhotoPath"]" style="width:50px;height:50px;border-radius:50%" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Employee photo</label>
-                <div class="col-sm-8">
-                    <input class="form-control" asp-for="EmployeePhoto">
-                    <span asp-validation-for="EmployeePhoto" class="text-danger" />
-                </div>
-            </div>
-
+            <partial name="_EmployeeVMFormFields"/>
+            
             <div class="row">
                 <div class="offset-sm-4 col-sm-4 d-grid">
                     <input type="submit" value="Save" class="btn btn-primary" />
@@ -84,5 +24,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

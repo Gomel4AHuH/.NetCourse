@@ -7,75 +7,11 @@
 
 <h1>Employees</h1>
 
-@if (TempData["InfoMessage"] != null)
-{
-    <div class="alert alert-info">
-        <strong>Information ! </strong>   @TempData["InfoMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
-    </div>
-}
-else if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        <strong>Success ! </strong>   @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
-    </div>
-}
-else if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        <strong>Error ! </strong>   @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
-    </div>
-}
+<partial name="_AlertMessages"/>
 
-@using (Html.BeginForm())
-{
-    <p>
-        Find by name: @Html.TextBox("SearchString")
-        <input type="submit" class="btn btn-primary" value="Search" />
-        <a asp-action="Index" class="btn btn-primary">Cancel search</a>
-    </p>
-}
+<partial name="_SearchForm"/>
 
-@{
-    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
-    var firstDisabled = (Model.PageIndex == 1) ? "disabled" : "";
-    var lastDisabled = (Model.PageIndex == Model.TotalPages) ? "disabled" : "";
-
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="1"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @firstDisabled">
-        First
-    </a>
-
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="@(Model.PageIndex - 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @prevDisabled">
-        Previous
-    </a>
-
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="@(Model.PageIndex + 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @nextDisabled">
-        Next
-    </a>
-
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-pageNumber="@(Model.TotalPages)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @lastDisabled">
-        Last
-    </a>
-}
+<partial name="_PaginationButtons"/>
 
 <hr />
 
@@ -144,13 +80,9 @@ else if (TempData["ErrorMessage"] != null)
         }
         else
         {
-            <table class="table table-bordered table-hover table-striped">
-                <tbody>
-                    <tr>
-                        No employees avaliable for now.
-                    </tr>
-                </tbody>
-            </table>
+            <tr>
+                No employees avaliable for now.
+            </tr>
         }
     </tbody>
 </table>

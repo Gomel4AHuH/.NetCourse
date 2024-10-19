@@ -1,0 +1,73 @@
+﻿@model ToDoApp.Models.EmployeeVM
+
+<h2 class="text-center mb-5">@ViewData["Title"]</h2>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Last name</label>
+    <div class="col-sm-8">
+        <input class="form-control" asp-for="LastName">
+        <span asp-validation-for="LastName" class="text-danger" />
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">First name</label>
+    <div class="col-sm-8">
+        <input class="form-control" asp-for="FirstName">
+        <span asp-validation-for="FirstName" class="text-danger" />
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Middle name</label>
+    <div class="col-sm-8">
+        <input class="form-control" asp-for="MiddleName">
+        <span asp-validation-for="MiddleName" class="text-danger" />
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Birthday</label>
+    <div class="col-sm-8">
+        <input type="date" class="form-control" asp-for="Birthday">
+        <span asp-validation-for="Birthday" class="text-danger" />
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Speciality</label>
+    <div class="col-sm-8">
+        <input class="form-control" asp-for="Speciality">
+        <span asp-validation-for="Speciality" class="text-danger" />
+    </div>
+</div>
+<!--
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Speciality</label>
+                <div class="col-sm-8">
+                    <select class="form-select" aria-label="Default select example">
+                        <option selected>Choose position</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                </div>
+            </div>
+            -->
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Employment date</label>
+    <div class="col-sm-8">
+        <input type="date" class="form-control" asp-for="EmploymentDate">
+        <span asp-validation-for="EmploymentDate" class="text-danger" />
+    </div>
+</div>
+@if (ViewData["EmployeePhotoPath"] != null)
+{
+    <div class="row mb-3">
+        <div class="offset-sm-4 col-sm-8">
+            <img src="/photos/@ViewData["EmployeePhotoPath"]" style="width:50px;height:50px;border-radius:50%" />
+        </div>
+    </div>
+}
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Employee photo</label>
+    <div class="col-sm-8">
+        <input class="form-control" asp-for="EmployeePhoto">
+        <span asp-validation-for="EmployeePhoto" class="text-danger" />
+    </div>
+</div>

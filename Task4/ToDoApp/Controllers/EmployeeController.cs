@@ -6,7 +6,7 @@ using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
-
+    
     public class EmployeeController(IEmployeeService service, ILoggerService loggerService, IToDoService toDoService, UserManager<ToDoAppUser> userManager) : Controller
     {
         private readonly IEmployeeService _employeeService = service;
@@ -23,7 +23,7 @@ namespace ToDoApp.Controllers
 
         #region API
         //[HttpGet("", Name = nameof(GetAll))]
-        //[Route("GetAll")]        
+        //[Route("GetAll")]
         public async Task<ActionResult<IEnumerable<Employee>>> GetAll()
         {
             return await _employeeService.GetAllAsync();
@@ -121,7 +121,8 @@ namespace ToDoApp.Controllers
         // GET: EmployeeController/Create
         public IActionResult Create()
         {
-            return PartialView();
+            //return PartialView();
+            return View();
         }
 
         // POST: EmployeeController/Create

@@ -1,0 +1,38 @@
+﻿@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    var firstDisabled = (Model.PageIndex == 1) ? "disabled" : "";
+    var lastDisabled = (Model.PageIndex == Model.TotalPages) ? "disabled" : "";
+
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="1"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @firstDisabled">
+        First
+    </a>
+
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="@(Model.PageIndex - 1)"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="@(Model.PageIndex + 1)"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+
+    <a asp-action="Index"
+        asp-route-sortOrder="@ViewData["CurrentSort"]"
+        asp-route-pageNumber="@(Model.TotalPages)"
+        asp-route-currentFilter="@ViewData["CurrentFilter"]"
+        class="btn btn-primary @lastDisabled">
+        Last
+    </a>
+}

@@ -1,0 +1,45 @@
+﻿@model ToDoApp.Models.Employee
+
+<h2 class="text-center mb-5">@ViewData["Title"]</h2>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Last name</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.LastName)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">First name</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.FirstName)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Middle name</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.MiddleName)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Birthday</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.Birthday)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Speciality</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.Speciality)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Employment date</label>
+    <div class="col-sm-8">
+        @Html.DisplayFor(model => model.EmploymentDate)
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Employee photo</label>
+    <div class="col-sm-8">
+        <img src="/photos/@Model.EmployeePhotoPath" style="width:50px;height:50px;border-radius:50%" />
+    </div>
+</div>

@@ -40,10 +40,6 @@ namespace ToDoApp.Controllers
 
                 List<Logger> loggerList = await _loggerService.GetAllAsync(sortOrder, searchString, pageNumber);
 
-                /*List<Logger> loggerListAll = await _loggerService.GetAllAsync(sortOrder, searchString, null);
-                List<Logger> loggerListAll = _loggerService.loggerSearchResult;
-                ViewData["LoggerListAll"] = loggerListAll.Count;*/
-
                 if (loggerList.Count == 0)
                 {
                     Message = "No logs available for now.";

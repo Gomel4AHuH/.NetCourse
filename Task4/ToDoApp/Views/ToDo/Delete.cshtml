@@ -4,35 +4,11 @@
     ViewData["Title"] = "Delete";
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        <strong>Error ! </strong>   @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
-    </div>
-}
+<partial name="_AlertMessages" />
 
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
-        <h2 class="text-center mb-5">Delete todo</h2>
-        <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Name</label>
-            <div class="col-sm-8">
-                @Html.DisplayFor(model => model.Name)
-            </div>
-        </div>
-        <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Description</label>
-            <div class="col-sm-8">
-                @Html.DisplayFor(model => model.Description)
-            </div>
-        </div>
-        <div class="row mb-3">
-            <label class="col-sm-4 col-form-label">Status</label>
-            <div class="col-sm-8">
-                @Html.DisplayFor(model => model.IsClosed)
-            </div>
-        </div>
+        <partial name="_ToDoFormFields"/>
 
         <form asp-action="Delete">
             <div class="row">
