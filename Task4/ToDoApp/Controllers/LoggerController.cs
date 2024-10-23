@@ -51,7 +51,7 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _logger.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ToDoApp.Areas.Identity.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
@@ -101,7 +102,7 @@ namespace ToDoApp.Controllers
                 ViewData["CurrentFilter"] = searchString;
 
                 List<Employee> employeeList = await _employeeService.GetAllAsync(sortOrder, searchString, pageNumber);
-
+                
                 if (employeeList.Count == 0)
                 {
                     Message = "No employees available for now.";
@@ -113,7 +114,7 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }           
         }        
@@ -135,13 +136,13 @@ namespace ToDoApp.Controllers
                 await _employeeService.CreateAsync(employeeVM);
                 Message = $"Employee created successfully.";
                 TempData["SuccessMessage"] = Message;
-                await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
@@ -156,7 +157,7 @@ namespace ToDoApp.Controllers
                 {
                     Message = "Employee details not available with the Id : " + id;
                     TempData["ErrorMessage"] = Message;
-                    await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                    //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                     return RedirectToAction("Index");
                 }
 
@@ -169,7 +170,7 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
@@ -185,13 +186,13 @@ namespace ToDoApp.Controllers
                 await _employeeService.UpdateAsync(employeeVM, employee);
                 Message = $"Employee with id {id} updated successfully.";
                 TempData["SuccessMessage"] = Message;
-                await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
@@ -206,7 +207,7 @@ namespace ToDoApp.Controllers
                 {
                     Message = "Employee details not available with the Id : " + id;
                     TempData["ErrorMessage"] = Message;
-                    await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                    //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                     return RedirectToAction("Index");
                 }
 
@@ -216,7 +217,7 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
@@ -239,13 +240,13 @@ namespace ToDoApp.Controllers
                 await _employeeService.DeleteAsync(id);
                 Message = $"Employee with id {id} and todos with ids: {ids} deleted successfully.";
                 TempData["SuccessMessage"] = Message;
-                await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }
@@ -266,13 +267,13 @@ namespace ToDoApp.Controllers
                 await _employeeService.CreateToDoAsync(toDo, id);
                 Message = $"ToDo for employee with id {id} created successfully.";
                 TempData["SuccessMessage"] = Message;
-                await _loggerService.CreateAsync(Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }
         }

@@ -2,6 +2,13 @@
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 using ToDoApp.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Security.Policy;
+using System.Text;
+using System.Net.Http;
+using Elfie.Serialization;
 
 namespace ToDoApp.Services
 {
@@ -10,17 +17,42 @@ namespace ToDoApp.Services
         private readonly ToDoAppDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
-
-        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment, IConfiguration configuration)
+        private readonly IHttpClientFactory _httpClientFactory;
+        
+        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _environment = environment;
             _configuration = configuration;
+            _httpClientFactory = httpClientFactory;            
+        }
+        
+        public async Task<List<Employee>> GetAllAsync()
+        {            
+            return await _context.Employees.ToListAsync();
         }
 
-        public async Task<List<Employee>> GetAllAsync()
+        public async Task<string> GetHttpResponseAsync(string api)
         {
-            return await _context.Employees.ToListAsync();
+            try
+            {
+                string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
+                HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
+                
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                                
+                HttpResponseMessage response = client.GetAsync(api).Result;
+
+                if (!response.IsSuccessStatusCode) return "";
+                
+                return await response.Content.ReadAsStringAsync();
+
+            }
+            catch
+            {
+                //_logger.LogError(e, "Something went wrong while fetching data from external service");
+                return "";
+            }            
         }
         public async Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
@@ -29,9 +61,13 @@ namespace ToDoApp.Services
                 pageNumber = 1;
             }
 
-            IQueryable<Employee> employees = from e in _context.Employees
-                                       select e;
-
+            string responseBody = await GetHttpResponseAsync("api/employees");
+            //if (responseBody != null)
+            //{
+            //IQueryable<Employee> employees1 = JsonConvert.DeserializeObject<List<Employee>>(responseBody).AsQueryable();
+            //}
+            IEnumerable<Employee> employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
+            
             if (!String.IsNullOrEmpty(searchString))
             {
                 employees = employees.Where(e => e.LastName.Contains(searchString)
@@ -41,7 +77,7 @@ namespace ToDoApp.Services
                                               || e.Speciality.Contains(searchString)
                                               || e.EmploymentDate.ToString().Contains(searchString));
             }
-
+            
             employees = sortOrder switch
             {
                 "id" => employees.OrderBy(e => e.Id),
@@ -61,7 +97,8 @@ namespace ToDoApp.Services
             };
 
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("Employee").Value);
-            return await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
+            
+            return await PaginatedList<Employee>.CreateAsync(employees, pageNumber ?? 1, pageSize);
         }       
 
         public async Task<Employee> GetByIdAsync(Guid id)

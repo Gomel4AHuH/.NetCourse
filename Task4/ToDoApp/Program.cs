@@ -4,6 +4,7 @@ using ToDoApp.Areas.Identity.Data;
 using ToDoApp.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ToDoAppAuthContextConnection") ?? throw new InvalidOperationException("Connection string 'ToDoAppAuthContextConnection' not found.");
 
@@ -15,6 +16,20 @@ builder.Services.AddScoped<IToDoService, ToDoService>();
 builder.Services.AddScoped<ILoggerService, LoggerService>();
 
 builder.Services.AddDefaultIdentity<ToDoAppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ToDoAppAuthContext>();
+
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(
+    builder.Configuration["ToDoAppHTTPClient:Name"],
+    client =>
+    {
+        // Set the base address of the named client.
+        client.BaseAddress = new Uri(builder.Configuration["ToDoAppHTTPClient:Url"]);
+    });
+/*builder.Services.AddHttpClient<IEmployeeService, EmployeeService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ToDoAppAPIUrl"]);
+});*/
+//builder.Services.AddHttpClient<IEmployeeService, EmployeeService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

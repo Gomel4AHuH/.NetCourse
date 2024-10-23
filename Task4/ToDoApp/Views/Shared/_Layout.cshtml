@@ -28,8 +28,10 @@
                         <li class="nav-item">
                             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ToDoApp</a>
                         </li>
-                    @if (SignInManager.IsSignedIn(User))
-                    {
+                        <!--
+                            i@f (SignInManager.IsSignedIn(User))
+                            {
+                        -->                    
                         <li class="nav-item">
                             <a class="navbar-brand" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
                         </li>
@@ -39,7 +41,10 @@
                         <li class="nav-item">
                             <a class="navbar-brand" asp-area="" asp-controller="Logger" asp-action="Index">Logs</a>
                         </li>
-                    }
+                    <!--
+                            }
+                    -->
+                    
                     </ul>                
             </div>
             <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
