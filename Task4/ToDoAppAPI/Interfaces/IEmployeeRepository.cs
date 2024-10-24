@@ -9,5 +9,7 @@ namespace ToDoAppAPI.Interfaces
         Task<Employee?> GetByIdAsync(string id);
         Task<Employee?> UpdateAsync(string id, Employee employee);
         Task<Employee?> DeleteAsync(string id);
+        Task<LoginedDto?> LoginAsync(LoginDto loginDto);
+        Task<NewEmployeeDto?> RegisterAsync(RegisterDto registerDto);
     }
 }

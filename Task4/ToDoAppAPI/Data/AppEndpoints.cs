@@ -72,7 +72,7 @@ namespace ToDoAppAPI.Data
             todos.MapGet("/", [Authorize] async (ApplicationDbContext db) =>
                 await db.ToDos.ToListAsync());
 
-            todos.MapGet("/{id}", [Authorize] async (Guid id, ApplicationDbContext db) =>
+            todos.MapGet("/{id}", [Authorize] async (string id, ApplicationDbContext db) =>
                 await db.ToDos.FindAsync(id)
                     is ToDo todo
                         ? Results.Ok(todo)
@@ -86,7 +86,7 @@ namespace ToDoAppAPI.Data
                 return Results.Created($"/todos/{todo.Id}", todo);
             });
 
-            todos.MapPut("/{id}", [Authorize] async (Guid id, ToDo inputTodo, ApplicationDbContext db) =>
+            todos.MapPut("/{id}", [Authorize] async (string id, ToDo inputTodo, ApplicationDbContext db) =>
             {
                 var todo = await db.ToDos.FindAsync(id);
 
@@ -101,7 +101,7 @@ namespace ToDoAppAPI.Data
                 return Results.NoContent();
             });
 
-            todos.MapDelete("/{id}", [Authorize] async (Guid id, ApplicationDbContext db) =>
+            todos.MapDelete("/{id}", [Authorize] async (string id, ApplicationDbContext db) =>
             {
                 if (await db.ToDos.FindAsync(id) is ToDo todo)
                 {

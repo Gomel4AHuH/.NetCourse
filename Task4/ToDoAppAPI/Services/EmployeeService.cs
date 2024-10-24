@@ -22,7 +22,7 @@ namespace ToDoAppAPI.Services
         {
             Employee employee = new()
             {
-                UserName = registerDto.Username,
+                UserName = registerDto.UserName,
                 Email = registerDto.Email
             };
 

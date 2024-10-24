@@ -1,7 +1,7 @@
 ﻿
 namespace ToDoAppAPI.Dtos.Employee
 {
-    public class EmployeeDto
+    public record EmployeeDto
     {
         public string Id { get; set; }
         public string UserName { get; set; }

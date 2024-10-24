@@ -4,27 +4,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ToDoAppAPI.Models
 {
-    public class ToDo(Guid id, string name, string description, bool isClosed, Guid employeeId)
+    public class ToDo
     {
         [Key]
-        public Guid Id { get; set; } = id;
+        [Column(TypeName = "nvarchar(450)")]
+        public string Id { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(50)")]
         [DisplayName("Name")]
-        public required string Name { get; set; } = name;
+        public required string Name { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(100)")]
         [DisplayName("Description")]
-        public required string Description { get; set; } = description;
+        public required string Description { get; set; }
 
         [Column(TypeName = "bit")]
         [DisplayName("IsClosed")]
-        public bool IsClosed { get; set; } = isClosed;
+        public bool IsClosed { get; set; }
 
         [Required]
         [DisplayName("EmployeeId")]
-        public Guid EmployeeId { get; set; } = employeeId;
+        [Column(TypeName = "nvarchar(450)")]
+        public string EmployeeId { get; set; }
     }
 }

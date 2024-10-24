@@ -2,10 +2,10 @@
 
 namespace ToDoAppAPI.Dtos.Employee
 {
-    public class RegisterDto
+    public record RegisterDto
     {
         [Required]
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
         [Required]
         [EmailAddress]
         public string? Email { get; set; }
@@ -22,7 +22,8 @@ namespace ToDoAppAPI.Dtos.Employee
         public string? Speciality { get; set; }
         [Required]
         public DateOnly? EmploymentDate { get; set; }
-        //public string? EmployeePhotoPath { get; set; }
+        
+        [Display(Name = "File")]
         public IFormFile? EmployeePhoto { get; set; }
     }
 }

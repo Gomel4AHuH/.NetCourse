@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using ToDoAppAPI.Data;
+using ToDoAppAPI.Dtos.Employee;
 using ToDoAppAPI.Interfaces;
 using ToDoAppAPI.Models;
 using ToDoAppAPI.Repositories;
@@ -18,8 +19,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 //builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 //builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("EmployeeList"));
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IToDoRepository, ToDoRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<Employee>();
+//builder.Services.AddScoped<Employee>();
+//builder.Services.AddScoped<ToDo>();
 
 builder.Services.AddIdentity<Employee, IdentityRole>(options => 
 {

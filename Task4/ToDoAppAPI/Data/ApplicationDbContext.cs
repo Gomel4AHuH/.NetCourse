@@ -16,7 +16,7 @@ namespace ToDoAppAPI.Data
         public DbSet<Employee> Employees { get; set; } = default!;
         public DbSet<ToDo> ToDos { get; set; } = default!;
 
-        protected override async void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
@@ -31,17 +31,17 @@ namespace ToDoAppAPI.Data
                     NormalizedName = "Employee"
                 }
             ];
-
+            /*
             List<IdentityUser> users =
             [
                 new() {
                     UserName = "Manager",
                     Email = "manager@gmail.com"
                 }
-            ];
+            ];*/
             
             modelBuilder.Entity<IdentityRole>().HasData(roles);
-            modelBuilder.Entity<IdentityUser>().HasData(users);
+            //modelBuilder.Entity<IdentityUser>().HasData(users);
         }
     }
 }
