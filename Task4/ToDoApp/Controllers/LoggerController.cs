@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using ToDoApp.Areas.Identity.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
 
@@ -10,21 +8,19 @@ namespace ToDoApp.Controllers
     {
         private readonly ILoggerService _loggerService;
         private readonly ILoggerService _logger;
-        private readonly UserManager<ToDoAppUser> _userManager;
         private string Message = "";
 
-        public LoggerController(ILoggerService loggerService, ILoggerService logger, UserManager<ToDoAppUser> userManager)
+        public LoggerController(ILoggerService loggerService, ILoggerService logger)
         {
             _loggerService = loggerService;
             _logger = logger;
-            _userManager = userManager;
         }
 
-        private string GetUserMail()
+        /*private string GetUserMail()
         {
             string name = _userManager.GetUserName(User);
             return name;
-        }
+        }*/
 
         // GET: LoggerController
         public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
@@ -38,7 +34,8 @@ namespace ToDoApp.Controllers
 
                 ViewData["CurrentFilter"] = searchString;
 
-                List<Logger> loggerList = await _loggerService.GetAllAsync(sortOrder, searchString, pageNumber);
+                List<Logger> loggerList = [];
+                    //await _loggerService.GetAllAsync(sortOrder, searchString, pageNumber);
 
                 if (loggerList.Count == 0)
                 {
@@ -59,7 +56,7 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Export(List<Logger> logs, int count)
         {
-            await _loggerService.ExportAsync(logs);
+            //await _loggerService.ExportAsync(logs);
             return View();
         }
     }

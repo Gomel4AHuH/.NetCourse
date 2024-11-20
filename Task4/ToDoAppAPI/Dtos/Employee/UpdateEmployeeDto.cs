@@ -1,16 +1,23 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace ToDoAppAPI.Dtos.Employee
 {
     public record UpdateEmployeeDto
     {
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }        
-        public string LastName { get; set; }
-        public string MiddleName { get; set; }
+        [Required]
+        public string? FirstName { get; set; }
+        [Required]
+        public string? LastName { get; set; }
+        public string? MiddleName { get; set; }
+        [Required]
         public DateOnly? Birthday { get; set; }
+        [Required]
         public string? Speciality { get; set; }
+        [Required]
         public DateOnly? EmploymentDate { get; set; }
-        public string? EmployeePhotoPath { get; set; }
+        [Display(Name = "File")]
+        public IFormFile? EmployeePhoto { get; set; }
+        public byte[]? EmployeePhotoBytes { get; set; }
     }
 }

@@ -18,23 +18,35 @@ namespace ToDoAppAPI.Mappers
                 Birthday = employee.Birthday,
                 Speciality = employee.Speciality,
                 EmploymentDate = employee.EmploymentDate,
-                EmployeePhotoPath = employee.EmployeePhotoPath        
+                EmployeePhoto = employee.EmployeePhoto
             };            
-        }              
+        }
+
+        public static Employee ToEmployeeDto(this RegisterDto registerDto)
+        {
+            return new Employee
+            {
+                UserName = registerDto.UserName,
+                Email = registerDto.Email,
+                FirstName = registerDto.FirstName,
+                LastName = registerDto.LastName,
+                MiddleName = registerDto.MiddleName,
+                Birthday = registerDto.Birthday,
+                Speciality = registerDto.Speciality,
+                EmploymentDate = registerDto.EmploymentDate
+            };
+        }
 
         public static Employee ToEmployeeFromUpdate(this UpdateEmployeeDto updateEmployeeDto)
         {
             return new Employee
             {
-                UserName = updateEmployeeDto.UserName,
-                Email = updateEmployeeDto.Email,
                 FirstName = updateEmployeeDto.FirstName,
                 LastName = updateEmployeeDto.LastName,
                 MiddleName = updateEmployeeDto.MiddleName,
                 Birthday = updateEmployeeDto.Birthday,
                 Speciality = updateEmployeeDto.Speciality,
-                EmploymentDate = updateEmployeeDto.EmploymentDate,
-                EmployeePhotoPath = updateEmployeeDto.EmployeePhotoPath
+                EmploymentDate = updateEmployeeDto.EmploymentDate                
             };
         }
 
@@ -50,7 +62,7 @@ namespace ToDoAppAPI.Mappers
                 Birthday = employee.Birthday,
                 Speciality = employee.Speciality,
                 EmploymentDate = employee.EmploymentDate,
-                EmployeePhotoPath = employee.EmployeePhotoPath
+                EmployeePhoto = employee.EmployeePhoto
             };
         }
     }

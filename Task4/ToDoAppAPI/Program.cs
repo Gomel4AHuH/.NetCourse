@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 using ToDoAppAPI.Data;
-using ToDoAppAPI.Dtos.Employee;
 using ToDoAppAPI.Interfaces;
 using ToDoAppAPI.Models;
 using ToDoAppAPI.Repositories;
@@ -16,22 +16,42 @@ var config = builder.Configuration;
 
 var connectionString = builder.Configuration.GetConnectionString("ToDoAppAPIContextConnection") ?? throw new InvalidOperationException("Connection string 'ToDoAppAPIContextConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-//builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
-//builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("EmployeeList"));
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IToDoRepository, ToDoRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-//builder.Services.AddScoped<Employee>();
-//builder.Services.AddScoped<ToDo>();
+
+builder.Services.AddProblemDetails(options => 
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Instance =
+            $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+
+        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+
+        var activity = context.HttpContext.Features.Get<IHttpActivityFeature>()?.Activity;
+
+        context.ProblemDetails.Extensions.TryAdd("traceId", activity.Id);
+    };
+});
+
+builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(config));
+
 
 builder.Services.AddIdentity<Employee, IdentityRole>(options => 
 {
-    options.Password.RequireDigit = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 12;    
-}).AddEntityFrameworkStores<ApplicationDbContext>();
+    options.Password.RequireDigit = Convert.ToBoolean(config["Identity:PasswordRequireDigit"]);
+    options.Password.RequireUppercase = Convert.ToBoolean(config["Identity:PasswordRequireUppercase"]);
+    options.Password.RequireLowercase = Convert.ToBoolean(config["Identity:PasswordRequireLowercase"]);
+    options.Password.RequireNonAlphanumeric = Convert.ToBoolean(config["Identity:PasswordRequireNonAlphanumeric"]);
+    options.Password.RequiredLength = Convert.ToInt32(config["Identity:PasswordRequireLength"]);
+    options.User.RequireUniqueEmail = Convert.ToBoolean(config["Identity:UserRequireUniqueEmail"]);
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -41,7 +61,8 @@ builder.Services.AddAuthentication(options =>
     options.DefaultSignOutScheme =
     options.DefaultSignInScheme = 
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -53,6 +74,16 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+            if (!string.IsNullOrEmpty(accessToken))
+                context.Token = accessToken;
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthentication();
@@ -62,53 +93,24 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
 var app = builder.Build();
 
-//app.MapEndpoints();
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+//app.UseStaticFiles();
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -13,10 +13,10 @@
         <form asp-action="Delete">
             <div class="row">
                 <div class="offset-sm-4 col-sm-4 d-grid">
-                    <input type="submit" asp-route-id="@Model?.Id" value="Delete" class="btn btn-danger" />
+                    <input type="submit" asp-route-id="@Model?.Id" asp-route-employeeId="@Model?.EmployeeId" value="Delete" class="btn btn-danger" />
                 </div>
                 <div class="col-sm-4 d-grid">
-                    <a asp-action="IndexEmployee" asp-route-id="@Model?.EmployeeId" class="btn btn-info">Back to todos</a>
+                    <a asp-action="IndexByEmployee" asp-route-id="@Model?.EmployeeId" class="btn btn-info">Back to todos</a>
                 </div>
             </div>
         </form>

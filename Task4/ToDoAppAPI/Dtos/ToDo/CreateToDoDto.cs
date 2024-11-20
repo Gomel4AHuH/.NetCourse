@@ -9,5 +9,7 @@ namespace ToDoAppAPI.Dtos.ToDo
 
         public bool IsClosed { get; set; }
 
+        public string EmployeeId { get; set; }
+
     }
 }

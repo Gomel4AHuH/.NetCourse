@@ -1,19 +1,57 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using ToDoApp.Areas.Identity.Data
-
-@inject SignInManager<ToDoAppUser> SignInManager
-@inject UserManager<ToDoAppUser> UserManager
-
-<ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
+﻿<ul class="navbar-nav">
+<!--if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello UserManager.GetUserName(User)!</a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm" class="form-inline" asp-page="/Employee/Logout" asp-route-returnUrl="Url.Action("Index", "Home", new { area = "" })">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+            </form>
+        </li>
+    }
+-->
+    
     <li class="nav-item">
-        <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+        <!--
+            UserManager.GetUserName(User)
+        <a id="manage" class="nav-link text-dark" asp-page="/Account/Manage/Index" title="Manage">Hello UserManager.GetUserName(User)!</a>
+        User.Identity.IsAuthenticated
+        -->
+        @if (true)
+        {
+            <form id="logoutForm" class="form-inline" asp-page="/Employee/Logout">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+            </form>
+        }
+        <form id="logoutForm" class="form-inline" asp-page="/Employee/Logout">
             <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
         </form>
+        <a asp-controller="Employee" asp-action="Logout">Logout</a>
+        <!--
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Avatar
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Edit profile</a></li>
+                <li><a class="dropdown-item" href="#">Change username</a></li>
+                <li><a class="dropdown-item" href="#">Change email</a></li>
+                <li><a class="dropdown-item" href="#">Change password</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Logout</a></li>
+            </ul>
+        </div>
+        -->
     </li>
-}
+    <!--
+    <li class="nav-item">
+        <form id="logoutForm" class="form-inline" asp-page="/Employee/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+        </form>
+        <form asp-controller="Employee" asp-action="Logout" method="post">
+            <button type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+        </form>
+    </li>
+    -->
 </ul>

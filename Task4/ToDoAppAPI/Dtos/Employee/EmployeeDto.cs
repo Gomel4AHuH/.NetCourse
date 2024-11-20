@@ -12,6 +12,6 @@ namespace ToDoAppAPI.Dtos.Employee
         public DateOnly? Birthday { get; set; }
         public string? Speciality { get; set; }
         public DateOnly? EmploymentDate { get; set; }
-        public string? EmployeePhotoPath { get; set; }
+        public byte[]? EmployeePhoto { get; set; }
     }
 }

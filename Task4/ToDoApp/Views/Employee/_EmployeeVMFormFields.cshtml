@@ -1,6 +1,34 @@
-﻿@model ToDoApp.Models.EmployeeVM
+﻿<!--
+    model ToDoApp.Models.EmployeeVM
+-->
+@model ToDoApp.Models.Employee
 
 <h2 class="text-center mb-5">@ViewData["Title"]</h2>
+
+<!--
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">UserName</label>
+    <div class="col-sm-8">
+        Html.DisplayFor(model => model.UserName)
+        <a asp-controller="Employee" asp-action="ChangeUserName" asp-route-id="@Model.Id">Change username</a></p>
+        <a asp-action="ChangeUserName" asp-route-id="@Model.Id" class="btn btn-primary">Change UserName</a>
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Email</label>
+    <div class="col-sm-8">
+        Html.DisplayFor(model => model.Email)
+        <a asp-controller="Employee" asp-action="ChangeEmail" asp-route-id="@Model.Id">Change email</a>
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-4 col-form-label">Password</label>
+    <div class="col-sm-8">
+        Html.DisplayFor(model => model.Password)
+        <a asp-controller="Employee" asp-action="ChangePassword" asp-route-id="@Model.Id">Change password</a>
+    </div>
+</div>
+-->
 <div class="row mb-3">
     <label class="col-sm-4 col-form-label">Last name</label>
     <div class="col-sm-8">
@@ -56,11 +84,11 @@
         <span asp-validation-for="EmploymentDate" class="text-danger" />
     </div>
 </div>
-@if (ViewData["EmployeePhotoPath"] != null)
+@if (Model.EmployeePhotoImage != null)
 {
     <div class="row mb-3">
         <div class="offset-sm-4 col-sm-8">
-            <img src="/photos/@ViewData["EmployeePhotoPath"]" style="width:50px;height:50px;border-radius:50%" />
+            <img src="@Model.EmployeePhotoImage" style="width:50px;height:50px;border-radius:50%" />
         </div>
     </div>
 }

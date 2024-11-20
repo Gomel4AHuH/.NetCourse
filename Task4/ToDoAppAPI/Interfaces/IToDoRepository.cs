@@ -1,4 +1,5 @@
-﻿using ToDoAppAPI.Models;
+﻿using ToDoAppAPI.Dtos.ToDo;
+using ToDoAppAPI.Models;
 
 namespace ToDoAppAPI.Interfaces
 {
@@ -10,5 +11,9 @@ namespace ToDoAppAPI.Interfaces
         Task<ToDo?> UpdateAsync(string id, ToDo ToDo);
         Task<ToDo?> DeleteAsync(string id);
         Task<Employee?> GetEmployeeByIdAsync(string id);
+        Task<List<ToDo>> GetAllByEmployeeIdAsync(string id);
+        Task<ToDo?> DuplicateAsync(string id);
+        Task<ToDo?> StatusChangeAsync(string id);
+        Task<string> ReassignAsync(ReassignDto reassignDto);
     }
 }

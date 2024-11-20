@@ -7,8 +7,10 @@ namespace ToDoAppAPI.Dtos.Employee
         [Required]
         public string Email { get; set; }
         [Required]
-        public string OldPassword { get; set; }
+        public string CurrentPassword { get; set; }
         [Required]
         public string NewPassword { get; set; }
+        [Required]
+        public string NewPasswordConfirmation { get; set; }
     }
 }

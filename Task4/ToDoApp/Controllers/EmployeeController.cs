@@ -1,92 +1,134 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using ToDoApp.Areas.Identity.Data;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
+using ToDoApp.Dtos.Employee.Authorization;
+using ToDoApp.Mappers;
+using ToDoApp.Dtos.Employee;
+using System.Configuration;
+using NuGet.Configuration;
+using ToDoAppAPI.Dtos.Token;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ToDoApp.Controllers
 {
-    
-    public class EmployeeController(IEmployeeService service, ILoggerService loggerService, IToDoService toDoService, UserManager<ToDoAppUser> userManager) : Controller
+    public class EmployeeController(IEmployeeService service, IConfiguration configuration) : Controller
     {
         private readonly IEmployeeService _employeeService = service;
-        private readonly IToDoService _toDoService = toDoService;
-        private readonly ILoggerService _loggerService = loggerService;
-        private readonly UserManager<ToDoAppUser> _userManager = userManager;
+        private readonly IConfiguration _configuration = configuration;
         private string? Message;
 
-        private string GetUserMail()
+        #region Authorization
+        [HttpGet]
+        public IActionResult Login()
         {
-            string name = _userManager.GetUserName(User);
-            return name;
+            return View();
         }
-
-        #region API
-        //[HttpGet("", Name = nameof(GetAll))]
-        //[Route("GetAll")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetAll()
+                
+        public async Task<IActionResult> Login(LoginDto loginModel)
         {
-            return await _employeeService.GetAllAsync();
-        }
-
-        //[HttpGet("{id:int}", Name = nameof(GetEmployee))]
-        //[Route("GetById")]
-        public async Task<ActionResult<Employee>> GetEmployee(Guid id)
-        {
-            Employee employee = await _employeeService.GetByIdAsync(id);
-
-            if (employee == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound("Employee not found.");
+                return View(loginModel);
             }
 
-            return employee;
-        }
-        
-        //[HttpPost("{employeeVM}", Name = nameof(AddEmployee))]
-        //[Route("Add")]
-        public async Task<ActionResult<Employee>> AddEmployee(EmployeeVM employeeVM)
-        {
-            await _employeeService.CreateAsync(employeeVM);
-            return NoContent();
-        }
-        /*
-        [HttpPost]
-        [Route("Update")]
-        public async Task<IActionResult> UpdateEmployee(Guid id)
-        {
-            Employee employee = await _employeeService.GetByIdAsync(id);
+            HttpResponseMessage response = await _employeeService.LoginAsync(loginModel);
+            
+            var test = response.Content.ReadAsStringAsync();
+            
+            string strResult = response.Content.ReadAsStringAsync().Result;
 
-            if (employee == null)
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            TokenDto tokenDto = new(arrResult["accessToken"].ToString(), arrResult["refreshToken"].ToString());
+
+            SetTokensInsideCookie(tokenDto, HttpContext);
+
+            if (response.IsSuccessStatusCode)
+            {                
+                return RedirectToAction("Index", "Home");
+            }
+            else
             {
-                return NotFound("Employee not found.");
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(loginModel);
+            }
+        }
+        private void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context)
+        {
+            context.Response.Cookies.Append("accessToken", tokenDto.AccessToken,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddHours(Convert.ToDouble(_configuration["JwtSettings:expiryInHours"])),
+                    HttpOnly = true,
+                    IsEssential = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+
+            context.Response.Cookies.Append("refreshToken", tokenDto.RefreshToken,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddDays(7),
+                    HttpOnly = true,
+                    IsEssential = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+        }
+
+        public async Task<IActionResult> Logout()
+        {            
+            HttpResponseMessage response = await _employeeService.LogoutAsync();
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+                
+        public async Task<IActionResult> Register(RegisterDto registerModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(registerModel);
             }
 
-            await _employeeService.UpdateAsync(employee);
+            HttpResponseMessage response = await _employeeService.RegisterAsync(registerModel);
 
-            return NoContent();
-        }*/
-        
-        //Access to the path 'D:\Work\Education\.NetCourse\Task4\ToDoApp\wwwroot\photos\' is denied.
-        //[HttpDelete("{id:int}", Name = nameof(DeleteEmployee))]
-        //[Route("Delete")]
-        public async Task<IActionResult> DeleteEmployee(Guid id)
-        {
-            Employee employee = await _employeeService.GetByIdAsync(id);
-            if (employee == null)
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
             {
-                return NotFound();
+                return RedirectToAction("Index", "Home");
             }
-
-            await _employeeService.DeleteAsync(id);
-
-            return NoContent();
+            else
+            {
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(registerModel);
+            }
         }
         #endregion
 
-        #region Actions
-        // GET: EmployeeController
+        #region Indexes
         public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
             try
@@ -114,167 +156,241 @@ namespace ToDoApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
                 return View();
             }           
-        }        
-
-        // GET: EmployeeController/Create
-        public IActionResult Create()
-        {
-            //return PartialView();
-            return View();
         }
+        #endregion
 
-        // POST: EmployeeController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EmployeeVM employeeVM)
-        {            
-            try
-            {
-                await _employeeService.CreateAsync(employeeVM);
-                Message = $"Employee created successfully.";
-                TempData["SuccessMessage"] = Message;
-                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
-                return View();
-            }
-        }
-
-        // GET: EmployeeController/Edit/5
+        #region Actions
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            try
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
             {
-                Employee employee = await _employeeService.GetByIdAsync(id);
-                if (employee == null)
-                {
-                    Message = "Employee details not available with the Id : " + id;
-                    TempData["ErrorMessage"] = Message;
-                    //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                    return RedirectToAction("Index");
-                }
-
-                EmployeeVM employeeVM = _employeeService.EmployeeToEmployeeVM(employee);
-
-                ViewData["EmployeePhotoPath"] = employee.EmployeePhotoPath;
-
-                return View(employeeVM);
+                Message = "Employee details not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
-                return View();
-            }
+
+            string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
+            //SelectList selectList = new(specialities);
+            //ViewData["Specialities"] = selectList;
+            
+            ViewData["Specialities"] = specialities;
+            ViewData["Email"] = employee.Email;
+            ViewData["UserName"] = employee.UserName;
+
+            return View(employee.ToEditEmployeeDto());
         }
-
-        // POST: EmployeeController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, EmployeeVM employeeVM)
+                
+        public async Task<IActionResult> Edit(Guid id, EditEmployeeDto editEmployeeDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                Employee employee = await _employeeService.GetByIdAsync(id);
-                await _employeeService.UpdateAsync(employeeVM, employee);
+                return View(editEmployeeDto);
+            }
+
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee details not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("Index");
+            }
+
+            HttpResponseMessage response = await _employeeService.UpdateAsync(editEmployeeDto, employee);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
+            {
                 Message = $"Employee with id {id} updated successfully.";
                 TempData["SuccessMessage"] = Message;
-                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            else
             {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                ModelState.AddModelError("", arrResult["detail"].ToString());
                 return View();
             }
         }
 
-        // GET: EmployeeController/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
-            try
-            {
-                Employee employee = await _employeeService.GetByIdAsync(id);
-                if (employee == null)
-                {
-                    Message = "Employee details not available with the Id : " + id;
-                    TempData["ErrorMessage"] = Message;
-                    //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                    return RedirectToAction("Index");
-                }
-
-                return View(employee);
-                //return PartialView("Details", employee);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
-                return View();
-            }
-        }
-
-        // GET: EmployeeController/Delete/5
-        public async Task<IActionResult> Delete(Guid id)
-        {
             Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee details not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("Index");
+            }
+
             return View(employee);
         }
 
-        // POST: EmployeeController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee deleting not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("Index");
+            }
+
+            return View(employee);            
+        }
+                
         public async Task<IActionResult> Delete(Guid id, IFormCollection collection)
         {
-            try
+            HttpResponseMessage response = await _employeeService.DeleteAsync(id);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
             {
-                string ids = await _toDoService.GetIdsByEmployeeIdAsync(id);
-                await _employeeService.DeleteAsync(id);
-                Message = $"Employee with id {id} and todos with ids: {ids} deleted successfully.";
+                Message = $"Employee with id {id} and all todos deleted successfully.";
                 TempData["SuccessMessage"] = Message;
-                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            else
             {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
+                ModelState.AddModelError("", arrResult["detail"].ToString());
                 return View();
             }
         }
 
-        // GET: EmployeeController/Create
-        public ActionResult CreateToDo()
+        [HttpGet]
+        public async Task<IActionResult> ChangeUserName(Guid id)
         {
-            return View();
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee changing username not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("ChangeUserName", "Employee", new { id });
+            }
+
+            return View(employee.ToChangeUserNameDto());
         }
 
-        // POST: EmployeeController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateToDo(ToDo toDo, Guid id)
+        public async Task<IActionResult> ChangeUserName(ChangeUserNameDto changeUserNameDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                await _employeeService.CreateToDoAsync(toDo, id);
-                Message = $"ToDo for employee with id {id} created successfully.";
-                TempData["SuccessMessage"] = Message;
-                //await _loggerService.CreateAsync(Message, GetUserMail().ToString());
-                return RedirectToAction(nameof(Index));
+                return View(changeUserNameDto);
             }
-            catch (Exception ex)
+
+            HttpResponseMessage response = await _employeeService.ChangeUserNameAsync(changeUserNameDto);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
             {
-                TempData["ErrorMessage"] = ex.Message;
-                //await _loggerService.CreateAsync(ex.Message, GetUserMail().ToString());
-                return View();
+                Message = $"Username for user '{changeUserNameDto.UserName}' changed to '{changeUserNameDto.NewUserName}' successfully";
+                TempData["SuccessMessage"] = Message;
+                return RedirectToAction("Edit", "Employee", new { id = changeUserNameDto.Id });
+            }
+            else
+            {
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(changeUserNameDto);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangeEmail(Guid id)
+        {
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee changing email not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("ChangeEmail", "Employee", new { id });
+            }
+
+            return View(employee.ToChangeEmailDto());
+        }
+
+        public async Task<IActionResult> ChangeEmail(ChangeEmailDto changeEmailDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(changeEmailDto);
+            }
+
+            HttpResponseMessage response = await _employeeService.ChangeEmailAsync(changeEmailDto);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Message = $"Email for user '{changeEmailDto.Email}' changed to '{changeEmailDto.NewEmail}' successfully";
+                TempData["SuccessMessage"] = Message;
+                return RedirectToAction("Edit", "Employee", new { id = changeEmailDto.Id });
+            }
+            else
+            {
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(changeEmailDto);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(Guid id)
+        {
+            Employee employee = await _employeeService.GetByIdAsync(id);
+
+            if (employee == null)
+            {
+                Message = "Employee changing password not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("ChangePassword", "Employee", new { id });
+            }
+
+            return View(employee.ToChangePasswordDto());
+        }
+
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(changePasswordDto);
+            }
+
+            HttpResponseMessage response = await _employeeService.ChangePasswordAsync(changePasswordDto);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Message = $"Password for user '{changePasswordDto.Email}' changed successfully";
+                TempData["SuccessMessage"] = Message;
+                return RedirectToAction("Edit", "Employee", new { id = changePasswordDto.Id });
+            }
+            else
+            {
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(changePasswordDto);
             }
         }
         #endregion

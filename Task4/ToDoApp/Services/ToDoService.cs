@@ -1,49 +1,83 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ToDoApp.Interfaces;
+﻿using ToDoApp.Interfaces;
 using ToDoApp.Data;
 using ToDoApp.Models;
+using Newtonsoft.Json;
+using ToDoApp.Dtos.ToDo;
 
 namespace ToDoApp.Services
 {
-    public class ToDoService : IToDoService
+    public class ToDoService(IConfiguration configuration, IHttpClientFactory httpClientFactory) : IToDoService
     {
-        private readonly ToDoAppDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
-        public ToDoService(ToDoAppDbContext context, IConfiguration configuration)
+        private async Task<HttpResponseMessage> GetHttpResponseAsync(string apiUrl, string action, JsonContent? content)
         {
-            _context = context;
-            _configuration = configuration;
-        }
+            string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
 
-        public async Task<List<ToDo>> GetAllAsync()
-        {
-            return await _context.ToDos.ToListAsync();
+            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
+
+            HttpResponseMessage response = new();
+            
+            switch (action)
+            {
+                case "get":
+                    response = await client.GetAsync(apiUrl);
+                    break;
+                case "post":
+                    response = await client.PostAsync(apiUrl, content);
+                    break;
+                case "put":
+                    response = await client.PutAsync(apiUrl, content);
+                    break;
+                case "delete":
+                    response = await client.DeleteAsync(apiUrl);
+                    break;
+                default:
+                    break;
+            };
+
+            return response;
         }
+        
         public async Task<List<ToDo>> GetAllByEmployeeIdAsync(string sortOrder, string searchString, int? pageNumber, Guid id)
         {
-            IQueryable<ToDo> toDos = from e in _context.ToDos
-                                     where e.EmployeeId.CompareTo(id) == 0
-                                     select e;
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:TodosByEmployeeEndpoint"] + id.ToString(), "get", null);
 
+            IEnumerable<ToDo> toDos = [];
+
+            if (responseBody.IsSuccessStatusCode)
+            {
+                string response = await responseBody.Content.ReadAsStringAsync();
+                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
+            }
+            
             return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
         }
 
         public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
-            IQueryable<ToDo> toDos = from e in _context.ToDos
-                                     select e;
+
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDosEndpoint"], "get", null);
+
+            IEnumerable<ToDo> toDos = [];
+
+            if (responseBody.IsSuccessStatusCode)
+            {
+                string response = await responseBody.Content.ReadAsStringAsync();
+                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
+            }
 
             return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
         }
 
-        private async Task<List<ToDo>> PreparePaginatedList(string sortOrder, string searchString, int? pageNumber, IQueryable<ToDo> toDos)
+        private async Task<List<ToDo>> PreparePaginatedList(string sortOrder, string searchString, int? pageNumber, IEnumerable<ToDo> toDos)
         {
             if (!String.IsNullOrEmpty(searchString))
             {
                 pageNumber = 1;
-                toDos = toDos.Where(e => e.Name.Contains(searchString)
-                                      || e.Description.Contains(searchString));
+                toDos = toDos.Where(e => e.Name.ToLower().Contains(searchString.ToLower())
+                                      || e.Description.ToLower().Contains(searchString.ToLower()));
             }
 
             toDos = sortOrder switch
@@ -58,82 +92,88 @@ namespace ToDoApp.Services
             };
 
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("ToDo").Value);
-            return await PaginatedList<ToDo>.CreateAsync(toDos.AsNoTracking(), pageNumber ?? 1, pageSize);
+            return await PaginatedList<ToDo>.CreateAsync(toDos, pageNumber ?? 1, pageSize);
         }
 
         public async Task<ToDo> GetByIdAsync(Guid id)
         {
-            return await _context.ToDos.FindAsync(id);
+            HttpResponseMessage httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "get", null);
+
+            ToDo toDo = null;
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string response = await httpResponseMessage.Content.ReadAsStringAsync();
+                toDo = JsonConvert.DeserializeObject<ToDo>(response);
+            }
+
+            return toDo;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<HttpResponseMessage> DeleteAsync(Guid id)
         {
-            ToDo toDo = await _context.ToDos.FindAsync(id);
+            HttpResponseMessage httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "get", null);
+
+            ToDo toDo = null;
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                string response = await httpResponseMessage.Content.ReadAsStringAsync();
+                toDo = JsonConvert.DeserializeObject<ToDo>(response);
+            }
+
             if (toDo != null)
             {
-                _context.ToDos.Remove(toDo);
-                await _context.SaveChangesAsync();
+                httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "delete", null);
             }
+
+            return httpResponseMessage;
         }
 
-        public async Task<string> GetIdsByEmployeeIdAsync(Guid id)
+        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(Guid id)
         {
-            List<Guid> ids = [];
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:TodosByEmployeeEndpoint"] + id.ToString(), "get", null);
 
-            IQueryable<ToDo> toDos = _context.ToDos.Where(e => e.EmployeeId.CompareTo(id) == 0);
+            List<ToDo> toDos = [];
 
-            foreach (ToDo toDo in toDos)
+            if (responseBody.IsSuccessStatusCode)
             {
-                ids.Add(toDo.Id);
-            }            
-
-            return String.Join(", ", ids);
-        }
-        public async Task CreateAsync(ToDo toDo)
-        {
-            _context.ToDos.Add(toDo);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(ToDo toDo)
-        {
-            _context.Update(toDo);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task StatusChangeAsync(Guid id)
-        {
-            ToDo toDo = await _context.ToDos.FindAsync(id);
-            if (toDo != null)
-            {
-                toDo.IsClosed = !toDo.IsClosed;
-                await _context.SaveChangesAsync();
+                string response = await responseBody.Content.ReadAsStringAsync();
+                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
             }
+                        
+            return toDos;
+        }
+
+        public async Task<HttpResponseMessage> CreateAsync(CreateToDoDto createToDoDto)
+        {
+            JsonContent content = JsonContent.Create(createToDoDto);
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"], "post", content);
+        }
+
+        public async Task<HttpResponseMessage> UpdateAsync(ToDo toDo)
+        {
+            JsonContent content = JsonContent.Create(toDo);
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + toDo.Id.ToString(), "put", content);
+        }
+
+        public async Task<HttpResponseMessage> StatusChangeAsync(Guid id)
+        {
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoStatusChangeEndpoint"] + id.ToString(), "put", null);
         }
         
-        public async Task DuplicateAsync(Guid id)
+        public async Task<HttpResponseMessage> DuplicateAsync(Guid id)
         {
-            ToDo toDo = await _context.ToDos.FindAsync(id);
-            if (toDo != null)
-            {
-                toDo.Id = new Guid();
-                _context.ToDos.Add(toDo);
-                await _context.SaveChangesAsync();
-            }
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoDuplicateEndpoint"] + id.ToString(), "get", null);
         }
 
-        public async Task<Guid> GetEmployeeIdAsync(Guid id)
+        public async Task<HttpResponseMessage> ReassignAsync(ReassignDto reassignDto)
         {
-            ToDo toDo = await _context.ToDos.FindAsync(id);
+            JsonContent content = JsonContent.Create(reassignDto);
 
-            Guid employeeId = new();
-
-            if (toDo != null)
-            {
-                employeeId = toDo.EmployeeId;
-            }
-
-            return employeeId;
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoReassignEndpoint"], "put", content);
         }
     }
 }

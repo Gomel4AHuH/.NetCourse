@@ -1,0 +1,43 @@
+﻿@model ToDoApp.Dtos.Employee.Authorization.ChangeEmailDto
+
+@{
+    ViewData["Title"] = "Change email";
+}
+
+<partial name="_AlertMessages" />
+
+<form asp-action="ChangeEmail">    
+    <div class="row">        
+        <div class="col-md-8 mx-auto rounded border p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Email</label>                
+                <div class="col-sm-8">
+                    @Html.DisplayFor(model => model.Email)
+                </div>
+            </div>
+            <input type="hidden" asp-for="Email">
+
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">New email</label>                
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="NewEmail">
+                    <span asp-validation-for="NewEmail" class="text-danger" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+                <div class="col-sm-4 d-grid">
+                    <a asp-action="Edit" asp-controller="Employee" asp-route-id="@Model.Id" class="btn btn-info">Back to employee</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

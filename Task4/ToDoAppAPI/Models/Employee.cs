@@ -16,6 +16,10 @@ namespace ToDoAppAPI.Models
 
         public DateOnly? EmploymentDate { get; set; }
 
-        public string? EmployeePhotoPath { get; set; }
+        public byte[]? EmployeePhoto { get; set; }
+
+        public string? RefreshToken { get; set; }
+
+        public DateTime RefreshTokenExpirationDate { get; set; }
     }
 }

@@ -5,6 +5,21 @@ namespace ToDoApp.Models
 {
     public class EmployeeVM
     {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar(50)")]
+        public required string UserName { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar(50)")]
+        public required string Email { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar(50)")]
+        public string? Password { get; set; }
+
         [Required]
         [Column(TypeName = "varchar(50)")]
         public required string FirstName { get; set; }
@@ -28,5 +43,7 @@ namespace ToDoApp.Models
         public DateOnly EmploymentDate { get; set; }
 
         public IFormFile? EmployeePhoto { get; set; }
+
+        public string? EmployeePhotoImage { get; set; }
     }
 }

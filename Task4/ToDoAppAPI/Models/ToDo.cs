@@ -8,7 +8,7 @@ namespace ToDoAppAPI.Models
     {
         [Key]
         [Column(TypeName = "nvarchar(450)")]
-        public string Id { get; set; }
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         [Column(TypeName = "varchar(50)")]

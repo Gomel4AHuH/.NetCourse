@@ -1,17 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ToDoApp.Data;
-using ToDoApp.Interfaces;
+﻿using ToDoApp.Interfaces;
 using ToDoApp.Models;
 
 namespace ToDoApp.Services
 {
-    public class LoggerService(ToDoAppDbContext context, IConfiguration configuration) : ILoggerService
+    public class LoggerService(IConfiguration configuration) : ILoggerService
     {
-        private readonly ToDoAppDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
         public IQueryable<Logger> loggersSearchResult;
 
-        public async Task CreateAsync(string message, string user)
+        /*public async Task CreateAsync(string message, string user)
         {
             Logger logger = new()
             {
@@ -21,9 +18,9 @@ namespace ToDoApp.Services
             
             _context.Loggers.Add(logger);
             await _context.SaveChangesAsync();
-        }
+        }*/
 
-        public async Task<List<Logger>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
+        /*public async Task<List<Logger>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -53,9 +50,9 @@ namespace ToDoApp.Services
 
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("Logger").Value);
             return await PaginatedList<Logger>.CreateAsync(loggersSearchResult.AsNoTracking(), pageNumber ?? 1, pageSize);
-        }
+        }*/
 
-        public async Task ExportAsync(List<Logger> logs)
+        /*public async Task ExportAsync(List<Logger> logs)
         {
             try
             {
@@ -66,6 +63,6 @@ namespace ToDoApp.Services
             {
                 //dialogService.ShowMessage(ex.Message);
             }
-        }        
+        }   */     
     }
 }

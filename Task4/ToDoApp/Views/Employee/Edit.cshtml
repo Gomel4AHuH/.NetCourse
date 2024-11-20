@@ -1,15 +1,111 @@
-﻿@model ToDoApp.Models.EmployeeVM
+﻿@model ToDoApp.Dtos.Employee.EditEmployeeDto
 
 @{
     ViewData["Title"] = "Edit";
+    var userName = ViewData["UserName"];
+    var email = ViewData["Email"];
+    var specialities = (string[])ViewData["Specialities"];
 }
 
 <partial name="_AlertMessages" />
 
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">UserName</label>
+            <div class="col-sm-8">
+                @userName
+                <a asp-controller="Employee" asp-action="ChangeUserName" asp-route-id="@Model.Id">Change username</a>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Email</label>
+            <div class="col-sm-8">
+                @email
+                <a asp-controller="Employee" asp-action="ChangeEmail" asp-route-id="@Model.Id">Change email</a>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Password</label>
+            <div class="col-sm-8">
+                <a asp-controller="Employee" asp-action="ChangePassword" asp-route-id="@Model.Id">Change password</a>
+            </div>
+        </div>
         <form asp-action="Edit" enctype="multipart/form-data">
-            <partial name="_EmployeeVMFormFields"/>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Last name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="LastName">
+                    <span asp-validation-for="LastName" class="text-danger" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">First name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="FirstName">
+                    <span asp-validation-for="FirstName" class="text-danger" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Middle name</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="MiddleName">
+                    <span asp-validation-for="MiddleName" class="text-danger" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Birthday</label>
+                <div class="col-sm-8">
+                    <input type="date" class="form-control" asp-for="Birthday">
+                    <span asp-validation-for="Birthday" class="text-danger" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Speciality</label>
+                <div class="col-sm-8">
+                    <span asp-validation-for="Speciality" class="text-danger" />
+                    <!--
+                        <select asp-for="Speciality" asp-items="((List<SelectListItem>)ViewData["Specialities"])">
+                        <option value="">--Select--</option>
+                        </select>
+                    -->
+                    <select class="form-select" asp-for="Speciality">
+                        @foreach (var item in @specialities)
+                        {
+                            if (@item == Model.Speciality)
+                            {
+                                <option selected value=@item>@item</option>
+                            }
+                            else
+                            {
+                                <option value=@item>@item</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>            
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employment date</label>
+                <div class="col-sm-8">
+                    <input type="date" class="form-control" asp-for="EmploymentDate">
+                    <span asp-validation-for="EmploymentDate" class="text-danger" />
+                </div>
+            </div>
+            @if (Model.EmployeePhotoStr != "")
+            {
+                <div class="row mb-3">
+                    <div class="offset-sm-4 col-sm-8">
+                        <img src="@Model.EmployeePhotoStr" style="width:50px;height:50px;border-radius:50%" />
+                    </div>
+                </div>
+            }
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Employee photo</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="EmployeePhotoImage">
+                    <span asp-validation-for="EmployeePhotoImage" class="text-danger" />
+                </div>
+            </div>
             
             <div class="row">
                 <div class="offset-sm-4 col-sm-4 d-grid">

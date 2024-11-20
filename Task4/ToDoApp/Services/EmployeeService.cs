@@ -1,86 +1,110 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ToDoApp.Interfaces;
+﻿using ToDoApp.Interfaces;
 using ToDoApp.Models;
 using ToDoApp.Data;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Security.Policy;
+using ToDoApp.Dtos.Employee.Authorization;
+using ToDoApp.Dtos.Employee;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Net.Http;
-using Elfie.Serialization;
+using System.IO;
 
 namespace ToDoApp.Services
 {
-    public class EmployeeService : IEmployeeService
+    public class EmployeeService(IConfiguration configuration, IHttpClientFactory httpClientFactory, IToDoService toDoService) : IEmployeeService
     {
-        private readonly ToDoAppDbContext _context;
-        private readonly IWebHostEnvironment _environment;
-        private readonly IConfiguration _configuration;
-        private readonly IHttpClientFactory _httpClientFactory;
-        
-        public EmployeeService(ToDoAppDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly IToDoService _toDoService = toDoService;
+
+        private async Task<HttpResponseMessage> GetHttpResponseAsync(string apiUrl, string action, JsonContent? content, MultipartFormDataContent multipartFormDataContent)
         {
-            _context = context;
-            _environment = environment;
-            _configuration = configuration;
-            _httpClientFactory = httpClientFactory;            
+            string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
+
+            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
+                        
+            HttpResponseMessage response = new();
+                        
+            switch (action)
+            {
+                case "get":                    
+                    response = await client.GetAsync(apiUrl);
+                    break;
+                case "post":
+                    response = await client.PostAsync(apiUrl, (content != null) ? content : multipartFormDataContent);
+                    break;
+                case "put":
+                    response = await client.PutAsync(apiUrl, (content != null) ? content : multipartFormDataContent);
+                    break;
+                case "delete":
+                    response = await client.DeleteAsync(apiUrl);
+                    break;
+                default:
+                    break;
+            };
+            
+            return response;
         }
-        
-        public async Task<List<Employee>> GetAllAsync()
+
+        public async Task<HttpResponseMessage> LoginAsync(LoginDto loginModel)
         {            
-            return await _context.Employees.ToListAsync();
+            JsonContent content = JsonContent.Create(loginModel);
+            
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:LoginEndpoint"], "post", content, null);
         }
 
-        public async Task<string> GetHttpResponseAsync(string api)
+        public async Task<HttpResponseMessage> LogoutAsync()
         {
-            try
-            {
-                string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
-                HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
-                
-                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                                
-                HttpResponseMessage response = client.GetAsync(api).Result;
-
-                if (!response.IsSuccessStatusCode) return "";
-                
-                return await response.Content.ReadAsStringAsync();
-
-            }
-            catch
-            {
-                //_logger.LogError(e, "Something went wrong while fetching data from external service");
-                return "";
-            }            
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:LogoutEndpoint"], "post", null, null);
         }
+
+        public async Task<HttpResponseMessage> RegisterAsync(RegisterDto registerModel)
+        {
+            using var multipartFormContent = new MultipartFormDataContent
+            {
+                { new StringContent(registerModel.UserName), "UserName" },
+                { new StringContent(registerModel.Email), "Email" },
+                { new StringContent(registerModel.Password), "Password" },
+                { new StringContent(registerModel.FirstName), "FirstName" },
+                { new StringContent(registerModel.LastName), "LastName" },
+                { new StringContent(registerModel.MiddleName ?? ""), "MiddleName" },
+                { new StringContent(registerModel.Birthday.ToString()), "Birthday" },
+                { new StringContent(registerModel.Speciality), "Speciality" },
+                { new StringContent(registerModel.EmploymentDate.ToString()), "EmploymentDate" },
+                { new StringContent(IFormFileToByteArray(registerModel.EmployeePhotoImage).ToString() ?? ""), "EmployeePhoto" }
+            };
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:RegisterEndpoint"], "post", null, multipartFormContent);
+        }
+
         public async Task<List<Employee>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
         {
-            if (!String.IsNullOrEmpty(searchString))
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:EmployeesEndpoint"], "get", null, null);
+
+            IEnumerable<Employee> employees = [];
+
+            if (responseBody.IsSuccessStatusCode)
             {
-                pageNumber = 1;
+                string response = await responseBody.Content.ReadAsStringAsync();
+                employees = JsonConvert.DeserializeObject<List<Employee>>(response);
             }
 
-            string responseBody = await GetHttpResponseAsync("api/employees");
-            //if (responseBody != null)
-            //{
-            //IQueryable<Employee> employees1 = JsonConvert.DeserializeObject<List<Employee>>(responseBody).AsQueryable();
-            //}
-            IEnumerable<Employee> employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
-            
+            foreach (Employee employee in employees)
+            {
+                GetImageFromByteArray(employee);
+            }
+
             if (!String.IsNullOrEmpty(searchString))
             {
-                employees = employees.Where(e => e.LastName.Contains(searchString)
-                                              || e.FirstName.Contains(searchString)
-                                              || e.MiddleName.Contains(searchString)
-                                              || e.Birthday.ToString().Contains(searchString)
-                                              || e.Speciality.Contains(searchString)
-                                              || e.EmploymentDate.ToString().Contains(searchString));
+                employees = employees.Where(e => e.LastName.ToLower().Contains(searchString.ToLower())
+                                              || e.FirstName.ToLower().Contains(searchString.ToLower())
+                                              || e.MiddleName.ToLower().Contains(searchString.ToLower())
+                                              || e.Birthday.ToString().Contains(searchString.ToLower())
+                                              || e.Speciality.ToLower().Contains(searchString.ToLower())
+                                              || e.EmploymentDate.ToString().Contains(searchString.ToLower()));
             }
             
             employees = sortOrder switch
             {
-                "id" => employees.OrderBy(e => e.Id),
                 "lastName" => employees.OrderBy(e => e.LastName),
                 "lastName_desc" => employees.OrderByDescending(e => e.LastName),
                 "firstName" => employees.OrderBy(e => e.FirstName),
@@ -96,131 +120,160 @@ namespace ToDoApp.Services
                 _ => employees.OrderBy(e => e.Id),
             };
 
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                pageNumber = 1;
+            }
+
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("Employee").Value);
             
             return await PaginatedList<Employee>.CreateAsync(employees, pageNumber ?? 1, pageSize);
-        }       
+        }
+
+        public async Task<IEnumerable<Employee>> GetAllAsync()
+        {
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:EmployeesEndpoint"], "get", null, null);
+
+            IEnumerable<Employee> employees = [];
+
+            if (responseBody.IsSuccessStatusCode)
+            {
+                string response = await responseBody.Content.ReadAsStringAsync();
+                employees = JsonConvert.DeserializeObject<List<Employee>>(response);
+            }
+
+            employees = employees.OrderBy(e => e.LastName);
+
+            return employees;
+        }
+
+        private static async Task<byte[]> IFormFileToByteArray(IFormFile? EmployeePhoto)
+        {
+            byte[] result = [];
+
+            if (EmployeePhoto?.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+
+                await EmployeePhoto.CopyToAsync(memoryStream);
+
+                result = memoryStream.ToArray();
+            }
+
+            return result;
+        }
+
+        private static void GetImageFromByteArray(Employee employee)
+        {
+            employee.EmployeePhotoStr = "";
+
+            if (!employee.EmployeePhoto.IsNullOrEmpty())
+            {
+                string imreBase64Data = Convert.ToBase64String(employee.EmployeePhoto);
+                employee.EmployeePhotoStr = string.Format("data:image/png;base64,{0}", imreBase64Data);
+            }
+        }
 
         public async Task<Employee> GetByIdAsync(Guid id)
         {
-            return await _context.Employees.FindAsync(id);
-        }
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:EmployeeEndpoint"] + id.ToString(), "get", null, null);
 
-        public async Task DeleteAsync(Guid id)
-        {
-            Employee employee = await _context.Employees.FindAsync(id);
-            if (employee != null)
+            Employee? employee = null;
+
+            if (responseBody.IsSuccessStatusCode)
             {
-                if (employee.EmployeePhotoPath != null)
-                {
-                    DeletePhoto(employee.EmployeePhotoPath);
-                }                
-                IQueryable<ToDo> toDos = from e in _context.ToDos
-                                         where e.EmployeeId.CompareTo(id) == 0
-                                         select e;
-                foreach (ToDo toDo in toDos)
-                {
-                    _context.Remove(toDo);
-                }
-                _context.Employees.Remove(employee);
-                await _context.SaveChangesAsync();
+                string response = await responseBody.Content.ReadAsStringAsync();
+
+                employee = JsonConvert.DeserializeObject<Employee>(response);
+
+                GetImageFromByteArray(employee);
             }
-        }
-
-        private void DeletePhoto(string fileName)
-        {
-            string oldFullPath = _environment.WebRootPath + "/photos/" + fileName;
-            System.IO.File.Delete(oldFullPath);
-        }
-
-        private string CreatePhoto(EmployeeVM employeeVM)
-        {
-            if (employeeVM.EmployeePhoto != null)
-            {
-                string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                fileName += Path.GetExtension(employeeVM.EmployeePhoto.FileName);
-
-                string fullPath = _environment.WebRootPath + "/photos/" + fileName;
-                using (var stream = System.IO.File.Create(fullPath))
-                {
-                    employeeVM.EmployeePhoto.CopyTo(stream);
-                }
-
-                return fileName;
-            }
-            else
-            {
-                return "";
-            }
-            
-        }
-
-        public async Task CreateAsync(EmployeeVM employeeVM)
-        {
-            _context.Employees.Add(EmployeeVMToEmployee(employeeVM));
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(EmployeeVM employeeVM, Employee employee)
-        {
-            string fileName = employee.EmployeePhotoPath;
-            if (employeeVM.EmployeePhoto != null)
-            {
-                DeletePhoto(fileName);
-                fileName = CreatePhoto(employeeVM);
-            }
-
-            employee.LastName = employeeVM.LastName;
-            employee.FirstName = employeeVM.FirstName;
-            employee.MiddleName = employeeVM.MiddleName;
-            employee.Birthday = employeeVM.Birthday;
-            employee.Speciality = employeeVM.Speciality;
-            employee.EmploymentDate = employeeVM.EmploymentDate;
-            employee.EmployeePhotoPath = fileName;
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task CreateToDoAsync(ToDo toDo, Guid id)
-        {
-            toDo.EmployeeId = id;
-            toDo.Id = new Guid();
-            _context.ToDos.Add(toDo);
-            await _context.SaveChangesAsync();
-        }
-
-        private Employee EmployeeVMToEmployee(EmployeeVM employeeVM)
-        {
-            string fileName = CreatePhoto(employeeVM);            
-
-            Employee employee = new()
-            {
-                LastName = employeeVM.LastName,
-                FirstName = employeeVM.FirstName,
-                MiddleName = employeeVM.MiddleName,
-                Birthday = employeeVM.Birthday,
-                Speciality = employeeVM.Speciality,
-                EmploymentDate = employeeVM.EmploymentDate,
-                EmployeePhotoPath = fileName
-            };
 
             return employee;
         }
 
-        public EmployeeVM EmployeeToEmployeeVM(Employee employee)
+        public async Task<HttpResponseMessage> DeleteAsync(Guid id)
         {
+            Employee employee = await GetByIdAsync(id);
 
-            EmployeeVM employeeVM = new()
+            HttpResponseMessage httpResponseMessage = new();
+
+            if (employee != null)
             {
-                LastName = employee.LastName,
-                FirstName = employee.FirstName,
-                MiddleName = employee.MiddleName,
-                Birthday = employee.Birthday,
-                Speciality = employee.Speciality,
-                EmploymentDate = employee.EmploymentDate
+                httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:EmployeeEndpoint"] + id.ToString(), "delete", null, null);
+            }
+
+            return httpResponseMessage;
+        }
+
+        public async Task<HttpResponseMessage> UpdateAsync(EditEmployeeDto editEmployeeDto, Employee employee)
+        {
+            var array = await IFormFileToByteArray(editEmployeeDto.EmployeePhotoImage);
+            string utfString = Encoding.UTF8.GetString(array, 0, array.Length);
+            var content = new ByteArrayContent(array);
+
+            //var fileName = Path.GetFileName(filePath);
+            
+            Stream stream = editEmployeeDto.EmployeePhotoImage.OpenReadStream();
+
+            //var fileStream = System.IO.File.Open(filePath, FileMode.Open);
+
+            using (var multipartFormContent = new MultipartFormDataContent())
+            {
+                multipartFormContent.Add(new StringContent(editEmployeeDto.Id.ToString()), "Id");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.FirstName), "FirstName");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.LastName), "LastName");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.MiddleName ?? ""), "MiddleName");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.Birthday.ToString()), "Birthday");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.Speciality), "Speciality");
+                multipartFormContent.Add(new StringContent(editEmployeeDto.EmploymentDate.ToString()), "EmploymentDate");
+                //multipartFormContent.Add(content, "EmployeePhoto");
+                multipartFormContent.Add(new StringContent(IFormFileToByteArray(editEmployeeDto.EmployeePhotoImage).ToString() ?? ""), "EmployeePhoto");
+                //multipartFormContent.Add(new StringContent(array.ToString()), "EmployeePhotoBytes");
+                //multipartFormContent.Add(editEmployeeDto.EmployeePhotoImage, "EmployeePhoto");
+                //multipartFormContent.Add(content, "EmployeePhoto");
+
+                return await GetHttpResponseAsync(_configuration["ToDoAppAPI:EmployeeEndpoint"] + employee.Id, "put", null, multipartFormContent);
             };
 
-            return employeeVM;
+            /*
+             using (var client = new HttpClient())
+    {
+        using (var content = new MultipartFormDataContent())
+        {
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open);
+            content.Add(new StreamContent(fileStream), "file", fileName);  
+
+            var requestUri = baseURL;
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri) { Content = content };
+            var result = await client.SendAsync(request);
+
+            return;
+        }
+    }
+             */
+        }
+
+        public async Task<HttpResponseMessage> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
+        {
+            JsonContent content = JsonContent.Create(changeEmailDto);
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ChangeEmailEndpoint"], "post", content, null);
+        }
+
+        public async Task<HttpResponseMessage> ChangeUserNameAsync(ChangeUserNameDto changeUserNameDto)
+        {
+            JsonContent content = JsonContent.Create(changeUserNameDto);
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ChangeUserNameEndpoint"], "post", content, null);
+        }
+
+        public async Task<HttpResponseMessage> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+        {
+            JsonContent content = JsonContent.Create(changePasswordDto);
+
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ChangePasswordEndpoint"], "post", content, null);
         }
     }    
 }

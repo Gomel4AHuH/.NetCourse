@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ToDoAppAPI.Data;
 using ToDoAppAPI.Dtos.Employee;
@@ -8,15 +9,36 @@ using ToDoAppAPI.Models;
 
 namespace ToDoAppAPI.Repositories
 {
-    public class EmployeeRepository(ApplicationDbContext context, UserManager<Employee> userManager, SignInManager<Employee> signInManager, ITokenService tokenService, IWebHostEnvironment environment, IConfiguration configuration) : IEmployeeRepository
+    public class EmployeeRepository(ApplicationDbContext context, UserManager<Employee> userManager, SignInManager<Employee> signInManager) : IEmployeeRepository
     {
         private readonly ApplicationDbContext _context = context;
         private readonly UserManager<Employee> _userManager = userManager;
         private readonly SignInManager<Employee> _signInManager = signInManager;
-        private readonly ITokenService _tokenService = tokenService;
-        private readonly IWebHostEnvironment _environment = environment;
-        private readonly IConfiguration _configuration = configuration;
 
+        public async Task<string> RegisterAsync(RegisterDto registerDto)
+        {
+            List<string> errors = [];
+
+            Employee employee = registerDto.ToEmployeeDto();
+
+            employee.EmployeePhoto = await CreatePhoto(registerDto.EmployeePhoto);
+
+            IdentityResult createdEmployee = await _userManager.CreateAsync(employee, registerDto.Password);
+
+            if (!createdEmployee.Succeeded) errors.Add(IdentityErrorsToString(createdEmployee));
+
+            IdentityResult roleResult = await _userManager.AddToRoleAsync(employee, "Employee");
+
+            if (!roleResult.Succeeded) errors.Add(IdentityErrorsToString(roleResult));
+
+            return string.Join(", ", errors);
+        }
+
+        private static string IdentityErrorsToString(IdentityResult result)
+        {
+            List<IdentityError> errorList = result.Errors.ToList();
+            return string.Join(", ", errorList.Select(e => e.Description));
+        }
         public async Task<List<Employee>> GetAllAsync()
         {
             var employees = _context.Employees;
@@ -29,7 +51,7 @@ namespace ToDoAppAPI.Repositories
             return await _context.Employees.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Employee?> UpdateAsync(string id, Employee employee)
+        public async Task<Employee?> UpdateAsync(string id, UpdateEmployeeDto updateEmployeeDto)
         {
             var existingEmployee = await _context.Employees.FindAsync(id);
 
@@ -37,16 +59,14 @@ namespace ToDoAppAPI.Repositories
             {
                 return null;
             }
-            
-            existingEmployee.UserName = employee.UserName;
-            existingEmployee.Email = employee.Email;
-            existingEmployee.FirstName = employee.FirstName;
-            existingEmployee.LastName = employee.LastName;
-            existingEmployee.MiddleName = employee.MiddleName;
-            existingEmployee.Birthday = employee.Birthday;
-            existingEmployee.Speciality = employee.Speciality;
-            existingEmployee.EmploymentDate = employee.EmploymentDate;
-            existingEmployee.EmployeePhotoPath = employee.EmployeePhotoPath;
+
+            existingEmployee.FirstName = updateEmployeeDto.FirstName;
+            existingEmployee.LastName = updateEmployeeDto.LastName;
+            existingEmployee.MiddleName = updateEmployeeDto.MiddleName;
+            existingEmployee.Birthday = updateEmployeeDto.Birthday;
+            existingEmployee.Speciality = updateEmployeeDto.Speciality;
+            existingEmployee.EmploymentDate = updateEmployeeDto.EmploymentDate;
+            existingEmployee.EmployeePhoto = await CreatePhoto(updateEmployeeDto.EmployeePhoto);
 
             await _context.SaveChangesAsync();
 
@@ -62,82 +82,129 @@ namespace ToDoAppAPI.Repositories
                 return null;
             }
 
+            var toDos = _context.ToDos.Where(x => x.EmployeeId ==  id);
+
+            foreach (ToDo toDo in toDos)
+            {
+                _context.ToDos.Remove(toDo);
+            }
+
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
             return employee;
         }
 
-        public async Task<LoginedDto?> LoginAsync(LoginDto loginDto)
+        public async Task<string> ValidateUser(LoginDto loginDto)
         {
-            Employee employee = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.UserName.ToLower());
+            Employee employee = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email.ToLower());
 
-            if (employee != null)
-            {
-                var result = await _signInManager.CheckPasswordSignInAsync(employee, loginDto.Password, false);
-                if (result.Succeeded)
-                {
-                    return new LoginedDto
-                    {
-                        UserName = employee.UserName,
-                        Email = employee.Email,
-                        Token = _tokenService.CreateToken(employee)
-                    };
-                }
-            }
+            if (employee == null) return $"User with email {loginDto.Email} not found";
+            
+            var result = await _signInManager.CheckPasswordSignInAsync(employee, loginDto.Password, false);
 
-            return null;
+            if (!result.Succeeded) return $"Password for user with email {loginDto.Email} is not correct";
+
+            return "";
         }
 
-        public async Task<NewEmployeeDto?> RegisterAsync(RegisterDto registerDto)
+        private static async Task<byte[]> CreatePhoto(IFormFile? EmployeePhoto)
         {
-            Employee employee = new()
-            {
-                UserName = registerDto.UserName,
-                Email = registerDto.Email,
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                MiddleName = registerDto.MiddleName,
-                Birthday = registerDto.Birthday,
-                Speciality = registerDto.Speciality,
-                EmploymentDate = registerDto.EmploymentDate
-            };
+            byte[] result = [];
 
-            IdentityResult createdEmployee = await _userManager.CreateAsync(employee, registerDto.Password);
-
-            if (createdEmployee.Succeeded)
+            if (EmployeePhoto?.Length > 0)
             {
-                IdentityResult roleResult = await _userManager.AddToRoleAsync(employee, "Employee");
-                if (roleResult.Succeeded)
-                {                    
-                    NewEmployeeDto newEmployeeDto = employee.ToNewEmployeeDto();
-                    newEmployeeDto.Token = _tokenService.CreateToken(employee);
-                    newEmployeeDto.EmployeePhotoPath = CreatePhoto(registerDto);
-                    return newEmployeeDto;
-                }                
+                using var memoryStream = new MemoryStream();
+
+                await EmployeePhoto.CopyToAsync(memoryStream);
+
+                result = memoryStream.ToArray();
             }
 
-            return null;
+            return result;
         }
 
-        private string CreatePhoto(RegisterDto registerDto)
+        public async Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
-            if (registerDto.EmployeePhoto != null)
-            {
-                string fileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                fileName += Path.GetExtension(registerDto.EmployeePhoto.FileName);
+            Employee employee = await _userManager.Users.FirstOrDefaultAsync(x => string.Equals(x.Email, changePasswordDto.Email.ToLower()));
 
-                string fullPath = _environment.ContentRootPath + _configuration["PhotosFolder"] + fileName;
-                using (var stream = System.IO.File.Create(fullPath))
-                {
-                    registerDto.EmployeePhoto.CopyTo(stream);
-                }
+            if (employee == null) return $"Employee '{changePasswordDto.Email}' not found.";
 
-                return fileName;
-            }
-            else
+            if (!await _signInManager.UserManager.CheckPasswordAsync(employee, changePasswordDto.CurrentPassword)) return "Current password is incorrect";
+
+            if (changePasswordDto.NewPassword != changePasswordDto.NewPasswordConfirmation) return "Passwords don't match";
+
+            if (changePasswordDto.CurrentPassword == changePasswordDto.NewPasswordConfirmation) return "Old password and new password must be different. Please try again.";
+
+            var result = await _signInManager.UserManager.ChangePasswordAsync(employee, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);                      
+
+            if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
+            
+            return "";
+        }
+
+        public async Task<string> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
+        {
+            Employee currentEmployee = await _userManager.Users.FirstOrDefaultAsync(x => string.Equals(x.Email, changeEmailDto.Email.ToLower()));
+            
+            if (currentEmployee == null) return $"Employee '{changeEmailDto.Email}' not found.";
+
+            Employee newEmployee = await _userManager.Users.FirstOrDefaultAsync(x => string.Equals(x.Email, changeEmailDto.NewEmail.ToLower()));
+
+            if (newEmployee != null) return $"Email '{changeEmailDto.NewEmail}' is already taken.";
+
+            var result = await _signInManager.UserManager.SetEmailAsync(currentEmployee, changeEmailDto.NewEmail);
+
+            if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));            
+
+            return "";
+        }
+
+        public async Task<string> ChangeUserNameAsync(ChangeUserNameDto changeUserNameDto)
+        {
+            Employee currentEmployee = await _userManager.Users.FirstOrDefaultAsync(x => string.Equals(x.UserName, changeUserNameDto.UserName.ToLower()));
+
+            if (currentEmployee == null) return $"Employee '{changeUserNameDto.UserName}' not found.";
+
+            Employee newEmployee = await _userManager.Users.FirstOrDefaultAsync(x => string.Equals(x.UserName, changeUserNameDto.NewUserName.ToLower()));
+
+            if (newEmployee != null) return $"Username '{changeUserNameDto.NewUserName}' is already taken.";
+
+            var result = await _signInManager.UserManager.SetUserNameAsync(currentEmployee, changeUserNameDto.NewUserName);
+
+            if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
+
+            return "";
+        }
+
+        public async Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+        {
+            Employee employee = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == forgotPasswordDto.Email.ToLower());
+
+            if (employee == null) return $"Employee '{forgotPasswordDto.Email}' not found.";
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(employee);
+
+            string newPassword = CreateRandomPassword();
+
+            var result = await _userManager.ResetPasswordAsync(employee, token, newPassword);
+
+            if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
+
+            return "";
+            //return $"Password successfully changed. New passwrod: {newPassword}";
+        }
+
+        private static string CreateRandomPassword(int length = 15)
+        {
+            string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+            Random random = new Random();
+
+            char[] chars = new char[length];
+            for (int i = 0; i < length; i++)
             {
-                return "";
+                chars[i] = validChars[random.Next(0, validChars.Length)];
             }
+            return new string(chars);
         }
     }
 }

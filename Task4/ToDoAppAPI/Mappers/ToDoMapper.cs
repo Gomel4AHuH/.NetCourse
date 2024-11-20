@@ -18,31 +18,25 @@ namespace ToDoAppAPI.Mappers
             };
         }
 
-        public static ToDo ToToDoFromCreate(this CreateToDoDto createToDoDto, string id)
+        public static ToDo ToToDoFromCreate(this CreateToDoDto createToDoDto, string employeeId)
         {
             return new ToDo
             {
                 Name = createToDoDto.Name,
                 Description = createToDoDto.Description,
                 IsClosed = createToDoDto.IsClosed,
-                EmployeeId = id
+                EmployeeId = employeeId
             };
         }
-        /*
-        public static Employee ToEmployeeFromUpdate(this UpdateEmployeeDto updateEmployeeDto, string id)
+        
+        public static ToDo ToToDoFromUpdate(this UpdateToDoDto updateToDoDto, string id)
         {
-            return new Employee
+            return new ToDo
             {
-                UserName = updateEmployeeDto.UserName,
-                Email = updateEmployeeDto.Email,
-                FirstName = updateEmployeeDto.FirstName,
-                LastName = updateEmployeeDto.LastName,
-                MiddleName = updateEmployeeDto.MiddleName,
-                Birthday = updateEmployeeDto.Birthday,
-                Speciality = updateEmployeeDto.Speciality,
-                EmploymentDate = updateEmployeeDto.EmploymentDate,
-                EmployeePhotoPath = updateEmployeeDto.EmployeePhotoPath
+                Name = updateToDoDto.Name,
+                Description = updateToDoDto.Description,
+                IsClosed = updateToDoDto.IsClosed                
             };
-        }*/
+        }
     }
 }
