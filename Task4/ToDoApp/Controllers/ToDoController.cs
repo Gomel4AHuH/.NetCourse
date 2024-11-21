@@ -4,14 +4,12 @@ using Newtonsoft.Json;
 using ToDoApp.Dtos.ToDo;
 using ToDoApp.Interfaces;
 using ToDoApp.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ToDoApp.Controllers
 {
-    public class ToDoController(IToDoService toDoService, ILoggerService logger, IEmployeeService employeeService) : Controller
+    public class ToDoController(IToDoService toDoService, IEmployeeService employeeService) : Controller
     {
         private readonly IToDoService _toDoService = toDoService;
-        private readonly ILoggerService _logger = logger;
         private readonly IEmployeeService _employeeService = employeeService;
         private string? Message;        
 
@@ -88,11 +86,17 @@ namespace ToDoApp.Controllers
         {
             return View(new CreateToDoDto { Name = "", Description = "", EmployeeId = employeeId });
         }
-               
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateToDoDto createToDoDto)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View(createToDoDto);
+                }
+
                 HttpResponseMessage response = await _toDoService.CreateAsync(createToDoDto);
 
                 string strResult = response.Content.ReadAsStringAsync().Result;
@@ -140,11 +144,17 @@ namespace ToDoApp.Controllers
                 return View();
             }
         }
-                
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, ToDo toDo)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View(toDo);
+                }
+
                 ToDo ToDo = await _toDoService.GetByIdAsync(id);
 
                 if (ToDo == null)
@@ -170,9 +180,7 @@ namespace ToDoApp.Controllers
                 {
                     ModelState.AddModelError("", arrResult["detail"].ToString());
                     return View();
-                }
-
-                
+                }                
             }
             catch (Exception ex)
             {
@@ -193,7 +201,7 @@ namespace ToDoApp.Controllers
                     return RedirectToAction("IndexByEmployee");
                 }
 
-                return View(toDo);                
+                return View(toDo);
             }
             catch (Exception ex)
             {
@@ -206,18 +214,39 @@ namespace ToDoApp.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             ToDo toDo = await _toDoService.GetByIdAsync(id);
+
+            if (toDo == null)
+            {
+                Message = "ToDo deleting not available with the Id : " + id;
+                TempData["ErrorMessage"] = Message;
+                return RedirectToAction("IndexByEmployee");
+            }
+
             return View(toDo);
         }
 
-
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id, IFormCollection collection, string employeeId)
         {
             try
             {
-                await _toDoService.DeleteAsync(id);
-                Message = $"ToDo with id {id} deleted successfully.";
-                TempData["SuccessMessage"] = Message;
-                return RedirectToAction("IndexByEmployee", "ToDo", new { id = employeeId });
+                HttpResponseMessage response = await _toDoService.DeleteAsync(id);
+
+                string strResult = response.Content.ReadAsStringAsync().Result;
+
+                var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+                if (response.IsSuccessStatusCode)
+                {                    
+                    Message = $"Employee with id {id} and all todos deleted successfully.";
+                    TempData["SuccessMessage"] = Message;
+                    return RedirectToAction("IndexByEmployee", new { id = employeeId });
+                }
+                else
+                {
+                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    return View();
+                }
             }
             catch (Exception ex)
             {
@@ -230,27 +259,24 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _toDoService.StatusChangeAsync(id);
-                string strStatus = status ? "Opened" : "Closed";
-                Message = $"ToDo status with id {id} was changed to '{strStatus}' successfully.";
-                TempData["SuccessMessage"] = Message;
-                return RedirectToAction("IndexByEmployee", "ToDo", new { id = employeeId });
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                return View();
-            }
-        }
-                
-        public async Task<IActionResult> Duplicate(Guid id, string employeeId)
-        {
-            try
-            {
-                await _toDoService.DuplicateAsync(id);
-                Message = $"ToDo with id {id} duplicated successfully.";
-                TempData["SuccessMessage"] = Message;
-                return RedirectToAction("IndexByEmployee", "ToDo", new { id = employeeId });
+                HttpResponseMessage response = await _toDoService.StatusChangeAsync(id);
+
+                string strResult = response.Content.ReadAsStringAsync().Result;
+
+                var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string strStatus = status ? "Opened" : "Closed";
+                    Message = $"ToDo status with id {id} was changed to '{strStatus}' successfully.";
+                    TempData["SuccessMessage"] = Message;
+                    return RedirectToAction("IndexByEmployee", new { id = employeeId });
+                }
+                else
+                {
+                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    return View();
+                }
             }
             catch (Exception ex)
             {
@@ -259,6 +285,36 @@ namespace ToDoApp.Controllers
             }
         }
 
+        public async Task<IActionResult> Duplicate(Guid id, string employeeId)
+        {
+            try
+            {
+                HttpResponseMessage response = await _toDoService.DuplicateAsync(id);
+
+                string strResult = response.Content.ReadAsStringAsync().Result;
+
+                var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Message = $"ToDo with id {id} duplicated successfully.";
+                    TempData["SuccessMessage"] = Message;
+                    return RedirectToAction("IndexByEmployee", new { id = employeeId });
+                }
+                else
+                {
+                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }
+        }
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reassign(Guid id, string newEmployeeId, string currentEmployeeId)
         {
             try
@@ -268,7 +324,7 @@ namespace ToDoApp.Controllers
                     ToDoId = id,
                     NewEmployeeId = newEmployeeId
                 };
-                reassignDto = null;
+
                 HttpResponseMessage response = await _toDoService.ReassignAsync(reassignDto);
 
                 string strResult = response.Content.ReadAsStringAsync().Result;
@@ -278,14 +334,14 @@ namespace ToDoApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     Message = $"ToDo with id {id} reassigned successfully.";
-                    TempData["SuccessMessage"] = Message;                    
+                    TempData["SuccessMessage"] = Message;
+                    return RedirectToAction("IndexByEmployee", new { id = currentEmployeeId });
                 }
                 else
                 {
                     ModelState.AddModelError("", arrResult["detail"].ToString());
-                    //return View(createToDoDto);
-                }
-                return RedirectToAction("IndexByEmployee", "ToDo", new { id = currentEmployeeId });
+                    return View();
+                }                
             }
             catch (Exception ex)
             {

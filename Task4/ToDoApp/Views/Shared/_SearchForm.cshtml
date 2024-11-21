@@ -3,6 +3,13 @@
     <p>
         Find by name: @Html.TextBox("SearchString")
         <input type="submit" class="btn btn-primary" value="Search" />
-        <a asp-action="Index" class="btn btn-primary">Cancel search</a>
+        @if (Context.Request.Path.Value.Contains("IndexByEmployee"))
+        {
+            <a asp-action="IndexByEmployee" class="btn btn-primary">Cancel search</a>
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-primary">Cancel search</a>
+        }        
     </p>
 }

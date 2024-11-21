@@ -11,6 +11,7 @@ namespace ToDoApp.Services
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
+        #region Private methods
         private async Task<HttpResponseMessage> GetHttpResponseAsync(string apiUrl, string action, JsonContent? content)
         {
             string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
@@ -18,7 +19,7 @@ namespace ToDoApp.Services
             HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
 
             HttpResponseMessage response = new();
-            
+
             switch (action)
             {
                 case "get":
@@ -38,37 +39,6 @@ namespace ToDoApp.Services
             };
 
             return response;
-        }
-        
-        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(string sortOrder, string searchString, int? pageNumber, Guid id)
-        {
-            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:TodosByEmployeeEndpoint"] + id.ToString(), "get", null);
-
-            IEnumerable<ToDo> toDos = [];
-
-            if (responseBody.IsSuccessStatusCode)
-            {
-                string response = await responseBody.Content.ReadAsStringAsync();
-                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
-            }
-            
-            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
-        }
-
-        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
-        {
-
-            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDosEndpoint"], "get", null);
-
-            IEnumerable<ToDo> toDos = [];
-
-            if (responseBody.IsSuccessStatusCode)
-            {
-                string response = await responseBody.Content.ReadAsStringAsync();
-                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
-            }
-
-            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
         }
 
         private async Task<List<ToDo>> PreparePaginatedList(string sortOrder, string searchString, int? pageNumber, IEnumerable<ToDo> toDos)
@@ -94,40 +64,54 @@ namespace ToDoApp.Services
             int pageSize = Int32.Parse(_configuration.GetSection("PageSizes").GetSection("ToDo").Value);
             return await PaginatedList<ToDo>.CreateAsync(toDos, pageNumber ?? 1, pageSize);
         }
+        #endregion
+
+        #region Actions
+        public async Task<List<ToDo>> GetAllByEmployeeIdAsync(string sortOrder, string searchString, int? pageNumber, Guid id)
+        {
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:TodosByEmployeeEndpoint"] + id.ToString(), "get", null);
+
+            IEnumerable<ToDo> toDos = [];
+
+            if (responseBody.IsSuccessStatusCode)
+            {
+                string response = await responseBody.Content.ReadAsStringAsync();
+                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
+            }
+
+            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+        }
+
+        public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
+        {
+
+            HttpResponseMessage responseBody = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDosEndpoint"], "get", null);
+
+            IEnumerable<ToDo> toDos = [];
+
+            if (responseBody.IsSuccessStatusCode)
+            {
+                string response = await responseBody.Content.ReadAsStringAsync();
+                toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
+            }
+
+            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+        }
 
         public async Task<ToDo> GetByIdAsync(Guid id)
         {
             HttpResponseMessage httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "get", null);
+                        
+            if (!httpResponseMessage.IsSuccessStatusCode) return null;
 
-            ToDo toDo = null;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                string response = await httpResponseMessage.Content.ReadAsStringAsync();
-                toDo = JsonConvert.DeserializeObject<ToDo>(response);
-            }
-
-            return toDo;
+            string response = await httpResponseMessage.Content.ReadAsStringAsync();
+            
+            return JsonConvert.DeserializeObject<ToDo>(response);
         }
 
         public async Task<HttpResponseMessage> DeleteAsync(Guid id)
         {
-            HttpResponseMessage httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "get", null);
-
-            ToDo toDo = null;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                string response = await httpResponseMessage.Content.ReadAsStringAsync();
-                toDo = JsonConvert.DeserializeObject<ToDo>(response);
-            }
-
-            if (toDo != null)
-            {
-                httpResponseMessage = await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "delete", null);
-            }
-
-            return httpResponseMessage;
+            return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"] + id.ToString(), "delete", null);
         }
 
         public async Task<List<ToDo>> GetAllByEmployeeIdAsync(Guid id)
@@ -141,13 +125,13 @@ namespace ToDoApp.Services
                 string response = await responseBody.Content.ReadAsStringAsync();
                 toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
             }
-                        
+
             return toDos;
         }
 
-        public async Task<HttpResponseMessage> CreateAsync(CreateToDoDto createToDoDto)
+        public async Task<HttpResponseMessage> CreateAsync(CreateToDoDto createToDo)
         {
-            JsonContent content = JsonContent.Create(createToDoDto);
+            JsonContent content = JsonContent.Create(createToDo);
 
             return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoEndpoint"], "post", content);
         }
@@ -163,7 +147,7 @@ namespace ToDoApp.Services
         {
             return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoStatusChangeEndpoint"] + id.ToString(), "put", null);
         }
-        
+
         public async Task<HttpResponseMessage> DuplicateAsync(Guid id)
         {
             return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoDuplicateEndpoint"] + id.ToString(), "get", null);
@@ -175,5 +159,6 @@ namespace ToDoApp.Services
 
             return await GetHttpResponseAsync(_configuration["ToDoAppAPI:ToDoReassignEndpoint"], "put", content);
         }
+        #endregion
     }
 }

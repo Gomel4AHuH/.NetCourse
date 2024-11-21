@@ -1,4 +1,5 @@
-﻿namespace ToDoApp.Dtos.ToDo
+﻿
+namespace ToDoApp.Dtos.ToDo
 {
     public record ReassignDto
     {

@@ -7,13 +7,13 @@ namespace ToDoAppAPI.Interfaces
     {
         Task<List<ToDo>> GetAllAsync();
         Task<ToDo?> GetByIdAsync(string id);
-        Task<ToDo> CreateAsync(ToDo toDo);
-        Task<ToDo?> UpdateAsync(string id, ToDo ToDo);
-        Task<ToDo?> DeleteAsync(string id);
+        Task CreateAsync(ToDo toDo);
+        Task<string> UpdateAsync(string id, ToDo ToDo);
+        Task<string> DeleteAsync(string id);
         Task<Employee?> GetEmployeeByIdAsync(string id);
         Task<List<ToDo>> GetAllByEmployeeIdAsync(string id);
-        Task<ToDo?> DuplicateAsync(string id);
-        Task<ToDo?> StatusChangeAsync(string id);
+        Task<string> DuplicateAsync(string id);
+        Task<string> StatusChangeAsync(string id);
         Task<string> ReassignAsync(ReassignDto reassignDto);
     }
 }

@@ -23,21 +23,21 @@
     </div>
 }
 
-<!--Edit/Create-->
-@if (ViewData["Title"].ToString() == "Edit" || ViewData["Title"].ToString() == "Create")
+<!--Edit-->
+@if (ViewData["Title"].ToString() == "Edit")
 {
     <div class="row mb-3">
         <label class="col-sm-4 col-form-label">Name</label>
         <div class="col-sm-8">
             <input class="form-control" asp-for="Name">
-            <span asp-validation-for="Name" class="text-danger" />
+            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
     </div>
     <div class="row mb-3">
         <label class="col-sm-4 col-form-label">Description</label>
         <div class="col-sm-8">
             <input class="form-control" asp-for="Description">
-            <span asp-validation-for="Description" class="text-danger" />
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
     </div>
     <div class="row mb-3">

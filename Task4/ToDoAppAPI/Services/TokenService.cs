@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,16 +10,11 @@ using ToDoAppAPI.Models;
 
 namespace ToDoAppAPI.Services
 {
-    public class TokenService : ITokenService
+    public class TokenService(IConfiguration configuration, UserManager<Employee> userManager) : ITokenService
     {
-        private readonly IConfiguration _configuration;
-        private readonly UserManager<Employee> _userManager;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly UserManager<Employee> _userManager = userManager;
 
-        public TokenService(IConfiguration configuration, UserManager<Employee> userManager)
-        {
-            _configuration = configuration;
-            _userManager = userManager;
-        }
         public async Task<TokenDto> CreateToken(string email, bool populateExp)
         {
             Employee employee = await _userManager.FindByEmailAsync(email.ToLower());
@@ -39,7 +33,7 @@ namespace ToDoAppAPI.Services
             SecurityTokenDescriptor tokenOptions = new()
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddHours(Convert.ToDouble(jwtSettings["expiryInHours"])),
+                Expires = DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["expiryInMinutes"])),
                 SigningCredentials = creds,
                 Issuer = jwtSettings["Issuer"],
                 Audience = jwtSettings["Audience"]
@@ -69,9 +63,9 @@ namespace ToDoAppAPI.Services
 
             Employee employee = await _userManager.FindByNameAsync(claimsPrincipal.Identity.Name);
 
-            if (employee == null || employee.RefreshToken != tokenDto.RefreshToken || employee.RefreshTokenExpirationDate <= DateTime.Now)
+            if (employee is null || !(string.Compare(employee.RefreshToken, tokenDto.RefreshToken) == 0) || employee.RefreshTokenExpirationDate <= DateTime.Now)
             {
-                //throw new RefreshTokenBadRequest();
+                return null;
             }
 
             return await CreateToken(employee.Email, false);
@@ -82,7 +76,7 @@ namespace ToDoAppAPI.Services
             context.Response.Cookies.Append("accessToken", tokenDto.AccessToken,
                 new CookieOptions
                 {
-                    Expires = DateTimeOffset.UtcNow.AddHours(Convert.ToDouble(_configuration["JwtSettings:expiryInHours"])),
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:expiryInMinutes"])),
                     HttpOnly = true,
                     IsEssential = true,
                     Secure = true,

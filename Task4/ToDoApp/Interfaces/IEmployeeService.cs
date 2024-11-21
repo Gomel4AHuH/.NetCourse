@@ -1,7 +1,6 @@
 ﻿using ToDoApp.Dtos.Employee;
 using ToDoApp.Dtos.Employee.Authorization;
 using ToDoApp.Models;
-using Task = System.Threading.Tasks.Task;
 
 namespace ToDoApp.Interfaces
 {

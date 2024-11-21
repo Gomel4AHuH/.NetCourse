@@ -2,11 +2,10 @@
     ViewData["Title"] = "Home Page";
 }
 
-<!--
-i@f (User.Identity.IsAuthenticated)
+@if (User.Identity.IsAuthenticated)
 {
     <div class="text-center">
-        <p>Please use links above for further actions.</p>
+        <p>Please use actions above for further actions.</p>
     </div>
 }
 else
@@ -16,9 +15,3 @@ else
         <p>Please <a asp-controller="Employee" asp-action="Login">Login</a> or <a asp-controller="Employee" asp-action="Register">Register</a> before start.</p>
     </div>
 }
--->
-<div class="text-center">
-    <h1 class="display-4">Welcome to ToDo application.</h1>
-    <p>Please <a asp-controller="Employee" asp-action="Login">Login</a> or <a asp-controller="Employee" asp-action="Register">Register</a> before start.</p>
-</div>
-

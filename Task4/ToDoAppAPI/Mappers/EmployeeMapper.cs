@@ -35,35 +35,6 @@ namespace ToDoAppAPI.Mappers
                 Speciality = registerDto.Speciality,
                 EmploymentDate = registerDto.EmploymentDate
             };
-        }
-
-        public static Employee ToEmployeeFromUpdate(this UpdateEmployeeDto updateEmployeeDto)
-        {
-            return new Employee
-            {
-                FirstName = updateEmployeeDto.FirstName,
-                LastName = updateEmployeeDto.LastName,
-                MiddleName = updateEmployeeDto.MiddleName,
-                Birthday = updateEmployeeDto.Birthday,
-                Speciality = updateEmployeeDto.Speciality,
-                EmploymentDate = updateEmployeeDto.EmploymentDate                
-            };
-        }
-
-        public static NewEmployeeDto ToNewEmployeeDto(this Employee employee)
-        {
-            return new NewEmployeeDto
-            {   
-                UserName = employee.UserName,
-                Email = employee.Email,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                MiddleName = employee.MiddleName,
-                Birthday = employee.Birthday,
-                Speciality = employee.Speciality,
-                EmploymentDate = employee.EmploymentDate,
-                EmployeePhoto = employee.EmployeePhoto
-            };
-        }
+        }        
     }
 }

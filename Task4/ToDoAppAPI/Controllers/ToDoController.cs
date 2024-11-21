@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using ToDoAppAPI.Dtos.Employee;
 using ToDoAppAPI.Dtos.ToDo;
 using ToDoAppAPI.Interfaces;
 using ToDoAppAPI.Mappers;
@@ -12,7 +11,7 @@ namespace ToDoAppAPI.Controllers
     [Produces("application/json")]
     [Route("api/[controller]/")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ToDoController(IToDoRepository toDoRepository) : ControllerBase
     {
         private readonly IToDoRepository _toDoRepository = toDoRepository;
@@ -23,9 +22,15 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDos = await _toDoRepository.GetAllAsync();
+            List<ToDo> toDos = await _toDoRepository.GetAllAsync();
 
-            return Ok(toDos);
+            if (toDos is not null)
+            {
+                return Ok(toDos);
+            }
+
+            Log.Information("No todos found");
+            return Ok(new List<ToDo>());           
         }
 
         [HttpGet("{id}")]
@@ -34,13 +39,13 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDo = await _toDoRepository.GetByIdAsync(id);
+            ToDo toDo = await _toDoRepository.GetByIdAsync(id);
 
-            if (toDo == null)
+            if (toDo is null)
             {
-                string error = "ToDo does not exist.";
-                Log.Error(error);
-                throw new ProblemException("ToDo getting error", error);
+                string result = "ToDo does not exist.";
+                Log.Error(result);
+                throw new ProblemException("Get by id problem", result);
             }
 
             return Ok(toDo);
@@ -53,27 +58,23 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var employee = await _toDoRepository.GetEmployeeByIdAsync(createToDoDto.EmployeeId);
+            Employee employee = await _toDoRepository.GetEmployeeByIdAsync(createToDoDto.EmployeeId);
 
-            if (employee == null)
+            string result = "";
+
+            if (employee is null)
             {
-                string error = $"Employee with id {createToDoDto.EmployeeId} does not exist for creating ToDo.";
-                Log.Error(error);
-                throw new ProblemException("Employee does not exist", error);
+                result = $"Employee with id {createToDoDto.EmployeeId} does not exist for creating ToDo.";
+                Log.Error(result);
+                throw new ProblemException("Create problem", result);
             }
 
-            var toDo = createToDoDto.ToToDoFromCreate(createToDoDto.EmployeeId);
+            ToDo toDo = createToDoDto.ToToDoFromCreate(createToDoDto.EmployeeId);
 
-            toDo = await _toDoRepository.CreateAsync(toDo);
+            await _toDoRepository.CreateAsync(toDo);            
 
-            if (toDo == null)
-            {
-                string error = $"ToDo {toDo} cannot be created.";
-                Log.Error(error);
-                throw new ProblemException("Employee does not exist", error);
-            }
-
-            Log.Information($"ToDo with id {toDo.Id} created successfully.");
+            result = $"ToDo with id {toDo.Id} created successfully.";
+            Log.Information(result);
 
             return Ok();
         }
@@ -85,16 +86,16 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDo = await _toDoRepository.UpdateAsync(id, updateToDoDto.ToToDoFromUpdate(id));
-
-            if (toDo == null)
-            {
-                string error = "ToDo not found for updating.";
-                Log.Error(error);
-                throw new ProblemException("ToDo does not exist", error);
+            string result = await _toDoRepository.UpdateAsync(id, updateToDoDto.ToToDoFromUpdate(id));
+            
+            if (!string.IsNullOrEmpty(result))
+            {                
+                Log.Error(result);
+                throw new ProblemException("Update problem", result);
             }
 
-            Log.Information($"ToDo with id {toDo.Id} updated successfully.");
+            result = $"ToDo with id {id} updated successfully.";
+            Log.Information(result);
 
             return Ok();
         }
@@ -106,16 +107,16 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDo = await _toDoRepository.DeleteAsync(id);
+            string result = await _toDoRepository.DeleteAsync(id);
 
-            if (toDo == null)
+            if (!string.IsNullOrEmpty(result))
             {
-                string error = "ToDo not found for deleting.";
-                Log.Error(error);
-                throw new ProblemException("ToDo does not exist", error);
-            }
+                Log.Error(result);
+                throw new ProblemException("Delete problem", result);
+            }            
 
-            Log.Information($"ToDo with id {toDo.Id} deleted successfully.");
+            result = $"ToDo with id {id} deleted successfully.";
+            Log.Information(result);
 
             return Ok();
         }
@@ -126,9 +127,15 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDos = await _toDoRepository.GetAllByEmployeeIdAsync(id);
+            List<ToDo> toDos = await _toDoRepository.GetAllByEmployeeIdAsync(id);
 
-            return Ok(toDos);
+            if (toDos is not null)
+            {
+                return Ok(toDos);
+            }
+
+            Log.Information("No todos found");
+            return Ok(new List<ToDo>());            
         }
 
         [HttpGet]
@@ -138,16 +145,16 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDo = await _toDoRepository.DuplicateAsync(id);
+            string result = await _toDoRepository.DuplicateAsync(id);
 
-            if (toDo == null)
+            if (!string.IsNullOrEmpty(result))
             {
-                string error = "ToDo not found for duplicating.";
-                Log.Error(error);
-                throw new ProblemException("ToDo does not exist", error);
-            }
+                Log.Error(result);
+                throw new ProblemException("Duplicate problem", result);
+            }            
 
-            Log.Information($"ToDo with id {toDo.Id} duplicated successfully.");
+            result = $"ToDo with id {id} duplicated successfully.";
+            Log.Information(result);
 
             return Ok();
         }
@@ -159,16 +166,16 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var toDo = await _toDoRepository.StatusChangeAsync(id);
+            string result = await _toDoRepository.StatusChangeAsync(id);
 
-            if (toDo == null)
+            if (!string.IsNullOrEmpty(result))
             {
-                string error = "ToDo not found for status changing.";
-                Log.Error(error);
-                throw new ProblemException("ToDo does not exist", error);
-            }
+                Log.Error(result);
+                throw new ProblemException("Status change problem", result);
+            }            
 
-            Log.Information($"ToDo status with id {toDo.Id} changed successfully.");
+            result = $"ToDo status with id {id} changed successfully.";
+            Log.Information(result);
 
             return Ok();
         }
@@ -182,7 +189,7 @@ namespace ToDoAppAPI.Controllers
 
             string result = await _toDoRepository.ReassignAsync(reassignDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Reassign problem", result);

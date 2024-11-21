@@ -1,5 +1,4 @@
-﻿
-namespace ToDoApp.Dtos.Employee.Authorization
+﻿namespace ToDoApp.Dtos.Employee.Authorization
 {
     public record ChangeEmailDto
     {

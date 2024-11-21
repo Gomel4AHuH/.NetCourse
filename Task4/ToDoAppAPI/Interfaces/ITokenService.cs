@@ -1,5 +1,4 @@
-﻿using ToDoAppAPI.Dtos.Employee;
-using ToDoAppAPI.Dtos.Token;
+﻿using ToDoAppAPI.Dtos.Token;
 
 namespace ToDoAppAPI.Interfaces
 {

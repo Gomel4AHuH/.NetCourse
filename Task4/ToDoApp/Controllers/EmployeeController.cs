@@ -6,10 +6,7 @@ using ToDoApp.Models;
 using ToDoApp.Dtos.Employee.Authorization;
 using ToDoApp.Mappers;
 using ToDoApp.Dtos.Employee;
-using System.Configuration;
-using NuGet.Configuration;
 using ToDoAppAPI.Dtos.Token;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ToDoApp.Controllers
 {
@@ -19,48 +16,13 @@ namespace ToDoApp.Controllers
         private readonly IConfiguration _configuration = configuration;
         private string? Message;
 
-        #region Authorization
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-                
-        public async Task<IActionResult> Login(LoginDto loginModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(loginModel);
-            }
-
-            HttpResponseMessage response = await _employeeService.LoginAsync(loginModel);
-            
-            var test = response.Content.ReadAsStringAsync();
-            
-            string strResult = response.Content.ReadAsStringAsync().Result;
-
-            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
-
-            TokenDto tokenDto = new(arrResult["accessToken"].ToString(), arrResult["refreshToken"].ToString());
-
-            SetTokensInsideCookie(tokenDto, HttpContext);
-
-            if (response.IsSuccessStatusCode)
-            {                
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
-                return View(loginModel);
-            }
-        }
+        #region Private methods
         private void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context)
         {
             context.Response.Cookies.Append("accessToken", tokenDto.AccessToken,
                 new CookieOptions
                 {
-                    Expires = DateTimeOffset.UtcNow.AddHours(Convert.ToDouble(_configuration["JwtSettings:expiryInHours"])),
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:expiryInMinutes"])),
                     HttpOnly = true,
                     IsEssential = true,
                     Secure = true,
@@ -77,6 +39,87 @@ namespace ToDoApp.Controllers
                     SameSite = SameSiteMode.None
                 });
         }
+        private void DeleteTokensInsideCookie(HttpContext context)
+        {
+            context.Response.Cookies.Delete("accessToken");
+
+            context.Response.Cookies.Delete("refreshToken");
+        }
+
+        private void PasswordValidation(ChangePasswordDto changePasswordDto) 
+        {
+            if (changePasswordDto.CurrentPassword == changePasswordDto.NewPassword)
+            {
+                ModelState.AddModelError(nameof(changePasswordDto.NewPassword),
+                             "New password can't be the same as current password.");
+            }
+
+            if (changePasswordDto.NewPassword != changePasswordDto.NewPasswordConfirmation)
+            {
+                ModelState.AddModelError(nameof(changePasswordDto.NewPasswordConfirmation),
+                             "New password and new password confimation should be the same.");
+            }
+        }
+
+        private void UserNameValidation(ChangeUserNameDto changeUserNameDto)
+        {
+            if (changeUserNameDto.UserName == changeUserNameDto.NewUserName)
+            {
+                ModelState.AddModelError(nameof(changeUserNameDto.NewUserName),
+                             "New username can't be the same as current username.");
+            }
+        }
+
+        private void EmailValidation(ChangeEmailDto changeEmailDto)
+        {
+            if (changeEmailDto.Email == changeEmailDto.NewEmail)
+            {
+                ModelState.AddModelError(nameof(changeEmailDto.NewEmail),
+                             "New email can't be the same as current email.");
+            }
+        }
+
+        private void EmployeeValidation(EditEmployeeDto editEmployeeDto)
+        {
+            if (editEmployeeDto.EmployeePhotoImage?.Length >= 2097152)
+            {
+                ModelState.AddModelError(nameof(editEmployeeDto.EmployeePhotoImage),
+                             "Photo image size is too large. Please use images less than 2 mb");
+            }
+        }
+        #endregion
+
+        #region Authorization
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }                
+        public async Task<IActionResult> Login(LoginDto loginModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(loginModel);
+            }
+
+            HttpResponseMessage response = await _employeeService.LoginAsync(loginModel);
+
+            string strResult = response.Content.ReadAsStringAsync().Result;
+
+            var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
+
+            if (!response.IsSuccessStatusCode)
+            {                
+                ModelState.AddModelError("", arrResult["detail"].ToString());
+                return View(loginModel);
+            }            
+
+            TokenDto tokenDto = new(arrResult["accessToken"].ToString(), arrResult["refreshToken"].ToString());
+
+            SetTokensInsideCookie(tokenDto, HttpContext);
+
+            return RedirectToAction("Index", "Home");
+        }        
 
         public async Task<IActionResult> Logout()
         {            
@@ -88,6 +131,7 @@ namespace ToDoApp.Controllers
 
             if (response.IsSuccessStatusCode)
             {
+                DeleteTokensInsideCookie(HttpContext);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -100,11 +144,21 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
+
+            ViewData["Specialities"] = specialities;
+
             return View();
         }
-                
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterDto registerModel)
         {
+
+            string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
+
+            ViewData["Specialities"] = specialities;
+
             if (!ModelState.IsValid)
             {
                 return View(registerModel);
@@ -116,15 +170,17 @@ namespace ToDoApp.Controllers
 
             var arrResult = (JObject)JsonConvert.DeserializeObject(strResult);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            else
+            if (!response.IsSuccessStatusCode)            
             {
                 ModelState.AddModelError("", arrResult["detail"].ToString());
                 return View(registerModel);
             }
+
+            TokenDto tokenDto = new(arrResult["accessToken"].ToString(), arrResult["refreshToken"].ToString());
+
+            SetTokensInsideCookie(tokenDto, HttpContext);
+
+            return RedirectToAction("Index", "Home");
         }
         #endregion
 
@@ -175,23 +231,17 @@ namespace ToDoApp.Controllers
             }
 
             string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
-            //SelectList selectList = new(specialities);
-            //ViewData["Specialities"] = selectList;
-            
+                        
             ViewData["Specialities"] = specialities;
             ViewData["Email"] = employee.Email;
             ViewData["UserName"] = employee.UserName;
 
             return View(employee.ToEditEmployeeDto());
         }
-                
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, EditEmployeeDto editEmployeeDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(editEmployeeDto);
-            }
-
             Employee employee = await _employeeService.GetByIdAsync(id);
 
             if (employee == null)
@@ -200,6 +250,20 @@ namespace ToDoApp.Controllers
                 TempData["ErrorMessage"] = Message;
                 return RedirectToAction("Index");
             }
+
+            EmployeeValidation(editEmployeeDto);
+
+            string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
+
+            ViewData["Specialities"] = specialities;
+            ViewData["Email"] = employee.Email;
+            ViewData["UserName"] = employee.UserName;
+            editEmployeeDto.EmployeePhotoStr = employee.EmployeePhotoStr;
+
+            if (!ModelState.IsValid)
+            {
+                return View(editEmployeeDto);
+            }            
 
             HttpResponseMessage response = await _employeeService.UpdateAsync(editEmployeeDto, employee);
 
@@ -249,7 +313,8 @@ namespace ToDoApp.Controllers
 
             return View(employee);            
         }
-                
+
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id, IFormCollection collection)
         {
             HttpResponseMessage response = await _employeeService.DeleteAsync(id);
@@ -271,7 +336,7 @@ namespace ToDoApp.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet]        
         public async Task<IActionResult> ChangeUserName(Guid id)
         {
             Employee employee = await _employeeService.GetByIdAsync(id);
@@ -286,8 +351,11 @@ namespace ToDoApp.Controllers
             return View(employee.ToChangeUserNameDto());
         }
 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeUserName(ChangeUserNameDto changeUserNameDto)
         {
+            UserNameValidation(changeUserNameDto);
+
             if (!ModelState.IsValid)
             {
                 return View(changeUserNameDto);
@@ -301,7 +369,7 @@ namespace ToDoApp.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                Message = $"Username for user '{changeUserNameDto.UserName}' changed to '{changeUserNameDto.NewUserName}' successfully";
+                Message = $"Username for employee '{changeUserNameDto.UserName}' changed to '{changeUserNameDto.NewUserName}' successfully";
                 TempData["SuccessMessage"] = Message;
                 return RedirectToAction("Edit", "Employee", new { id = changeUserNameDto.Id });
             }
@@ -327,8 +395,11 @@ namespace ToDoApp.Controllers
             return View(employee.ToChangeEmailDto());
         }
 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeEmail(ChangeEmailDto changeEmailDto)
         {
+            EmailValidation(changeEmailDto);
+
             if (!ModelState.IsValid)
             {
                 return View(changeEmailDto);
@@ -342,7 +413,7 @@ namespace ToDoApp.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                Message = $"Email for user '{changeEmailDto.Email}' changed to '{changeEmailDto.NewEmail}' successfully";
+                Message = $"Email for employee '{changeEmailDto.Email}' changed to '{changeEmailDto.NewEmail}' successfully";
                 TempData["SuccessMessage"] = Message;
                 return RedirectToAction("Edit", "Employee", new { id = changeEmailDto.Id });
             }
@@ -368,8 +439,11 @@ namespace ToDoApp.Controllers
             return View(employee.ToChangePasswordDto());
         }
 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
+            PasswordValidation(changePasswordDto);
+            
             if (!ModelState.IsValid)
             {
                 return View(changePasswordDto);
@@ -383,7 +457,7 @@ namespace ToDoApp.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                Message = $"Password for user '{changePasswordDto.Email}' changed successfully";
+                Message = $"Password for employee '{changePasswordDto.Email}' changed successfully";
                 TempData["SuccessMessage"] = Message;
                 return RedirectToAction("Edit", "Employee", new { id = changePasswordDto.Id });
             }

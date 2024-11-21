@@ -18,6 +18,5 @@ namespace ToDoAppAPI.Dtos.Employee
         public DateOnly? EmploymentDate { get; set; }
         [Display(Name = "File")]
         public IFormFile? EmployeePhoto { get; set; }
-        public byte[]? EmployeePhotoBytes { get; set; }
     }
 }

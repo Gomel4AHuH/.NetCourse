@@ -8,7 +8,7 @@ namespace ToDoApp.Interfaces
         Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber);
         Task<List<ToDo>> GetAllByEmployeeIdAsync(string sortOrder, string searchString, int? pageNumber, Guid id);
         Task<ToDo> GetByIdAsync(Guid id);
-        Task<HttpResponseMessage> CreateAsync(CreateToDoDto toDo);
+        Task<HttpResponseMessage> CreateAsync(CreateToDoDto createToDo);
         Task<HttpResponseMessage> UpdateAsync(ToDo toDo);
         Task<HttpResponseMessage> DeleteAsync(Guid id);        
         Task<List<ToDo>> GetAllByEmployeeIdAsync(Guid id);

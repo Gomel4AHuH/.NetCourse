@@ -30,18 +30,9 @@ namespace ToDoAppAPI.Data
                     Name = "Employee",
                     NormalizedName = "Employee"
                 }
-            ];
-            /*
-            List<IdentityUser> users =
-            [
-                new() {
-                    UserName = "Manager",
-                    Email = "manager@gmail.com"
-                }
-            ];*/
+            ];            
             
             modelBuilder.Entity<IdentityRole>().HasData(roles);
-            //modelBuilder.Entity<IdentityUser>().HasData(users);
         }
     }
 }

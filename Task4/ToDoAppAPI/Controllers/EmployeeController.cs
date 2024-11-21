@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using ToDoAppAPI.Dtos.Employee;
@@ -32,7 +30,7 @@ namespace ToDoAppAPI.Controllers
 
             string result = await _employeeRepository.RegisterAsync(registerDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Registration problem", result);
@@ -40,7 +38,7 @@ namespace ToDoAppAPI.Controllers
 
             TokenDto tokenDto = await _tokenService.CreateToken(registerDto.Email, true);
 
-            if (tokenDto == null) 
+            if (tokenDto is null) 
             {
                 Log.Error(result);
                 throw new ProblemException("Token creation error", result);
@@ -48,11 +46,11 @@ namespace ToDoAppAPI.Controllers
 
             _tokenService.SetTokensInsideCookie(tokenDto, HttpContext);
 
-            result = $"User with email {registerDto.Email} registered successfully";
+            result = $"Employee with email {registerDto.Email} registered successfully";
 
             Log.Information(result);
-            //return Ok(result);
-            return Ok();
+
+            return Ok(tokenDto);
         }
 
         [HttpPost("login")]
@@ -63,7 +61,7 @@ namespace ToDoAppAPI.Controllers
 
             string result = await _employeeRepository.ValidateUser(loginDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Login problem", result);
@@ -73,11 +71,10 @@ namespace ToDoAppAPI.Controllers
 
             _tokenService.SetTokensInsideCookie(tokenDto, HttpContext);
 
-            result = $"User with email {loginDto.Email} logged in successfully";
+            result = $"Employee with email {loginDto.Email} logged in successfully";
 
             Log.Information(result);
 
-            //return Ok(result);
             return Ok(tokenDto);
         }
 
@@ -86,16 +83,15 @@ namespace ToDoAppAPI.Controllers
         {
             _tokenService.DeleteTokensInsideCookie(HttpContext);
 
-            string result = $"User with email 'test' logged out successfully";
+            string result = $"Employee with email 'test' logged out successfully";
 
             Log.Information(result);
 
-            //return Ok(result);
             return Ok();
         }
 
         [HttpPost("changepassword")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             if (!ModelState.IsValid)
@@ -103,57 +99,43 @@ namespace ToDoAppAPI.Controllers
 
             string result = await _employeeRepository.ChangePasswordAsync(changePasswordDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Change password problem", result);
             }
 
-            result = $"Password for user '{changePasswordDto.Email}' changed successfully";
+            result = $"Password for employee '{changePasswordDto.Email}' changed successfully";
 
             Log.Information(result);
 
-            //return Ok(result);
             return Ok();
         }
 
         [HttpPost("changeemail")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> ChangeEmail(ChangeEmailDto changeEmailDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            //string token = await HttpContext.GetTokenAsync("accessToken");
-            //var accessToken = await HttpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "accessToken");
-            //string token1 = await HttpContext.GetTokenAsync("refreshToken");
-
-            /*string result = "You are not authorized";
-
-            if (string.IsNullOrEmpty(token))
-            {                
-                Log.Error("result");
-                throw new ProblemException("Change email problem", result);
-            }*/
+                return BadRequest(ModelState);            
 
             string result = await _employeeRepository.ChangeEmailAsync(changeEmailDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Change email problem", result);
             }
 
-            result = $"Email for user '{changeEmailDto.Email}' changed to '{changeEmailDto.NewEmail}' successfully";
+            result = $"Email for employee '{changeEmailDto.Email}' changed to '{changeEmailDto.NewEmail}' successfully";
 
             Log.Information(result);
 
-            //return Ok(result);
             return Ok();
         }
 
         [HttpPost("changeusername")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> ChangeUserName(ChangeUserNameDto changeUserNameDto)
         {
             if (!ModelState.IsValid)
@@ -161,58 +143,41 @@ namespace ToDoAppAPI.Controllers
 
             string result = await _employeeRepository.ChangeUserNameAsync(changeUserNameDto);
 
-            if (result != "")
+            if (!string.IsNullOrEmpty(result))
             {
                 Log.Error(result);
                 throw new ProblemException("Change username problem", result);
             }
 
-            result = $"Username for user '{changeUserNameDto.UserName}' changed to '{changeUserNameDto.NewUserName}' successfully";
+            result = $"Username for employee '{changeUserNameDto.UserName}' changed to '{changeUserNameDto.NewUserName}' successfully";
 
             Log.Information(result);
 
-            //return Ok(result);
             return Ok();
-        }
-
-        [HttpPost("forgotpassword")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _employeeRepository.ForgotPasswordAsync(forgotPasswordDto);
-
-            if (result != "")
-            {
-                Log.Error(result);
-                throw new ProblemException("Forgot password problem", result);
-            }
-
-            result = $"Password for user '{forgotPasswordDto.Email}' reseted successfully";
-
-            Log.Information(result);
-
-            //return Ok(result);
-            return Ok();
-        }
+        }        
 
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
+                        
             var employees = await _employeeRepository.GetAllAsync();
 
-            var employeeDto = employees.Select(s => s.ToEmployeeDto());
+            if (employees is not null)
+            {
+                var employeeDto = employees.Select(s => s.ToEmployeeDto());
+                               
+                return Ok(employeeDto);
+            }
 
-            return Ok(employeeDto);
+            Log.Information("No employees found");
+            return Ok(new List<Employee>());
         }
         
         [HttpGet("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
             if (!ModelState.IsValid)
@@ -220,17 +185,24 @@ namespace ToDoAppAPI.Controllers
 
             var employee = await _employeeRepository.GetByIdAsync(id);
 
-            if (employee == null)
+            string result = "";
+
+            if (employee is null)
             {
-                return NotFound();
+                result = $"Employee with id '{id}' not found";
+                Log.Error(result);
+                throw new ProblemException("Get employee by id problem", result);
             }
+
+            result = $"Employee with id '{id}' returned successfully";
+            Log.Information(result);
 
             return Ok(employee.ToEmployeeDto());
         }
 
         [HttpPut]
         [Route("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Update([FromRoute] string id, [FromForm] UpdateEmployeeDto updateEmployeeDto)
         {
             if (!ModelState.IsValid)
@@ -239,39 +211,43 @@ namespace ToDoAppAPI.Controllers
             if (updateEmployeeDto.EmployeePhoto?.Length >= 2097152)
             {
                 ModelState.AddModelError("File", "The file is too large.");
-            }                      
-
-            //var employee = await _employeeRepository.UpdateAsync(id, updateEmployeeDto.ToEmployeeFromUpdate());
-            var employee = await _employeeRepository.UpdateAsync(id, updateEmployeeDto);
-
-            if (employee == null)
-            {
-                return NotFound("Employee not found");
             }
 
-            Log.Information($"User with email {employee.Email} updated successfully");
+            string result = await _employeeRepository.UpdateAsync(id, updateEmployeeDto);
 
-            return Ok(employee.ToEmployeeDto());
+            if (!string.IsNullOrEmpty(result))
+            {
+                Log.Error(result);
+                throw new ProblemException("Update employee problem", result);
+            }            
+
+            result = $"Employee with id '{id}' updated successfully";
+
+            Log.Information(result);
+
+            return Ok();
         }
 
         [HttpDelete]
         [Route("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var employee = await _employeeRepository.DeleteAsync(id);
+            string result = await _employeeRepository.DeleteAsync(id);
 
-            if (employee == null)
+            if (!string.IsNullOrEmpty(result))
             {
-                return NotFound("Employee does not exist");
+                Log.Error(result);
+                throw new ProblemException("Delete employee problem", result);
             }
 
-            Log.Information($"User with email {employee.Email} deleted successfully");
+            result = $"Employee with id '{id}' and all todos deleted successfully";
+            Log.Information(result);
 
-            return Ok(employee);                 
+            return Ok();                 
         }        
     }
 }

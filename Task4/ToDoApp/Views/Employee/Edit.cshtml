@@ -1,7 +1,7 @@
 ﻿@model ToDoApp.Dtos.Employee.EditEmployeeDto
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit";    
     var userName = ViewData["UserName"];
     var email = ViewData["Email"];
     var specialities = (string[])ViewData["Specialities"];
@@ -11,16 +11,17 @@
 
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
         <div class="row mb-3">
             <label class="col-sm-4 col-form-label">UserName</label>
-            <div class="col-sm-8">
+            <div class="col-sm-8">                
                 @userName
                 <a asp-controller="Employee" asp-action="ChangeUserName" asp-route-id="@Model.Id">Change username</a>
             </div>
         </div>
         <div class="row mb-3">
             <label class="col-sm-4 col-form-label">Email</label>
-            <div class="col-sm-8">
+            <div class="col-sm-8">                
                 @email
                 <a asp-controller="Employee" asp-action="ChangeEmail" asp-route-id="@Model.Id">Change email</a>
             </div>
@@ -31,44 +32,39 @@
                 <a asp-controller="Employee" asp-action="ChangePassword" asp-route-id="@Model.Id">Change password</a>
             </div>
         </div>
-        <form asp-action="Edit" enctype="multipart/form-data">
+        <form asp-action="Edit" enctype="multipart/form-data">            
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Last name</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="LastName">
-                    <span asp-validation-for="LastName" class="text-danger" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">First name</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="FirstName">
-                    <span asp-validation-for="FirstName" class="text-danger" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Middle name</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="MiddleName">
-                    <span asp-validation-for="MiddleName" class="text-danger" />
+                    <span asp-validation-for="MiddleName" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Birthday</label>
                 <div class="col-sm-8">
                     <input type="date" class="form-control" asp-for="Birthday">
-                    <span asp-validation-for="Birthday" class="text-danger" />
+                    <span asp-validation-for="Birthday" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
                 <label class="col-sm-4 col-form-label">Speciality</label>
                 <div class="col-sm-8">
-                    <span asp-validation-for="Speciality" class="text-danger" />
-                    <!--
-                        <select asp-for="Speciality" asp-items="((List<SelectListItem>)ViewData["Specialities"])">
-                        <option value="">--Select--</option>
-                        </select>
-                    -->
+                    <span asp-validation-for="Speciality" class="text-danger"></span>
                     <select class="form-select" asp-for="Speciality">
                         @foreach (var item in @specialities)
                         {
@@ -88,7 +84,7 @@
                 <label class="col-sm-4 col-form-label">Employment date</label>
                 <div class="col-sm-8">
                     <input type="date" class="form-control" asp-for="EmploymentDate">
-                    <span asp-validation-for="EmploymentDate" class="text-danger" />
+                    <span asp-validation-for="EmploymentDate" class="text-danger"></span>
                 </div>
             </div>
             @if (Model.EmployeePhotoStr != "")
@@ -103,7 +99,7 @@
                 <label class="col-sm-4 col-form-label">Employee photo</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="EmployeePhotoImage">
-                    <span asp-validation-for="EmployeePhotoImage" class="text-danger" />
+                    <span asp-validation-for="EmployeePhotoImage" class="text-danger"></span>
                 </div>
             </div>
             

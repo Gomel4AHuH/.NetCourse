@@ -3,12 +3,12 @@
 @{
     ViewData["Title"] = "Register";
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    var specialities = (string[])ViewData["Specialities"];
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<!-- enctype="multipart/form-data"-->
-<form asp-action="Register" method="post">
+<form asp-action="Register" enctype="multipart/form-data">
     <h2>Create a new account.</h2>
     <hr />
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
@@ -47,26 +47,32 @@
             <label asp-for="Birthday">Birthday</label>
             <span asp-validation-for="Birthday" class="text-danger"></span>
         </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Speciality" class="form-control" autocomplete="speciality" aria-required="true" placeholder="Speciality" />
-            <label asp-for="Speciality">Speciality</label>
+        <div class="form-floating mb-3">            
             <span asp-validation-for="Speciality" class="text-danger"></span>
-        </div>
+            <select class="form-select" asp-for="Speciality">
+                @foreach (var item in @specialities)
+                {
+                    <option value=@item>@item</option>
+                }
+            </select>
+            <label asp-for="Speciality">Speciality</label>
+        </div>        
         <div class="form-floating mb-3">
             <input asp-for="EmploymentDate" type="date" class="form-control" autocomplete="employmentdate" aria-required="true" placeholder="EmploymentDate" />
             <label asp-for="EmploymentDate">Employment date</label>
             <span asp-validation-for="EmploymentDate" class="text-danger"></span>
         </div>
         <div class="form-floating mb-3">
-            <input asp-for="EmployeePhotoImage" class="form-control" autocomplete="employeephoto" aria-required="true" placeholder="EmployeePhoto" />
-            <label asp-for="EmployeePhotoImage">Employee photo</label>
-        </div>
+            <input class="form-control" asp-for="EmployeePhotoImage">
+            <span asp-validation-for="EmployeePhotoImage" class="text-danger"></span>
+        </div>        
     </div>
     
     <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
 </form>
 
-
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

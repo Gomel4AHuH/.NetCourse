@@ -108,7 +108,6 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
-//app.UseStaticFiles();
 
 app.UseSerilogRequestLogging();
 

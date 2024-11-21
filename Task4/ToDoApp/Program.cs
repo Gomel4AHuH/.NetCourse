@@ -10,7 +10,6 @@ var config = builder.Configuration;
 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IToDoService, ToDoService>();
-builder.Services.AddScoped<ILoggerService, LoggerService>();
 
 builder.Services.AddAuthorization();
 
@@ -64,14 +63,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-//app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-//app.UseAuthenticationMiddleware();
+app.UseAuthenticationMiddleware();
 
 app.MapControllerRoute(
     name: "default",

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ToDoAppAPI.Dtos.Employee;
+﻿using ToDoAppAPI.Dtos.Employee;
 using ToDoAppAPI.Models;
 
 namespace ToDoAppAPI.Interfaces
@@ -8,8 +7,8 @@ namespace ToDoAppAPI.Interfaces
     {
         Task<List<Employee>> GetAllAsync();
         Task<Employee?> GetByIdAsync(string id);
-        Task<Employee?> UpdateAsync(string id, UpdateEmployeeDto updateEmployeeDto);
-        Task<Employee?> DeleteAsync(string id);
+        Task<string> UpdateAsync(string id, UpdateEmployeeDto updateEmployeeDto);
+        Task<string> DeleteAsync(string id);
         Task<string> ValidateUser(LoginDto loginDto);
         Task<string> RegisterAsync(RegisterDto registerDto);
         Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto);

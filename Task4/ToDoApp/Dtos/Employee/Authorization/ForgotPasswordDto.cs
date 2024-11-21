@@ -2,6 +2,6 @@
 {
     public record ForgotPasswordDto
     {
-        public string Email;
+        public string Email { get; set; }
     }
 }
