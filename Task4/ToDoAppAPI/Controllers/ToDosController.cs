@@ -12,7 +12,7 @@ namespace ToDoAppAPI.Controllers
     [Route("api/[controller]/")]
     [ApiController]
     [Authorize]
-    public class ToDoController(IToDoRepository toDoRepository) : ControllerBase
+    public class ToDosController(IToDoRepository toDoRepository) : ControllerBase
     {
         private readonly IToDoRepository _toDoRepository = toDoRepository;
 

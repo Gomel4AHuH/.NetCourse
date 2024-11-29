@@ -155,7 +155,6 @@ namespace ToDoApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterDto registerModel)
         {
-
             string[] specialities = _configuration.GetSection("Specialities").Get<string[]>();
 
             ViewData["Specialities"] = specialities;
@@ -175,13 +174,9 @@ namespace ToDoApp.Controllers
             {
                 ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(registerModel);
-            }
+            }            
 
-            TokenDto tokenDto = new(arrResult["accessToken"].ToString(), arrResult["refreshToken"].ToString());
-
-            SetTokensInsideCookie(tokenDto, HttpContext);
-
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Employee");
         }
         #endregion
 

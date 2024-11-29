@@ -12,7 +12,7 @@ namespace ToDoAppAPI.Controllers
     [Produces("application/json")]
     [Route("api/[controller]/")]
     [ApiController]
-    public class EmployeeController(IEmployeeRepository employeeRepository, ITokenService tokenService) : ControllerBase
+    public class EmployeesController(IEmployeeRepository employeeRepository, ITokenService tokenService) : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository = employeeRepository;
         private readonly ITokenService _tokenService = tokenService;
