@@ -21,7 +21,7 @@ namespace ToDoAppAPI.Repositories
             return string.Join(", ", errorList.Select(e => e.Description));
         }
 
-        private static async Task<byte[]> CreatePhoto(IFormFile? EmployeePhoto)
+        private static async Task<byte[]> CreatePhotoAsync(IFormFile? EmployeePhoto)
         {
             byte[] result = [];
 
@@ -59,7 +59,7 @@ namespace ToDoAppAPI.Repositories
 
             Employee employee = registerDto.ToEmployeeDto();
 
-            employee.EmployeePhoto = await CreatePhoto(registerDto.EmployeePhoto);
+            employee.EmployeePhoto = await CreatePhotoAsync(registerDto.EmployeePhoto);
 
             IdentityResult createdEmployee = await _userManager.CreateAsync(employee, registerDto.Password);
 
@@ -96,11 +96,11 @@ namespace ToDoAppAPI.Repositories
             existingEmployee.Birthday = updateEmployeeDto.Birthday;
             existingEmployee.Speciality = updateEmployeeDto.Speciality;
             existingEmployee.EmploymentDate = updateEmployeeDto.EmploymentDate;
-            if (updateEmployeeDto.EmployeePhoto is not null) existingEmployee.EmployeePhoto = await CreatePhoto(updateEmployeeDto.EmployeePhoto);
+            if (updateEmployeeDto.EmployeePhoto is not null) existingEmployee.EmployeePhoto = await CreatePhotoAsync(updateEmployeeDto.EmployeePhoto);
 
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> DeleteAsync(string id)
@@ -121,10 +121,10 @@ namespace ToDoAppAPI.Repositories
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
-        public async Task<string> ValidateUser(LoginDto loginDto)
+        public async Task<string> ValidateUserAsync(LoginDto loginDto)
         {
             Employee employee = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email.ToLower());
 
@@ -134,7 +134,7 @@ namespace ToDoAppAPI.Repositories
 
             if (!result.Succeeded) return $"Password for employee with email {loginDto.Email} is not correct";
 
-            return "";
+            return string.Empty;
         }                
 
         public async Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
@@ -153,7 +153,7 @@ namespace ToDoAppAPI.Repositories
 
             if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
             
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
@@ -170,7 +170,7 @@ namespace ToDoAppAPI.Repositories
 
             if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));            
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> ChangeUserNameAsync(ChangeUserNameDto changeUserNameDto)
@@ -187,7 +187,7 @@ namespace ToDoAppAPI.Repositories
 
             if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
@@ -204,7 +204,7 @@ namespace ToDoAppAPI.Repositories
 
             if (!result.Succeeded) return string.Join(", ", result.Errors.ToList().Select(e => e.Description));
 
-            return "";
+            return string.Empty;
         }
         #endregion
     }

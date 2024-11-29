@@ -15,7 +15,7 @@ namespace ToDoAppAPI.Services
         private readonly IConfiguration _configuration = configuration;
         private readonly UserManager<Employee> _userManager = userManager;
 
-        public async Task<TokenDto> CreateToken(string email, bool populateExp)
+        public async Task<TokenDto> CreateTokenAsync(string email, bool populateExp)
         {
             Employee employee = await _userManager.FindByEmailAsync(email.ToLower());
 
@@ -57,7 +57,7 @@ namespace ToDoAppAPI.Services
             return new TokenDto(accessToken, refreshToken);
         }
 
-        public async Task<TokenDto> RefreshToken(TokenDto tokenDto)
+        public async Task<TokenDto> RefreshTokenAsync(TokenDto tokenDto)
         {
             ClaimsPrincipal claimsPrincipal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
 
@@ -68,7 +68,7 @@ namespace ToDoAppAPI.Services
                 return null;
             }
 
-            return await CreateToken(employee.Email, false);
+            return await CreateTokenAsync(employee.Email, false);
         }
 
         public void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context)

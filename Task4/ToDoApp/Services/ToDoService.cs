@@ -16,7 +16,7 @@ namespace ToDoApp.Services
         {
             string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
 
-            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
+            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? string.Empty);
 
             HttpResponseMessage response = new();
 
@@ -41,7 +41,7 @@ namespace ToDoApp.Services
             return response;
         }
 
-        private async Task<List<ToDo>> PreparePaginatedList(string sortOrder, string searchString, int? pageNumber, IEnumerable<ToDo> toDos)
+        private async Task<List<ToDo>> PreparePaginatedListAsync(string sortOrder, string searchString, int? pageNumber, IEnumerable<ToDo> toDos)
         {
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -79,7 +79,7 @@ namespace ToDoApp.Services
                 toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
             }
 
-            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+            return await PreparePaginatedListAsync(sortOrder, searchString, pageNumber, toDos);
         }
 
         public async Task<List<ToDo>> GetAllAsync(string sortOrder, string searchString, int? pageNumber)
@@ -95,7 +95,7 @@ namespace ToDoApp.Services
                 toDos = JsonConvert.DeserializeObject<List<ToDo>>(response);
             }
 
-            return await PreparePaginatedList(sortOrder, searchString, pageNumber, toDos);
+            return await PreparePaginatedListAsync(sortOrder, searchString, pageNumber, toDos);
         }
 
         public async Task<ToDo> GetByIdAsync(Guid id)

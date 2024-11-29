@@ -27,7 +27,7 @@ namespace ToDoApp.Mappers
             {
                 Id = employee.Id,
                 Email = employee.Email,
-                NewEmail = ""
+                NewEmail = string.Empty
             };
         }
 
@@ -37,7 +37,7 @@ namespace ToDoApp.Mappers
             {
                 Id = employee.Id,
                 UserName = employee.UserName,
-                NewUserName = ""
+                NewUserName = string.Empty
             };
         }
 
@@ -47,9 +47,9 @@ namespace ToDoApp.Mappers
             {
                 Id = employee.Id,
                 Email = employee.Email,
-                CurrentPassword = "",
-                NewPassword = "",
-                NewPasswordConfirmation = ""
+                CurrentPassword = string.Empty,
+                NewPassword = string.Empty,
+                NewPasswordConfirmation = string.Empty
             };
         }
     }

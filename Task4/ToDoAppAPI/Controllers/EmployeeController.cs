@@ -16,6 +16,7 @@ namespace ToDoAppAPI.Controllers
     {
         private readonly IEmployeeRepository _employeeRepository = employeeRepository;
         private readonly ITokenService _tokenService = tokenService;
+        private const int fileMaxSize = 2097152;
 
         [HttpPost("register")]        
         public async Task<IActionResult> Register([FromForm] RegisterDto registerDto)
@@ -23,7 +24,7 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (registerDto.EmployeePhoto?.Length >= 2097152)
+            if (registerDto.EmployeePhoto?.Length >= fileMaxSize)
             {
                 ModelState.AddModelError("File", "The file is too large.");
             }
@@ -36,7 +37,7 @@ namespace ToDoAppAPI.Controllers
                 throw new ProblemException("Registration problem", result);
             }
 
-            TokenDto tokenDto = await _tokenService.CreateToken(registerDto.Email, true);
+            TokenDto tokenDto = await _tokenService.CreateTokenAsync(registerDto.Email, true);
 
             if (tokenDto is null) 
             {
@@ -59,7 +60,7 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string result = await _employeeRepository.ValidateUser(loginDto);
+            string result = await _employeeRepository.ValidateUserAsync(loginDto);
 
             if (!string.IsNullOrEmpty(result))
             {
@@ -67,7 +68,7 @@ namespace ToDoAppAPI.Controllers
                 throw new ProblemException("Login problem", result);
             }
 
-            TokenDto tokenDto = await _tokenService.CreateToken(loginDto.Email, true);
+            TokenDto tokenDto = await _tokenService.CreateTokenAsync(loginDto.Email, true);
 
             _tokenService.SetTokensInsideCookie(tokenDto, HttpContext);
 
@@ -185,7 +186,7 @@ namespace ToDoAppAPI.Controllers
 
             var employee = await _employeeRepository.GetByIdAsync(id);
 
-            string result = "";
+            string result = string.Empty;
 
             if (employee is null)
             {
@@ -208,7 +209,7 @@ namespace ToDoAppAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (updateEmployeeDto.EmployeePhoto?.Length >= 2097152)
+            if (updateEmployeeDto.EmployeePhoto?.Length >= fileMaxSize)
             {
                 ModelState.AddModelError("File", "The file is too large.");
             }

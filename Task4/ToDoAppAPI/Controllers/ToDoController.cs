@@ -30,7 +30,7 @@ namespace ToDoAppAPI.Controllers
             }
 
             Log.Information("No todos found");
-            return Ok(new List<ToDo>());           
+            return Ok(new List<ToDo>());
         }
 
         [HttpGet("{id}")]
@@ -60,7 +60,7 @@ namespace ToDoAppAPI.Controllers
 
             Employee employee = await _toDoRepository.GetEmployeeByIdAsync(createToDoDto.EmployeeId);
 
-            string result = "";
+            string result = string.Empty;
 
             if (employee is null)
             {

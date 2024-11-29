@@ -9,7 +9,7 @@ namespace ToDoAppAPI.Interfaces
         Task<Employee?> GetByIdAsync(string id);
         Task<string> UpdateAsync(string id, UpdateEmployeeDto updateEmployeeDto);
         Task<string> DeleteAsync(string id);
-        Task<string> ValidateUser(LoginDto loginDto);
+        Task<string> ValidateUserAsync(LoginDto loginDto);
         Task<string> RegisterAsync(RegisterDto registerDto);
         Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         Task<string> ChangeEmailAsync(ChangeEmailDto changeEmailDto);

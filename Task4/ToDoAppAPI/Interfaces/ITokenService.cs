@@ -4,8 +4,8 @@ namespace ToDoAppAPI.Interfaces
 {
     public interface ITokenService
     {
-        Task<TokenDto> CreateToken(string email, bool populateExp);
-        Task<TokenDto> RefreshToken(TokenDto tokenDto);
+        Task<TokenDto> CreateTokenAsync(string email, bool populateExp);
+        Task<TokenDto> RefreshTokenAsync(TokenDto tokenDto);
         void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context);
         void DeleteTokensInsideCookie(HttpContext context);
     }

@@ -15,6 +15,7 @@ namespace ToDoApp.Controllers
         private readonly IEmployeeService _employeeService = service;
         private readonly IConfiguration _configuration = configuration;
         private string? Message;
+        private const int fileMaxSize = 2097152;
 
         #region Private methods
         private void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context)
@@ -81,7 +82,7 @@ namespace ToDoApp.Controllers
 
         private void EmployeeValidation(EditEmployeeDto editEmployeeDto)
         {
-            if (editEmployeeDto.EmployeePhotoImage?.Length >= 2097152)
+            if (editEmployeeDto.EmployeePhotoImage?.Length >= fileMaxSize)
             {
                 ModelState.AddModelError(nameof(editEmployeeDto.EmployeePhotoImage),
                              "Photo image size is too large. Please use images less than 2 mb");
@@ -110,7 +111,7 @@ namespace ToDoApp.Controllers
 
             if (!response.IsSuccessStatusCode)
             {                
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(loginModel);
             }            
 
@@ -136,7 +137,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View();
             }
         }
@@ -172,7 +173,7 @@ namespace ToDoApp.Controllers
 
             if (!response.IsSuccessStatusCode)            
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(registerModel);
             }
 
@@ -279,7 +280,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View();
             }
         }
@@ -331,7 +332,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View();
             }
         }
@@ -375,7 +376,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(changeUserNameDto);
             }
         }
@@ -419,7 +420,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(changeEmailDto);
             }
         }
@@ -463,7 +464,7 @@ namespace ToDoApp.Controllers
             }
             else
             {
-                ModelState.AddModelError("", arrResult["detail"].ToString());
+                ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                 return View(changePasswordDto);
             }
         }

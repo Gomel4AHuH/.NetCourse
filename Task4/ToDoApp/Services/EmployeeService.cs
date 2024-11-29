@@ -19,7 +19,7 @@ namespace ToDoApp.Services
         {
             string? httpClientName = _configuration["ToDoAppHTTPClient:Name"];
 
-            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? "");
+            HttpClient client = _httpClientFactory.CreateClient(httpClientName ?? string.Empty);
                         
             HttpResponseMessage response = new();
                         
@@ -46,7 +46,7 @@ namespace ToDoApp.Services
 
         private static void GetImageFromByteArray(Employee employee)
         {
-            employee.EmployeePhotoStr = "";
+            employee.EmployeePhotoStr = string.Empty;
 
             if (!employee.EmployeePhoto.IsNullOrEmpty())
             {
@@ -95,7 +95,7 @@ namespace ToDoApp.Services
                 { new StringContent(registerModel.Password), "Password" },
                 { new StringContent(registerModel.FirstName), "FirstName" },
                 { new StringContent(registerModel.LastName), "LastName" },
-                { new StringContent(registerModel.MiddleName ?? ""), "MiddleName" },
+                { new StringContent(registerModel.MiddleName ?? string.Empty), "MiddleName" },
                 { new StringContent(registerModel.Birthday.ToString()), "Birthday" },
                 { new StringContent(registerModel.Speciality), "Speciality" },
                 { new StringContent(registerModel.EmploymentDate.ToString()), "EmploymentDate" }
@@ -207,7 +207,7 @@ namespace ToDoApp.Services
                 { new StringContent(editEmployeeDto.Id.ToString()), "Id" },
                 { new StringContent(editEmployeeDto.FirstName), "FirstName" },
                 { new StringContent(editEmployeeDto.LastName), "LastName" },
-                { new StringContent(editEmployeeDto.MiddleName ?? ""), "MiddleName" },
+                { new StringContent(editEmployeeDto.MiddleName ?? string.Empty), "MiddleName" },
                 { new StringContent(editEmployeeDto.Birthday.ToString()), "Birthday" },
                 { new StringContent(editEmployeeDto.Speciality), "Speciality" },
                 { new StringContent(editEmployeeDto.EmploymentDate.ToString()), "EmploymentDate" }

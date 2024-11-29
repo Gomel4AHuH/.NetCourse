@@ -1,8 +1,8 @@
 ﻿@{
-    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
-    var firstDisabled = (Model.PageIndex == 1) ? "disabled" : "";
-    var lastDisabled = (Model.PageIndex == Model.TotalPages) ? "disabled" : "";
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : string.Empty;
+    var nextDisabled = !Model.HasNextPage ? "disabled" : string.Empty;
+    var firstDisabled = (Model.PageIndex == 1) ? "disabled" : string.Empty;
+    var lastDisabled = (Model.PageIndex == Model.TotalPages) ? "disabled" : string.Empty;
 
     <a asp-action="Index"
         asp-route-sortOrder="@ViewData["CurrentSort"]"

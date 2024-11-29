@@ -38,7 +38,7 @@ namespace ToDoAppAPI.Repositories
 
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> DeleteAsync(string id)
@@ -50,7 +50,7 @@ namespace ToDoAppAPI.Repositories
             _context.ToDos.Remove(toDo);
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<Employee?> GetEmployeeByIdAsync(string id)
@@ -82,7 +82,7 @@ namespace ToDoAppAPI.Repositories
             await _context.ToDos.AddAsync(duplicateToDo);
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> StatusChangeAsync(string id)
@@ -95,7 +95,7 @@ namespace ToDoAppAPI.Repositories
 
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
 
         public async Task<string> ReassignAsync(ReassignDto reassignDto)
@@ -112,7 +112,7 @@ namespace ToDoAppAPI.Repositories
 
             await _context.SaveChangesAsync();
 
-            return "";
+            return string.Empty;
         }
     }
 }

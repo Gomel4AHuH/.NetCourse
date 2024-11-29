@@ -84,7 +84,7 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public ActionResult Create(Guid employeeId)
         {
-            return View(new CreateToDoDto { Name = "", Description = "", EmployeeId = employeeId });
+            return View(new CreateToDoDto { Name = string.Empty, Description = string.Empty, EmployeeId = employeeId });
         }
 
         [ValidateAntiForgeryToken]
@@ -111,7 +111,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View(createToDoDto);
                 }
             }
@@ -178,7 +178,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View();
                 }                
             }
@@ -244,7 +244,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View();
                 }
             }
@@ -274,7 +274,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View();
                 }
             }
@@ -303,7 +303,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View();
                 }
             }
@@ -339,7 +339,7 @@ namespace ToDoApp.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", arrResult["detail"].ToString());
+                    ModelState.AddModelError(string.Empty, arrResult["detail"].ToString());
                     return View();
                 }                
             }
